@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <!-- Config file for PHPUnit automated tests -->
 <phpunit
+        bootstrap="test/phpunit-bootstrap.php"
         cacheTokens="false"
         colors="true"
         convertErrorsToExceptions="true"
