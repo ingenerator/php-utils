@@ -1,0 +1,35 @@
+{
+  "name": "ingenerator/php-utils",
+  "description": "Simple, standalone utility classes for PHP applications",
+  "homepage": "https://github.com/ingenerator/php-utils",
+  "type": "library",
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Andrew Coulton",
+      "email": "andrew@ingenerator.com"
+    },
+    {
+      "name": "Craig Gosman",
+      "email": "craig@ingenerator.com"
+    }
+  ],
+  "require": {
+    "php": "^5.5||^7.0"
+  },
+  "require-dev": {
+
+  },
+  "support": {
+    "source": "https://github.com/ingenerator/php-utils",
+    "issues": "https://github.com/ingenerator/php-utils/issues"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ingenerator\\PHPUtils\\": "src/"
+    }
+  },
+  "config": {
+    "preferred-install": "dist"
+  }
+}
