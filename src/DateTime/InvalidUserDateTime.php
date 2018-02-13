@@ -35,7 +35,7 @@ class InvalidUserDateTime extends \DateTimeImmutable
         throw new \BadMethodCallException('Invalid call to '.__METHOD__);
     }
 
-    public static function createFromMutable(DateTime $dateTime)
+    public static function createFromMutable($dateTime)
     {
         throw new \BadMethodCallException('Invalid call to '.__METHOD__);
     }

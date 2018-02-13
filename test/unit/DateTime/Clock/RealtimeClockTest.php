@@ -42,7 +42,7 @@ class RealtimeClockTest extends \PHPUnit_Framework_TestCase
             0.0005,
             $end - $start,
             'Should sleep roughly the right time',
-            0.0002
+            0.0003
         );
     }
 
