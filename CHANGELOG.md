@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v0.1.3 (2018-02-22)
+
 * Extract the basic ValidNumber class for validating minimum
 
 ### v0.1.2 (2018-02-13)
