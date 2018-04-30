@@ -16,25 +16,65 @@ class StrictDate
      * Validate that value of one field is a date after the value of another
      *
      * @param \ArrayAccess $validation
-     * @param string $from_field
-     * @param string $to_field
+     * @param string       $from_field
+     * @param string       $to_field
      *
      * @return bool
      */
     public static function date_after(\ArrayAccess $validation, $from_field, $to_field)
+    {
+        if ( ! $dates = static::get_valid_date_pair($validation, $from_field, $to_field)) {
+            // Return true if either value is empty or invalid, this will be picked up by other rules
+            return TRUE;
+        }
+
+        list($from, $to) = $dates;
+
+        return ($to > $from);
+    }
+
+    /**
+     * Validate that value of one field is a date on or after value of another (>= ignoring time)
+     *
+     * @param \ArrayAccess $validation
+     * @param string       $from_field
+     * @param string       $to_field
+     *
+     * @return bool
+     */
+    public static function date_on_or_after(\ArrayAccess $validation, $from_field, $to_field)
+    {
+        if ( ! $dates = static::get_valid_date_pair($validation, $from_field, $to_field)) {
+            // Return true if either value is empty or invalid, this will be picked up by other rules
+            return TRUE;
+        }
+
+        list($from, $to) = $dates;
+
+        return ($to->format('Y-m-d') >= $from->format('Y-m-d'));
+    }
+
+    /**
+     * @param \ArrayAccess $validation
+     * @param string       $from_field
+     * @param string       $to_field
+     *
+     * @return \DateTimeImmutable[]
+     */
+    protected static function get_valid_date_pair(\ArrayAccess $validation, $from_field, $to_field)
     {
         $from = $validation[$from_field];
         $to   = $validation[$to_field];
 
         // Return true if either value is empty or invalid, this will be picked up by other rules
         if ($from instanceof InvalidUserDateTime OR ! $from instanceof \DateTimeImmutable) {
-            return TRUE;
+            return NULL;
         }
         if ($to instanceof InvalidUserDateTime OR ! $to instanceof \DateTimeImmutable) {
-            return TRUE;
+            return NULL;
         }
 
-        return ($to > $from);
+        return [$from, $to];
     }
 
     /**
@@ -107,6 +147,7 @@ class StrictDate
     {
         switch ($rulename) {
             case 'date_after':
+            case 'date_on_or_after':
             case 'date_immutable':
             case 'datetime_immutable':
             case 'iso_date':

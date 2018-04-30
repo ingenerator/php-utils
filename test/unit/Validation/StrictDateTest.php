@@ -71,7 +71,7 @@ class StrictDateTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
-    public function provider_date_after_date()
+    public function provider_date_before_after_invalid_inputs()
     {
         return [
             [['from' => NULL, 'to' => NULL], 'from', 'to', TRUE],
@@ -89,6 +89,28 @@ class StrictDateTest extends \PHPUnit_Framework_TestCase
                 'to',
                 TRUE
             ],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_date_before_after_invalid_inputs
+     */
+    public function test_date_compare_funcs_validate_invalid_input($data, $from_field, $to_field)
+    {
+        // This is so that an invalid date just says "invalid date" rather than also "must be after"
+        $data = new \ArrayObject($data);
+        $this->assertTrue(StrictDate::date_after($data, $from_field, $to_field), 'date_after');
+        $this->assertTrue(
+            StrictDate::date_on_or_after($data, $from_field, $to_field),
+            'date_on_or_after'
+        );
+    }
+
+    public function provider_date_after_date()
+    {
+        return [
+            // Invalid inputs all true as they should be caught by other rules
+            // Simple > the first one
             [
                 ['a' => new \DateTimeImmutable, 'b' => new \DateTimeImmutable('-5 mins')],
                 'a',
@@ -105,16 +127,47 @@ class StrictDateTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider provider_date_after_date
+     * @testWith ["", "-5 mins", false]
+     *           ["-5 mins", "", true]
      */
-    public function test_it_validates_date_after_date($data, $from_field, $to_field, $expect)
+    public function test_it_validates_date_after_date($from, $to, $expect)
     {
         $this->assertSame(
             $expect,
             StrictDate::date_after(
-                new \ArrayObject($data),
-                $from_field,
-                $to_field
+                new \ArrayObject(
+                    [
+                        'from' => new \DateTimeImmutable($from),
+                        'to'   => new \DateTimeImmutable($to)
+                    ]
+                ),
+                'from',
+                'to'
+            )
+        );
+    }
+
+    /**
+     * @testWith ["2017-01-05 00:00:00", "2017-01-04 23:59:59", false]
+     *           ["2017-01-04 10:00:00", "2017-01-04 23:59:59", true]
+     *           ["2017-01-04 00:00:00", "2017-01-04 00:00:00", true]
+     *           ["2017-01-04 10:00:00", "2017-01-04 08:00:00", true]
+     *           ["2017-05-06 10:00:00", "2018-12-30 00:00:00", true]
+     *
+     */
+    public function test_it_validates_date_on_or_after_date($from, $to, $expect)
+    {
+        $this->assertSame(
+            $expect,
+            StrictDate::date_on_or_after(
+                new \ArrayObject(
+                    [
+                        'from' => new \DateTimeImmutable($from),
+                        'to'   => new \DateTimeImmutable($to)
+                    ]
+                ),
+                'from',
+                'to'
             )
         );
     }
