@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v0.1.4 (2018-04-30)
+
+* Add StrictDate::on_or_after for validating date >= date ignoring any time component
+
 ### v0.1.3 (2018-02-22)
 
 * Extract the basic ValidNumber class for validating minimum
