@@ -13,6 +13,11 @@
             <directory>test/unit</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
     <listeners>
         <listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
             <arguments>
