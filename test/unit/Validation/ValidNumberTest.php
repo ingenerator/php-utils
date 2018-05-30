@@ -8,8 +8,9 @@ namespace test\unit\Ingenerator\PHPUtils\Validation;
 
 
 use Ingenerator\PHPUtils\Validation\ValidNumber;
+use PHPUnit\Framework\TestCase;
 
-class ValidNumberTest extends \PHPUnit_Framework_TestCase
+class ValidNumberTest extends TestCase
 {
 
     /**

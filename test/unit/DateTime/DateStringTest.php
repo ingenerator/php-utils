@@ -8,9 +8,11 @@ namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
 
 use Ingenerator\PHPUtils\DateTime\DateString;
+use PHPUnit\Framework\TestCase;
 
-class DateStringTest extends \PHPUnit_Framework_TestCase
+class DateStringTest extends TestCase
 {
+
     public function provider_generic_format()
     {
         return [

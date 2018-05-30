@@ -18,8 +18,8 @@
     "php": "^5.5||^7.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^4.8",
-    "johnkary/phpunit-speedtrap": "^1.0"
+    "phpunit/phpunit": "^4.8||^6.5",
+    "johnkary/phpunit-speedtrap": "^1.0||^2.0"
   },
   "support": {
     "source": "https://github.com/ingenerator/php-utils",
@@ -28,6 +28,11 @@
   "autoload": {
     "psr-4": {
       "Ingenerator\\PHPUtils\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "test\\unit\\Ingenerator\\PHPUtils\\": "test"
     }
   },
   "config": {

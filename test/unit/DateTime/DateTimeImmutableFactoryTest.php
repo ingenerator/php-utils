@@ -9,8 +9,9 @@ namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
+use PHPUnit\Framework\TestCase;
 
-class DateTimeImmutableFactoryTest extends \PHPUnit_Framework_TestCase
+class DateTimeImmutableFactoryTest extends TestCase
 {
 
     /**
@@ -104,8 +105,7 @@ class DateTimeImmutableFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function test_it_factories_null_from_empty_ymd_input($input)
     {
-        $this->assertNull(
-            DateTimeImmutableFactory::fromYmdInput($input));
+        $this->assertNull(DateTimeImmutableFactory::fromYmdInput($input));
     }
 
     /**

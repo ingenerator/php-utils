@@ -9,8 +9,9 @@ namespace test\unit\Ingenerator\PHPUtils\Validation;
 
 use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
 use Ingenerator\PHPUtils\Validation\StrictDate;
+use PHPUnit\Framework\TestCase;
 
-class StrictDateTest extends \PHPUnit_Framework_TestCase
+class StrictDateTest extends TestCase
 {
 
     /**

@@ -8,8 +8,9 @@ namespace test\unit\Ingenerator\PHPUtils\CSV;
 
 
 use Ingenerator\PHPUtils\CSV\CSVWriter;
+use PHPUnit\Framework\TestCase;
 
-class CSVWriterTest extends \PHPUnit_Framework_TestCase
+class CSVWriterTest extends TestCase
 {
 
     public function test_it_is_initialisable()
@@ -18,11 +19,11 @@ class CSVWriterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
+     * @expectedException \ErrorException
      */
     public function test_it_throws_if_file_cannot_be_opened()
     {
-        $this->markTestIncomplete();
+        $this->newSubject()->open('/invalid_csv_file');
     }
 
     /**
@@ -33,12 +34,18 @@ class CSVWriterTest extends \PHPUnit_Framework_TestCase
         $this->newSubject()->write(['any' => 'junk']);
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function test_it_throws_if_writing_after_closing_file()
     {
-        $subj = $this->newSubject();
-        $subj->open('php://temp');
-        $subj->close();
-        $this->setExpectedException(\LogicException::class);
+        try {
+            $subj = $this->newSubject();
+            $subj->open('php://temp');
+            $subj->close();
+        } catch (\Exception $e) {
+            $this->fail('Unexpected exception '.$e);
+        }
         $subj->write(['any' => 'content']);
     }
 
@@ -169,11 +176,6 @@ class CSVWriterTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    protected function newSubject()
-    {
-        return new CSVWriter;
-    }
-
     protected function assertCSVContent(array $expect, $file)
     {
         rewind($file);
@@ -183,6 +185,12 @@ class CSVWriterTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertSame($expect, $actual, 'CSV content should match');
+    }
+
+
+    protected function newSubject()
+    {
+        return new CSVWriter();
     }
 
 }

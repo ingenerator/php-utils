@@ -7,13 +7,15 @@
 namespace test\unit\Ingenerator\PHPUtils\Object;
 
 use Ingenerator\PHPUtils\Object\ConstantDirectory;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  * @licence   proprietary
  */
-class ConstantDirectoryTest extends \PHPUnit_Framework_TestCase
+class ConstantDirectoryTest extends TestCase
 {
+
     const TEST_ONE = 'any';
     const TEST_TWO = 'two';
     const TESTTHREE = 'three';

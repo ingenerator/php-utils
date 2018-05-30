@@ -8,8 +8,9 @@ namespace test\unit\Ingenerator\PHPUtils\Object;
 
 
 use Ingenerator\PHPUtils\Object\ObjectPropertyRipper;
+use PHPUnit\Framework\TestCase;
 
-class ObjectPropertyRipperTest extends \PHPUnit_Framework_TestCase
+class ObjectPropertyRipperTest extends TestCase
 {
 
     public function test_it_rips_properties()
@@ -30,6 +31,7 @@ class ObjectPropertyRipperTest extends \PHPUnit_Framework_TestCase
             ObjectPropertyRipper::ripOne(new TestRippingClass, 'something_private')
         );
     }
+
 }
 
 class TestRippingClass

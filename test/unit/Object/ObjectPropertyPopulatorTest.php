@@ -8,8 +8,9 @@ namespace test\unit\Ingenerator\PHPUtils\Object;
 
 
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
+use PHPUnit\Framework\TestCase;
 
-class ObjectPropertyPopulatorTest extends \PHPUnit_Framework_TestCase
+class ObjectPropertyPopulatorTest extends TestCase
 {
 
     public function test_it_assigns_single_property()

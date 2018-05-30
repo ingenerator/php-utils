@@ -8,8 +8,9 @@ namespace test\unit\Ingenerator\PHPUtils\DateTime\Clock;
 
 
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use PHPUnit\Framework\TestCase;
 
-class RealtimeClockTest extends \PHPUnit_Framework_TestCase
+class RealtimeClockTest extends TestCase
 {
 
     public function test_it_is_initialisable()
@@ -38,12 +39,9 @@ class RealtimeClockTest extends \PHPUnit_Framework_TestCase
         $subject = $this->newSubject();
         $subject->usleep(500);
         $end = microtime(TRUE);
-        $this->assertEquals(
-            0.0005,
-            $end - $start,
-            'Should sleep roughly the right time',
-            0.0003
-        );
+        $slept_for = $end - $start;
+        $this->assertGreaterThanOrEqual(0.0005, $slept_for, 'Should always sleep at least the minimum time');
+        $this->assertLessThan(0.004, $slept_for, 'May sleep a bit longer if running slow');
     }
 
     /**
@@ -75,12 +73,9 @@ class RealtimeClockTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /**
-     * @return RealtimeClock
-     */
     protected function newSubject()
     {
-        return new RealtimeClock;
+        return new RealtimeClock();
     }
 
 }
