@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v0.1.5(2018-08-16)
+
+* Add MysqlSession session handler
+
 ### v0.1.4 (2018-04-30)
 
 * Add StrictDate::on_or_after for validating date >= date ignoring any time component
