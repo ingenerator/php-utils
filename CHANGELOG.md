@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v0.1.6 (2018-09-06)
+
 * Add AbstractArrayRepository
 
 ### v0.1.5(2018-08-16)
