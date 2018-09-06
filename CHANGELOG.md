@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add AbstractArrayRepository
+
 ### v0.1.5(2018-08-16)
 
 * Add MysqlSession session handler
