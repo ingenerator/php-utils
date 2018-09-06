@@ -7,6 +7,7 @@
 namespace Ingenerator\PHPUtils\Repository;
 
 use Doctrine\Common\Collections\Collection;
+use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
 use PHPUnit\Framework\Assert;
 
 /**
@@ -80,7 +81,10 @@ abstract class AbstractArrayRepository
      */
     protected static function stubEntity(array $data)
     {
-        throw new \BadMethodCallException('Implement your own '.__METHOD__.'!');
+        $class = static::getEntityBaseClass();
+        $e     = new $class;
+        ObjectPropertyPopulator::assignHash($e, $data);
+        return $e;
     }
 
     /**

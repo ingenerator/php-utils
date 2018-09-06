@@ -231,13 +231,6 @@ class AnyArrayRepository extends AbstractArrayRepository
         return AnyEntity::class;
     }
 
-    protected static function stubEntity(array $data)
-    {
-        $e = new AnyEntity;
-        ObjectPropertyPopulator::assignHash($e, $data);
-        return $e;
-    }
-
     /**
      * @return array
      */
