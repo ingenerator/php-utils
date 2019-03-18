@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v0.1.6 (2019-03-18)
+
 * Update StoppedMockClock to support newer phpunit (use namespaced assert class) and add
   unit tests.
 
