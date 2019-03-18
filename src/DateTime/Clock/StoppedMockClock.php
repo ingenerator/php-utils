@@ -7,6 +7,7 @@
 namespace Ingenerator\PHPUtils\DateTime\Clock;
 
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use PHPUnit\Framework\Assert;
 
 class StoppedMockClock extends RealtimeClock
 {
@@ -25,7 +26,7 @@ class StoppedMockClock extends RealtimeClock
      */
     protected function __construct(\DateTimeImmutable $start_time)
     {
-        $this->current_microtime = $start_time->getTimestamp();
+        $this->current_microtime = (float) $start_time->getTimestamp();
     }
 
     /**
@@ -89,7 +90,7 @@ class StoppedMockClock extends RealtimeClock
     public function tick(\DateInterval $period)
     {
         $now                     = $this->getDateTime()->add($period);
-        $this->current_microtime = $now->getTimestamp();
+        $this->current_microtime = (float) $now->getTimestamp();
     }
 
     /**
@@ -108,7 +109,7 @@ class StoppedMockClock extends RealtimeClock
 
     public function assertSlept(array $expected, $msg = '')
     {
-        \PHPUnit_Framework_Assert::assertSame($expected, $this->sleeps, $msg);
+        Assert::assertSame($expected, $this->sleeps, $msg);
     }
 
 }
