@@ -42,7 +42,7 @@ abstract class AbstractArrayRepository
      */
     public static function with($entity)
     {
-        return static::withList(func_get_args());
+        return static::withList(\func_get_args());
     }
 
     /**
@@ -132,11 +132,11 @@ abstract class AbstractArrayRepository
      */
     protected function formatSaveLog($entity)
     {
-        return sprintf(
+        return \sprintf(
             "%s (object %s) with data:\n%s\n",
-            get_class($entity),
-            spl_object_hash($entity),
-            json_encode($this->entityToArray($entity), JSON_PRETTY_PRINT)
+            \get_class($entity),
+            \spl_object_hash($entity),
+            \json_encode($this->entityToArray($entity), JSON_PRETTY_PRINT)
         );
     }
 
@@ -152,7 +152,7 @@ abstract class AbstractArrayRepository
      */
     protected function entityToArray($entity, & $seen_objects = [])
     {
-        $entity_hash = spl_object_hash($entity);
+        $entity_hash = \spl_object_hash($entity);
         if (isset($seen_objects[$entity_hash])) {
             return '**RECURSION**';
         } else {
@@ -161,17 +161,17 @@ abstract class AbstractArrayRepository
 
         $all_props    = \Closure::bind(
             function ($e) {
-                return get_object_vars($e);
+                return \get_object_vars($e);
             },
             NULL,
             $entity
         );
         $obj_identity = function ($a) {
-            return get_class($a).'#'.spl_object_hash($a);
+            return \get_class($a).'#'.\spl_object_hash($a);
         };
         $result       = [];
         foreach ($all_props($entity) as $key => $var) {
-            if ( ! is_object($var)) {
+            if ( ! \is_object($var)) {
                 $result[$key] = $var;
             } elseif ($var instanceof Collection) {
                 $result[$key] = [];
@@ -181,7 +181,7 @@ abstract class AbstractArrayRepository
                     ];
                 }
             } elseif ($var instanceof \DateTimeInterface) {
-                $result[$key][get_class($var)] = $var->format(\DateTime::ISO8601);
+                $result[$key][\get_class($var)] = $var->format(\DateTime::ISO8601);
             } else {
                 $result[$key] = [
                     $obj_identity($var) => $this->entityToArray($var, $seen_objects)
@@ -209,7 +209,7 @@ abstract class AbstractArrayRepository
     {
         $counts = [];
         foreach ($this->entities as $entity) {
-            $group          = call_user_func($callable, $entity);
+            $group          = \call_user_func($callable, $entity);
             $counts[$group] = isset($counts[$group]) ? ++$counts[$group] : 1;
         }
         return $counts;
@@ -245,13 +245,13 @@ abstract class AbstractArrayRepository
     protected function findWith($callable)
     {
         $entities = $this->listWith($callable);
-        if (count($entities) > 1) {
+        if (\count($entities) > 1) {
             throw new \UnexpectedValueException(
                 'Found multiple entities : expected unique condition.'
             );
         }
 
-        return array_pop($entities);
+        return \array_pop($entities);
     }
 
     /**
@@ -265,7 +265,7 @@ abstract class AbstractArrayRepository
     {
         $entities = [];
         foreach ($this->entities as $entity) {
-            if (call_user_func($callable, $entity)) {
+            if (\call_user_func($callable, $entity)) {
                 $entities[] = $entity;
             }
         }
@@ -284,7 +284,7 @@ abstract class AbstractArrayRepository
     protected function saveEntity($entity)
     {
         $this->save_log .= $this->formatSaveLog($entity);
-        if ( ! in_array($entity, $this->entities, TRUE)) {
+        if ( ! \in_array($entity, $this->entities, TRUE)) {
             $this->entities[] = $entity;
         }
     }

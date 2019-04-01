@@ -48,7 +48,7 @@ class MysqlSession implements SessionHandlerInterface
         $this->db               = $db;
         $this->hash_salt        = $hash_salt;
         $this->lock_timeout     = $lock_timeout;
-        $this->session_lifetime = ini_get('session.gc_maxlifetime');
+        $this->session_lifetime = \ini_get('session.gc_maxlifetime');
     }
 
     /**
@@ -56,7 +56,7 @@ class MysqlSession implements SessionHandlerInterface
      */
     public function initialise()
     {
-        session_set_save_handler($this, TRUE);
+        \session_set_save_handler($this, TRUE);
     }
 
     /**
@@ -158,7 +158,7 @@ class MysqlSession implements SessionHandlerInterface
                 'id'         => $id,
                 'hash'       => $this->calculateHash(),
                 'data'       => $session_data,
-                'now'        => date('Y-m-d H:i:s'),
+                'now'        => \date('Y-m-d H:i:s'),
                 'user_agent' => $user_agent,
                 'ip'         => $ip,
             ]
@@ -178,7 +178,7 @@ class MysqlSession implements SessionHandlerInterface
 
         $hash .= $this->hash_salt;
 
-        return sha1($hash);
+        return \sha1($hash);
     }
 
     /**

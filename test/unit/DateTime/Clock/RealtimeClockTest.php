@@ -30,15 +30,15 @@ class RealtimeClockTest extends TestCase
     {
         $mt = $this->newSubject()->getMicrotime();
         $this->assertInternalType('float', $mt);
-        $this->assertEquals(microtime(TRUE), $mt, 'Should be roughly the real microtime', 0.2);
+        $this->assertEquals(\microtime(TRUE), $mt, 'Should be roughly the real microtime', 0.2);
     }
 
     public function test_it_sleeps()
     {
-        $start   = microtime(TRUE);
+        $start   = \microtime(TRUE);
         $subject = $this->newSubject();
         $subject->usleep(500);
-        $end = microtime(TRUE);
+        $end = \microtime(TRUE);
         $slept_for = $end - $start;
         $this->assertGreaterThanOrEqual(0.0005, $slept_for, 'Should always sleep at least the minimum time');
         $this->assertLessThan(0.004, $slept_for, 'May sleep a bit longer if running slow');
@@ -53,7 +53,7 @@ class RealtimeClockTest extends TestCase
         $start_ts = $subject->getDateTime();
         $start_mt = $subject->getMicrotime();
 
-        usleep(2500000);
+        \usleep(2500000);
 
         $end_ts = $subject->getDateTime();
         $end_mt = $subject->getMicrotime();

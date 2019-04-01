@@ -44,10 +44,10 @@ class ConstantDirectory
      */
     public function filterConstants($prefix)
     {
-        $prefix_len = strlen($prefix);
+        $prefix_len = \strlen($prefix);
         $consts     = [];
         foreach ($this->listConstants() as $name => $value) {
-            if (strncmp($name, $prefix, $prefix_len) === 0) {
+            if (\strncmp($name, $prefix, $prefix_len) === 0) {
                 $consts[$name] = $value;
             }
         }

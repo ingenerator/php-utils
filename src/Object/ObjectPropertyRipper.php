@@ -28,7 +28,7 @@ class ObjectPropertyRipper
      */
     public static function rip($object, array $properties)
     {
-        $ripper = static::getRipper(get_class($object));
+        $ripper = static::getRipper(\get_class($object));
 
         return $ripper($object, $properties);
     }

@@ -124,7 +124,7 @@ class AbstractArrayRepositoryTest extends TestCase
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
-            array_map(
+            \array_map(
                 function (AnyEntity $e) { return $e->getProp2(); },
                 $subject->listWith(function (AnyEntity $e) { return $e->getProp1() === 'ok'; })
             )

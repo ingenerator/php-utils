@@ -28,7 +28,7 @@ class RealtimeClock
      */
     public function getMicrotime()
     {
-        return microtime(TRUE);
+        return \microtime(TRUE);
     }
 
     /**
@@ -36,6 +36,6 @@ class RealtimeClock
      */
     public function usleep($microseconds)
     {
-        usleep($microseconds);
+        \usleep($microseconds);
     }
 }
