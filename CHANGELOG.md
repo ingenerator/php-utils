@@ -1,5 +1,10 @@
 ### Unreleased
 
+### v0.2.0 (2019-04-02)
+
+* Drop support for php < 7.2
+* Run test suite against php 7.2
+
 ### v0.1.6 (2019-03-18)
 
 * Update StoppedMockClock to support newer phpunit (use namespaced assert class) and add
