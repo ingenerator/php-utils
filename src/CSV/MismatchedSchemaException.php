@@ -14,8 +14,8 @@ class MismatchedSchemaException extends \InvalidArgumentException
     {
         return new static(
             'Mismatched row schema in CSV file:'."\n"
-            .'Expected: '.json_encode($expected)."\n"
-            .'Actual:   '.json_encode($actual)
+            .'Expected: '.\json_encode($expected)."\n"
+            .'Actual:   '.\json_encode($actual)
         );
     }
 

@@ -41,11 +41,11 @@ class CSVWriter
      */
     public function open($file, array $options = [])
     {
-        if (is_resource($file) AND (get_resource_type($file) === 'stream')) {
+        if (\is_resource($file) AND (\get_resource_type($file) === 'stream')) {
             $this->resource      = $file;
             $this->owns_resource = FALSE;
-        } elseif (is_string($file)) {
-            $this->resource      = fopen($file, 'w');
+        } elseif (\is_string($file)) {
+            $this->resource      = \fopen($file, 'w');
             $this->owns_resource = TRUE;
         } else {
             throw new \InvalidArgumentException(
@@ -53,7 +53,7 @@ class CSVWriter
             );
         }
         $this->expect_schema = NULL;
-        $this->options       = array_merge($this->options, $options);
+        $this->options       = \array_merge($this->options, $options);
     }
 
     /**
@@ -65,24 +65,24 @@ class CSVWriter
             throw new \LogicException('Cannot write to a closed file');
         }
 
-        $row_schema = array_keys($row);
+        $row_schema = \array_keys($row);
 
         if ($this->expect_schema === NULL) {
             if ($this->options['write_utf8_bom']) {
-                fputs($this->resource, static::UTF8_BOM);
+                \fputs($this->resource, static::UTF8_BOM);
             }
             $this->expect_schema = $row_schema;
-            fputcsv($this->resource, $this->expect_schema);
+            \fputcsv($this->resource, $this->expect_schema);
         } elseif ($this->expect_schema !== $row_schema) {
             throw MismatchedSchemaException::forSchema($this->expect_schema, $row_schema);
         }
 
-        fputcsv($this->resource, $row);
+        \fputcsv($this->resource, $row);
     }
 
     protected function isResourceOpen()
     {
-        return $this->resource && (get_resource_type($this->resource) === 'stream');
+        return $this->resource && (\get_resource_type($this->resource) === 'stream');
     }
 
     public function close()
@@ -92,7 +92,7 @@ class CSVWriter
         }
 
         if ($this->owns_resource) {
-            fclose($this->resource);
+            \fclose($this->resource);
         }
 
         $this->resource = NULL;

@@ -66,7 +66,7 @@ class StoppedMockClockTest extends TestCase
         $clock = StoppedMockClock::atNow();
         $start_microtime = $clock->getMicrotime();
         $start_time = $clock->getDateTime();
-        sleep(2);
+        \sleep(2);
         $this->assertEquals($start_time, $clock->getDateTime(), 'Stays at the same time');
         $this->assertSame($start_microtime, $clock->getMicrotime(), 'Stays at the same microtime');
     }
@@ -87,23 +87,23 @@ class StoppedMockClockTest extends TestCase
         $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02'), $clock->getDateTime());
 
         $clock->tickMicroseconds(150000);
-        $this->assertSame(1546682582.300, round($clock->getMicrotime(), 3));
+        $this->assertSame(1546682582.300, \round($clock->getMicrotime(), 3));
         $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02'), $clock->getDateTime(), 'DateTime not changed by sub-second tick');
 
 
         $clock->tickMicroseconds(750000);
-        $this->assertSame(1546682583.050, round($clock->getMicrotime(), 3));
+        $this->assertSame(1546682583.050, \round($clock->getMicrotime(), 3));
         $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:03'), $clock->getDateTime(), 'DateTime changed after second boundary');
     }
 
     public function test_its_usleep_is_immediate_but_advances_time()
     {
         $clock = StoppedMockClock::atMicrotime(1546682582.05);
-        $start = microtime(TRUE);
+        $start = \microtime(TRUE);
         $clock->usleep(900000);
-        $real_ms = 1000 * (microtime(TRUE) - $start);
+        $real_ms = 1000 * (\microtime(TRUE) - $start);
         $this->assertLessThan(50, $real_ms, 'Should not actually sleep');
-        $this->assertSame(1546682582.95, round($clock->getMicrotime(), 3), 'Should update time');
+        $this->assertSame(1546682582.95, \round($clock->getMicrotime(), 3), 'Should update time');
     }
 
     public function provider_assert_slept_fails()
@@ -154,7 +154,7 @@ class StoppedMockClockTest extends TestCase
         }
         $this->assertInstanceOf(\Exception::class, $e, 'Should have thrown');
         // Do it like this to make it type-safe for old and new phpunit
-        $this->assertContains('ExpectationFailedException', get_class($e), 'Should be assertion exception');
+        $this->assertContains('ExpectationFailedException', \get_class($e), 'Should be assertion exception');
     }
 
     public function test_assert_slept_passes_if_slept_for_expected_intervals()

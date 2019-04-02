@@ -79,7 +79,7 @@ class StoppedMockClock extends RealtimeClock
 
     public function getDateTime()
     {
-        return (new \DateTimeImmutable)->setTimestamp(floor($this->current_microtime));
+        return (new \DateTimeImmutable)->setTimestamp(\floor($this->current_microtime));
     }
 
     public function getMicrotime()
