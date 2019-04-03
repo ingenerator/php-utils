@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v1.0.0 (2019-04-03)
+
+* First major release from 0.2.0
+
 ### v0.2.0 (2019-04-02)
 
 * Drop support for php < 7.2
