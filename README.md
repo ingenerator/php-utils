@@ -1,6 +1,6 @@
 php-utils provides common, simple, dependency-free PHP helpers
 
-[![Build Status](https://travis-ci.org/ingenerator/php-utils.svg?branch=0.1.x)](https://travis-ci.org/ingenerator/php-utils)
+[![Build Status](https://travis-ci.org/ingenerator/php-utils.svg?branch=1.0.x)](https://travis-ci.org/ingenerator/php-utils)
 
 
 # Installing php-utils
