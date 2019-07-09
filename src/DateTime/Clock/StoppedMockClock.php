@@ -112,4 +112,9 @@ class StoppedMockClock extends RealtimeClock
         Assert::assertSame($expected, $this->sleeps, $msg);
     }
 
+    public function assertNeverSlept($msg = '')
+    {
+        Assert::assertNull($this->sleeps, $msg);
+    }
+
 }

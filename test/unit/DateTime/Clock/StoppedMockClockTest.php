@@ -4,6 +4,7 @@
 namespace test\unit\Ingenerator\PHPUtils\unit\DateTime\Clock;
 
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 
 class StoppedMockClockTest extends TestCase
@@ -147,14 +148,8 @@ class StoppedMockClockTest extends TestCase
     {
         $clock = StoppedMockClock::atNow();
         $callback($clock);
-        $e = NULL;
-        try {
-            $clock->assertSlept($expected, $msg);
-        } catch (\Exception $e) {
-        }
-        $this->assertInstanceOf(\Exception::class, $e, 'Should have thrown');
-        // Do it like this to make it type-safe for old and new phpunit
-        $this->assertContains('ExpectationFailedException', \get_class($e), 'Should be assertion exception');
+        $this->expectException(ExpectationFailedException::class);
+        $clock->assertSlept($expected, $msg);
     }
 
     public function test_assert_slept_passes_if_slept_for_expected_intervals()
@@ -166,5 +161,19 @@ class StoppedMockClockTest extends TestCase
         $this->assertNull(
             $clock->assertSlept([50000, 20000, 15000])
         );
+    }
+
+    public function test_assert_never_slept_passes_if_never_slept()
+    {
+        $clock = StoppedMockClock::atNow();
+        $this->assertNull($clock->assertNeverSlept());
+    }
+
+    public function test_assert_never_slept_if_ever_slept()
+    {
+        $clock = StoppedMockClock::atNow();
+        $clock->usleep(500);
+        $this->expectException(ExpectationFailedException::class);
+        $clock->assertNeverSlept();
     }
 }
