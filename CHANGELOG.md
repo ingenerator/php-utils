@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Allow asserting that the StoppedMockClock never slept
+
 ### v1.0.0 (2019-04-03)
 
 * First major release from 0.2.0
