@@ -22,7 +22,7 @@ class DeploymentConfig
     /**
      * @var string
      */
-    protected $config_dir = '/var/app_config';
+    protected $config_dir = '/etc/ingenerator/conf';
 
     /**
      * @var string
