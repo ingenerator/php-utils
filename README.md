@@ -17,6 +17,10 @@ This isn't in packagist yet : you'll need to add our package repository to your 
 
 `$> composer require ingenerator/php-utils`
 
+# Functionality included
+
+* [Support for managing runtime/environment configuration](docs/managing_runtime_config.md)
+
 # Contributing
 
 Contributions are welcome but please contact us before you start work on anything :
