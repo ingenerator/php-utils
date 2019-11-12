@@ -8,6 +8,8 @@ use Ingenerator\PHPUtils\DeploymentConfig\ConfigMapDeclarationParser;
 use Ingenerator\PHPUtils\DeploymentConfig\ConfigValueDecrypter;
 use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use Ingenerator\PHPUtils\DeploymentConfig\MissingConfigException;
+use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
+use Ingenerator\PHPUtils\StringEncoding\JSON;
 
 class DeploymentConfig
 {
@@ -137,12 +139,11 @@ class DeploymentConfig
             return $value;
         }
 
-        $result = json_decode($value, TRUE);
-        if (json_last_error() === JSON_ERROR_NONE) {
-            return $result;
+        try {
+            return JSON::decode($value);
+        } catch (InvalidJSONException $e) {
+            throw InvalidConfigException::badJSON($string, $e->getMessage());
         }
-
-        throw InvalidConfigException::badJSON($string, json_last_error_msg());
     }
 
     public function map(array ...$declarations)

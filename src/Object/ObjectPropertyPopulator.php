@@ -5,7 +5,7 @@
  */
 
 namespace Ingenerator\PHPUtils\Object;
-
+use Ingenerator\PHPUtils\StringEncoding\JSON;
 
 class ObjectPropertyPopulator
 {
@@ -37,7 +37,7 @@ class ObjectPropertyPopulator
     {
         if ($undefined = static::listUndefinedProperties($object, \array_keys($properties))) {
             throw new \InvalidArgumentException(
-                'Undefined properties on '.\get_class($object).' : '.\json_encode($undefined)
+                'Undefined properties on '.\get_class($object).' : '.JSON::encode($undefined, FALSE)
             );
         }
 
