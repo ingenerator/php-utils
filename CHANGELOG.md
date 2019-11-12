@@ -1,5 +1,6 @@
 ### Unreleased
 
+* Add JSON StringEncoding helper class - safe json parsing, encoding and prettifying with sane defaults
 * Add DeploymentConfig sub-package for loading (and, optionally, decrypting) runtime environment configuration
 
 ### v1.1.0 (2019-07-09)
