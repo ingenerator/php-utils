@@ -6,6 +6,7 @@
 
 namespace Ingenerator\PHPUtils\CSV;
 
+use Ingenerator\PHPUtils\StringEncoding\JSON;
 
 class MismatchedSchemaException extends \InvalidArgumentException
 {
@@ -14,8 +15,8 @@ class MismatchedSchemaException extends \InvalidArgumentException
     {
         return new static(
             'Mismatched row schema in CSV file:'."\n"
-            .'Expected: '.\json_encode($expected)."\n"
-            .'Actual:   '.\json_encode($actual)
+            .'Expected: '.JSON::encode($expected, FALSE)."\n"
+            .'Actual:   '.JSON::encode($actual, FALSE)
         );
     }
 

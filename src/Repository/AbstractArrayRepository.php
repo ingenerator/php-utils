@@ -9,6 +9,7 @@ namespace Ingenerator\PHPUtils\Repository;
 use Doctrine\Common\Collections\Collection;
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
 use PHPUnit\Framework\Assert;
+use Ingenerator\PHPUtils\StringEncoding\JSON;
 
 /**
  * Base class for an array-based memory repository for use in unit tests. Provides helpers to allow
@@ -136,7 +137,7 @@ abstract class AbstractArrayRepository
             "%s (object %s) with data:\n%s\n",
             \get_class($entity),
             \spl_object_hash($entity),
-            \json_encode($this->entityToArray($entity), JSON_PRETTY_PRINT)
+            JSON::encode($this->entityToArray($entity))
         );
     }
 
