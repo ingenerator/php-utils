@@ -1,5 +1,6 @@
 ### Unreleased
 
+* Add Base64Url StringEncoding helper class - like base64, but with entirely websafe characters for URLs etc
 * Add JSON StringEncoding helper class - safe json parsing, encoding and prettifying with sane defaults
 * Add DeploymentConfig sub-package for loading (and, optionally, decrypting) runtime environment configuration
 
