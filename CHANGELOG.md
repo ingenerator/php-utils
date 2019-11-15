@@ -1,9 +1,13 @@
 ### Unreleased
 
+### v1.2.1 (2019-11-15)
+
 * Allow DeploymentConfig->map() to return values in standalone environment
   This brings the `standalone` closer to the behaviour of other environments, except that it will
   continue to return null if there is nothing mapped (where other environments will throw). `->read`
-  continues to return null in standalone in every case. 
+  continues to return null in standalone in every case. Note that standalone will now return a value
+  if there's one mapped for `any` (`*`) - which is a minor breaking change to the behaviour of the 
+  standalone environment.
 
 ### v1.2.0 (2019-11-12)
 
