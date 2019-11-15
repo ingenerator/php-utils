@@ -148,15 +148,13 @@ class DeploymentConfig
 
     public function map(array ...$declarations)
     {
-        if ($this->environment === static::STANDALONE) {
-            return NULL;
-        }
-
         $map = $this->map_parser->parse($declarations);
         if (array_key_exists($this->environment, $map)) {
             $value = $map[$this->environment];
         } elseif (array_key_exists(static::ANY, $map)) {
             $value = $map[static::ANY];
+        } elseif ($this->environment === static::STANDALONE) {
+            return NULL;
         } else {
             throw MissingConfigException::missingMapValue($this->environment);
         }
