@@ -132,8 +132,9 @@ class DeploymentConfigTest extends TestCase
      *           ["qa", "i-am-prod-ish"]
      *           ["ci", null]
      *           ["imagined", "who-knows-what-i-am"]
+     *           ["standalone", "i-am-standalone"]
      */
-    public function test_its_map_environment_returns_value_or_default_for_the_current_env($env, $expect)
+    public function test_its_map_returns_value_or_default_for_the_current_env($env, $expect)
     {
         $subject = $this->newSubjectWithEnv($env);
         $this->assertSame(
@@ -142,16 +143,25 @@ class DeploymentConfigTest extends TestCase
                 ['dev', 'i-am-dev'],
                 [['prod', 'qa'], 'i-am-prod-ish'],
                 ['ci', NULL],
+                ['standalone', 'i-am-standalone'],
                 [DeploymentConfig::ANY, 'who-knows-what-i-am']
             )
         );
     }
 
-    public function test_its_map_returns_null_in_standalone_env()
+    /**
+     * @testWith ["dev"]
+     *           ["standalone"]
+     *           ["ci"]
+     */
+    public function test_its_map_returns_any_for_env_that_is_not_defined($env)
     {
-        $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
-        $this->assertNull(
-            $subject->map([DeploymentConfig::ANY, 'even `any` isn\'t taken'])
+        $subject = $this->newSubjectWithEnv($env);
+        $this->assertSame(
+            'I am anything',
+            $subject->map(
+                [DeploymentConfig::ANY, 'I am anything']
+            )
         );
     }
 
@@ -160,6 +170,18 @@ class DeploymentConfigTest extends TestCase
         $subject = $this->newSubjectWithEnv(DeploymentConfig::QA);
         $this->expectException(MissingConfigException::class);
         $subject->map([DeploymentConfig::PRODUCTION, 'prod']);
+    }
+
+    public function test_its_map_returns_null_for_standalone_if_nothing_defined()
+    {
+        $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
+        $this->assertSame(
+            NULL,
+            $subject->map(
+                [DeploymentConfig::DEV, 'I am dev'],
+                [DeploymentConfig::PRODUCTION, 'I am production']
+            )
+        );
     }
 
     public function test_its_map_decrypts_values()

@@ -1,5 +1,10 @@
 ### Unreleased
 
+* Allow DeploymentConfig->map() to return values in standalone environment
+  This brings the `standalone` closer to the behaviour of other environments, except that it will
+  continue to return null if there is nothing mapped (where other environments will throw). `->read`
+  continues to return null in standalone in every case. 
+
 ### v1.2.0 (2019-11-12)
 
 * Add Base64Url StringEncoding helper class - like base64, but with entirely websafe characters for URLs etc
