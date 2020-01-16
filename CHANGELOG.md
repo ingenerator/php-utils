@@ -1,5 +1,10 @@
 ### Unreleased
 
+### v1.3.0 (2020-01-16)
+
+* Add StaticAssetUrlProvider to provide simple cache-busted local URLs for CSS etc in local
+  dev or remote (e.g. cloud storage / s3) urls in production.
+
 ### v1.2.1 (2019-11-15)
 
 * Allow DeploymentConfig->map() to return values in standalone environment

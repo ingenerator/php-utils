@@ -145,10 +145,11 @@ class ConfigValueDecrypterTest extends TestCase
         $valid_encrypted_val = sodium_crypto_box_seal('whoops', sodium_crypto_box_publickey($kp));
         // The actual encrypted value is fine, but the problem is that the keypair it specifies isn't present with the
         // correct name.
-        $subject = $this->newSubject();
+        $other_keypair_name = uniqid('very');
+        $subject            = $this->newSubject();
         $this->expectException(InvalidConfigException::class);
         $this->expectExceptionMessage('Unknown config decryption key');
-        $subject->decrypt('#SECRET-very#'.$valid_encrypted_val);
+        $subject->decrypt("#SECRET-$other_keypair_name#$valid_encrypted_val");
     }
 
     public function provider_failed_decrypt()
