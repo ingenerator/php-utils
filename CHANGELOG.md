@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.3.0 (2020-01-16)
+
 * Add StaticAssetUrlProvider to provide simple cache-busted local URLs for CSS etc in local
   dev or remote (e.g. cloud storage / s3) urls in production.
 
