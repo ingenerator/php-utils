@@ -1,5 +1,16 @@
 ### Unreleased
 
+* Update MysqlSession to use strict sessions, SessionIdInterface and SessionUpdateTimestampHandlerInterface
+  The updated hander solves a couple of edge cases where the session data could be written but not read if using the
+  wrong hash. This would for example occur if an attacker attempted to overwrite and existing session, or if the hash
+  salt changed during a user's session. The new handler uses strict session mode and custom handler logic to validate
+  the session ID, including checking the hash, and issues a new session ID if it is invalid. The updated logic is also
+  more performant at the database as sessions are only INSERTed on creation and subsequently UPDATEd, rather than
+  the previous INSERT...ON DUPLICATE KEY UPDATE. **Note that ->initialise() now sets the session.use_strict_mode ini
+  value as it is required for proper operation. This should be set anyway, and is only relevant to the handler (of
+  which there can be only one) so this is not considered to be true global state or a breaking change.
+
+
 ### v1.3.0 (2020-01-16)
 
 * Add StaticAssetUrlProvider to provide simple cache-busted local URLs for CSS etc in local
