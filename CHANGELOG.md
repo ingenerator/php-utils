@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v1.4.1 (2020-02-17)
+
+* Fix missing return type from releaseLock when no lock is held
+
 ### v1.4.0 (2020-02-17)
 
 * Update MysqlSession to use strict sessions, SessionIdInterface and SessionUpdateTimestampHandlerInterface
