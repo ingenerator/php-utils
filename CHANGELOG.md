@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.4.0 (2020-02-17)
+
 * Update MysqlSession to use strict sessions, SessionIdInterface and SessionUpdateTimestampHandlerInterface
   The updated hander solves a couple of edge cases where the session data could be written but not read if using the
   wrong hash. This would for example occur if an attacker attempted to overwrite and existing session, or if the hash
