@@ -341,7 +341,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         if ( ! $this->session_lock) {
             // The lock has already been released e.g. due to validateSid releasing it because
             // we did not have a valid claim on that ID (expired / fixation)
-            return;
+            return TRUE;
         }
 
         $query = $this->db->prepare("SELECT RELEASE_LOCK(:session_lock)");
