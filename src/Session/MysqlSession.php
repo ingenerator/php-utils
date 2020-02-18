@@ -91,10 +91,10 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function destroy($id)
+    public function destroy($session_id)
     {
         return $this->db->prepare("DELETE FROM `sessions` WHERE `id` = :id")
-            ->execute(['id' => $id]);
+            ->execute(['id' => $session_id]);
     }
 
     /**
@@ -136,7 +136,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      */
     public function create_sid()
     {
-        $id = \session_create_id();
+        $session_id = \session_create_id();
 
         /*
          * The session does not exist, so create it in the DB
@@ -164,7 +164,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
                           VALUES (:id, :hash, :data, :now, :now, :user_agent, :ip)"
         )->execute(
             [
-                'id'         => $id,
+                'id'         => $session_id,
                 'hash'       => $this->calculateHash(),
                 'data'       => '',
                 'now'        => \date('Y-m-d H:i:s'),
@@ -174,9 +174,9 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         );
 
         // Cache the data for the read call which will immediately follow
-        $this->data_cache[$id] = '';
+        $this->data_cache[$session_id] = '';
 
-        return $id;
+        return $session_id;
     }
 
 
@@ -232,21 +232,21 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function read($id)
+    public function read($session_id)
     {
-        if ( ! isset($this->data_cache[$id])) {
+        if ( ! isset($this->data_cache[$session_id])) {
             // This cannot realistically ever happen in real life. PHP will *always* have called
             // either create_sid() or validateId() before it calls read, and both those methods
             // cache a value for the session.
             throw new \BadMethodCallException(
-                'Session data for '.$id.' has not been cached - session ID not validated?'
+                'Session data for '.$session_id.' has not been cached - session ID not validated?'
             );
         }
 
         // Note we leave data_cache set, so will have a second copy of the session data in memory
         // for the duration of the request. However that avoids any issues from an unexpected second
         // call to read (unlikely but not impossible) not being able to get the data.
-        return $this->data_cache[$id];
+        return $this->data_cache[$session_id];
     }
 
     /**
@@ -258,7 +258,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      *
      * {@inheritdoc}
      */
-    public function write($id, $session_data)
+    public function write($session_id, $session_data)
     {
         // There is no reason to update user_agent or hash
         // If user_agent has changed the hash will have changed
@@ -271,7 +271,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
                         WHERE id = :id"
         )->execute(
             [
-                'id'   => $id,
+                'id'   => $session_id,
                 'data' => $session_data,
                 'now'  => \date('Y-m-d H:i:s'),
                 'ip'   => $this->client_ip,
@@ -295,7 +295,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
                         WHERE id = :id"
         )->execute(
             [
-                'id'  => $id,
+                'id'  => $session_id,
                 'now' => \date('Y-m-d H:i:s'),
                 'ip'  => $this->client_ip,
             ]
@@ -313,14 +313,14 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     }
 
     /**
-     * @param $id
+     * @param $session_id
      *
      * @return bool
      * @throws \ErrorException
      */
-    protected function getLock($id)
+    protected function getLock($session_id)
     {
-        $this->session_lock = 'session_'.$id;
+        $this->session_lock = 'session_'.$session_id;
 
         $query = $this->db->prepare("SELECT GET_LOCK(:session_lock, :timeout)");
         $query->execute(['session_lock' => $this->session_lock, 'timeout' => $this->lock_timeout]);
