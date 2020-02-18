@@ -1,5 +1,10 @@
 ### Unreleased
 
+### v1.4.2 (2020-02-18)
+
+* Fix fatal error on updateSessionTimestamp due to incorrect variable naming. Made all vars consistent as 
+  $session_id to avoid recurrence.
+
 ### v1.4.1 (2020-02-17)
 
 * Fix missing return type from releaseLock when no lock is held
