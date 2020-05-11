@@ -93,6 +93,37 @@ class InitialisableSingletonTraitTest extends TestCase
         );
     }
 
+    public function test_it_can_be_extended()
+    {
+        $child = new class extends CustomParentSingleton {
+        };
+
+        $child::initialise(
+            function () use ($child) {
+                return new $child;
+            }
+        );
+
+        $this->assertSame(
+            [
+                'child'  => TRUE,
+                'parent' => TRUE,
+            ],
+            [
+                'child'  => $child::isInitialised(),
+                'parent' => CustomParentSingleton::isInitialised(),
+            ],
+            'Initialised after init'
+        );
+        $this->assertSame($child::instance(), $child::instance(), 'Works as singleton');
+        $this->assertSame(
+            $child::instance(),
+            CustomParentSingleton::instance(),
+            'Parent and child singleton are same instance'
+        );
+        $this->assertInstanceOf(\get_class($child), $child::instance(), 'Singleton is of the child class');
+    }
+
 }
 
 
@@ -102,6 +133,11 @@ class CustomSingletonOne
 }
 
 class CustomSingletonTwo
+{
+    use InitialisableSingletonTrait;
+}
+
+class CustomParentSingleton
 {
     use InitialisableSingletonTrait;
 }

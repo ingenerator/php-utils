@@ -9,7 +9,7 @@ namespace Ingenerator\PHPUtils\Object;
  */
 trait  InitialisableSingletonTrait
 {
-    private static $instance;
+    protected static $instance;
 
     /**
      * Return the singleton instance
