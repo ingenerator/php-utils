@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.5.0-beta1 (2020-05-14)
+
 * Add AssociativeArrayUtils for common operations on associative arrays
 * Add InitialisableSingleonTrait for objects that need to be initialised as singletons
 * Add StackdriverApplicationLogger framework and supporting classes

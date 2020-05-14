@@ -20,6 +20,9 @@ This isn't in packagist yet : you'll need to add our package repository to your 
 # Functionality included
 
 * [Support for managing runtime/environment configuration](docs/managing_runtime_config.md)
+* Logging framework for outputting application and request logs to Stackdriver via stderr/stdout (see 
+  StackdriverApplicationLogger)
+* Utils for working with Associative Arrays (some ported from Kohana framework)
 
 # Contributing
 
