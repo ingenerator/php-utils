@@ -22,6 +22,23 @@ class DateTimeImmutableFactory
     }
 
     /**
+     * Create from a unix timestamp (in seconds) in the current timezone
+     *
+     * PHP default behaviour when creating from a timestamp is to make the object UTC, this is a
+     * short helper to work round that.
+     *
+     * @param int $timestamp
+     *
+     * @return \DateTimeImmutable
+     */
+    public static function atUnixSeconds(int $timestamp): \DateTimeImmutable
+    {
+        $dt = new \DateTimeImmutable;
+
+        return $dt->setTimestamp($timestamp);
+    }
+
+    /**
      * Create a date from a d/m/y or d/m/Y date
      *
      * @param string $input
