@@ -12,6 +12,23 @@ class DefaultLogMetadata
 {
 
     /**
+     * The device identity, from the user's device_id cookie
+     *
+     * This is returned as a lazy function so that it can pick up the value once the DeviceIdentifier
+     * class has been initialised
+     *
+     * @return callable
+     */
+    public static function deviceIdentityLazy(): callable
+    {
+        return function () {
+            return [
+                'context' => ['did' => DeviceIdentifier::get()]
+            ];
+        };
+    }
+
+    /**
      * The basic request method, uri and remote IP for the request
      *
      * Note that these values are also "hoisted" by the request logger rather than look them up separately so you should
@@ -35,19 +52,14 @@ class DefaultLogMetadata
     }
 
     /**
-     * Basic request tracing information including the session ID, a random unique request ID and google trace if any
+     * Basic request tracing information including a random unique request ID and google trace if any
      *
-     * The session ID should be injected directly e.g. from `$_COOKIE['session']` as there is no guarantee that your
-     * session handler will have been initialised by the time logs are sent and so it may not be safe to rely on e.g.
-     * `session_id()` if runtime cookie params etc have not been initialised.
-     *
-     * @param string|null $session_id
      * @param array       $server
      * @param string|null $gcp_project
      *
      * @return array
      */
-    public static function requestTrace(?string $session_id, array $server = [], ?string $gcp_project = NULL): array
+    public static function requestTrace(array $server = [], ?string $gcp_project = NULL): array
     {
         $request_id = \uniqid('', TRUE);
 
@@ -64,8 +76,7 @@ class DefaultLogMetadata
 
         return [
             'context'                      => [
-                'req'  => $request_id,
-                'sess' => $session_id ?: '{na}',
+                'req' => $request_id,
             ],
             'logging.googleapis.com/trace' => $trace_id,
         ];

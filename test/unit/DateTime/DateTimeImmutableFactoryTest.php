@@ -121,4 +121,17 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($input, $actual->format('anything'));
     }
 
+    public function test_it_factories_from_unix_timestamp_in_default_tz()
+    {
+        try {
+            $old_default = \date_default_timezone_get();
+            \date_default_timezone_set('Europe/London');
+            $actual = DateTimeImmutableFactory::atUnixSeconds(1600947830);
+            $this->assertSame('Europe/London', $actual->getTimezone()->getName());
+            $this->assertSame('2020-09-24T12:43:50+01:00', $actual->format(\DateTime::ATOM));
+        } finally {
+            \date_default_timezone_set($old_default);
+        }
+    }
+
 }
