@@ -4,6 +4,7 @@
 namespace Ingenerator\PHPUtils\Logging;
 
 
+use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
 use Ingenerator\PHPUtils\Cookie\CookieWrapper;
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 
@@ -26,6 +27,16 @@ class DeviceIdentifier
      * @var \Ingenerator\PHPUtils\Logging\DeviceIdentifier
      */
     protected static $instance;
+
+    /**
+     * Forces the singleton state to a known value for use in testing
+     *
+     * @param string $id
+     */
+    public static function forceGlobalTestValue(string $id): void
+    {
+        static::$instance = new DeviceIdentifier(new ArrayCookieWrapperStub(['did' => $id]));
+    }
 
     /**
      * Initialises the instance, loading the current ID from cookies or setting new cookies

@@ -189,6 +189,12 @@ class DeviceIdentifierTest extends TestCase
         }
     }
 
+    public function test_its_force_test_value_forces_value_without_setting_cookies()
+    {
+        DeviceIdentifier::forceGlobalTestValue('abc4567890123456789012');
+        $this->assertSame('abc4567890123456789012', DeviceIdentifier::get());
+    }
+
     protected function setUp()
     {
         parent::setUp();

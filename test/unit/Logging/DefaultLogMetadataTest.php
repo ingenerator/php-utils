@@ -5,11 +5,26 @@ namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 
 use Ingenerator\PHPUtils\Logging\DefaultLogMetadata;
+use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 
 class DefaultLogMetadataTest extends TestCase
 {
+    /**
+     * ---------------------------------
+     * deviceIdentity
+     * ---------------------------------
+     */
+
+    public function test_its_device_identity_provides_device_id_as_deferred_value()
+    {
+        $result = DefaultLogMetadata::deviceIdentityLazy();
+        $this->assertIsCallable($result);
+        DeviceIdentifier::forceGlobalTestValue('abc4567890123456789012');
+        $this->assertSame(['context' => ['did' => 'abc4567890123456789012']], $result());
+    }
+
     /**
      * ---------------------------------
      * httpContext
@@ -56,13 +71,13 @@ class DefaultLogMetadataTest extends TestCase
 
     public function test_its_request_tracing_data_adds_random_request_id()
     {
-        $result1 = DefaultLogMetadata::requestTrace('abc');
+        $result1 = DefaultLogMetadata::requestTrace();
         $this->assertRegExp(
             '/^[a-z0-9]+\.[0-9]+$/',
             $result1['context']['req'],
             'Should match expected format'
         );
-        $result3 = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace('abc');
+        $result3 = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace();
         $this->assertNotSame(
             $result1['context']['req'],
             $result3['context']['req'],
@@ -70,21 +85,10 @@ class DefaultLogMetadataTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [null, "{na}"]
-     *           ["abasd23", "abasd23"]
-     */
-    public function test_its_request_tracing_data_adds_provided_session_id($sid, $expect)
+    public function test_its_request_tracing_data_adds_trace_id_with_request_id_if_no_headers_available(
+    )
     {
-        $this->assertSame(
-            $expect,
-            \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace($sid)['context']['sess']
-        );
-    }
-
-    public function test_its_request_tracing_data_adds_trace_id_with_request_id_if_no_headers_available()
-    {
-        $result = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace('abc');
+        $result = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace();
         $this->assertSame(
             $result['context']['req'],
             $result['logging.googleapis.com/trace'],
@@ -131,7 +135,7 @@ class DefaultLogMetadataTest extends TestCase
         $project,
         $expect
     ) {
-        $result = DefaultLogMetadata::requestTrace('abc', $server, $project);
+        $result = DefaultLogMetadata::requestTrace($server, $project);
         $this->assertSame(
             $expect,
             $result['logging.googleapis.com/trace'],

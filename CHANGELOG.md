@@ -1,5 +1,10 @@
 ### Unreleased
 
+* [BREAKING] Removed the $session_id parameter from `DefaultLogMetadata::requestTrace` - use the new
+  `DefaultLogMetadata::deviceIdentityLazy` method instead to capture the device ID into the logs.
+  The session ID was removed because reading from $_COOKIE does not provide a value on the user's first
+  request, and other methods (e.g. session_id()) may not give an accurate value if the session cookie name
+  is customised but the session has not been started at the time of logging. 
 * Add class to assign users a device ID cookie and provide the value for logging
 * Add class to wrap accessing / setting / deleting cookies for injectability and testability
 * Add helper method to get a DateTimeImmutable from a unix timestamp, in current timezone
