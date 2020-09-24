@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.5.0-beta2 (2020-09-24)
+
 * [BREAKING] Removed the $session_id parameter from `DefaultLogMetadata::requestTrace` - use the new
   `DefaultLogMetadata::deviceIdentityLazy` method instead to capture the device ID into the logs.
   The session ID was removed because reading from $_COOKIE does not provide a value on the user's first
