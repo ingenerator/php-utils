@@ -1,5 +1,6 @@
 ### Unreleased
 
+* Add class to wrap accessing / setting / deleting cookies for injectability and testability
 * Add helper method to get a DateTimeImmutable from a unix timestamp, in current timezone
 
 ### v1.5.0-beta1 (2020-05-14)
