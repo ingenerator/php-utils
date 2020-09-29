@@ -16,6 +16,7 @@
   ],
   "require": {
     "ext-json": "*",
+    "ext-pdo": "^7",
     "ext-sodium": "^7.2",
     "php": "^7.2",
     "psr/log": "^1.1"
