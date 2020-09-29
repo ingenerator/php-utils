@@ -13,11 +13,11 @@ class StoppedMockClockTest extends TestCase
     public function test_it_is_initialisable_now()
     {
         $clock = StoppedMockClock::atNow();
-        $this->assertEquals(
+        $this->assertEqualsWithDelta(
             new \DateTimeImmutable,
             $clock->getDateTime(),
-            'Starts at the right time',
-            1
+            1,
+            'Starts at the right time'
         );
     }
 
@@ -59,7 +59,7 @@ class StoppedMockClockTest extends TestCase
     {
         $clock = StoppedMockClock::atTimeAgo('P3D');
         $ago = (new \DateTimeImmutable)->sub(new \DateInterval('P3D'));
-        $this->assertEquals($ago, $clock->getDateTime(), 'Time is at correct interval', 1);
+        $this->assertEqualsWithDelta($ago, $clock->getDateTime(), 1, 'Time is at correct interval');
     }
 
     public function test_it_holds_its_time_forever_in_real_life()

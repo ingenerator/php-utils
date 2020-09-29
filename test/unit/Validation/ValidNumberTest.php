@@ -25,12 +25,10 @@ class ValidNumberTest extends TestCase
     {
         $this->assertSame($expect, ValidNumber::minimum($value, 13));
     }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
+    
     public function test_it_throws_for_unknown_rule_name()
     {
+        $this->expectException(\InvalidArgumentException::class);
         ValidNumber::rule('random nonsense');
     }
 

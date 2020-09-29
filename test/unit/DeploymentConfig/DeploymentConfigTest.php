@@ -377,7 +377,7 @@ class DeploymentConfigTest extends TestCase
         return $subject;
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->decrypter = new PaddedConfigDecryptStub;

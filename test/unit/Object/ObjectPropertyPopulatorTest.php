@@ -40,11 +40,9 @@ class ObjectPropertyPopulatorTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_it_throws_if_assigning_unknown_property()
     {
+        $this->expectException(\InvalidArgumentException::class);
         ObjectPropertyPopulator::assignHash(new TestPopulatingClass, ['junk' => 'rubbish']);
     }
 

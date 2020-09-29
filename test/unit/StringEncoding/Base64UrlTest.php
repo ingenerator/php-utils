@@ -33,7 +33,7 @@ class Base64UrlTest extends TestCase
     public function test_its_encoded_output_is_always_url_safe($value)
     {
         $encoded = Base64Url::encode($value);
-        $this->assertInternalType('string', $encoded);
+        $this->assertIsString($encoded);
         $this->assertRegExp('/^[a-zA-Z0-9\-\_]+$/', $encoded);
     }
 

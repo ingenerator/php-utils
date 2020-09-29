@@ -173,11 +173,9 @@ class StrictDateTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_it_throws_for_unknown_rule_name()
     {
+        $this->expectException(\InvalidArgumentException::class);
         StrictDate::rule('random nonsense');
     }
 

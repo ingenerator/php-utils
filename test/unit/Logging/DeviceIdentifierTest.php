@@ -195,7 +195,7 @@ class DeviceIdentifierTest extends TestCase
         $this->assertSame('abc4567890123456789012', DeviceIdentifier::get());
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->cookies = new ArrayCookieWrapperStub;

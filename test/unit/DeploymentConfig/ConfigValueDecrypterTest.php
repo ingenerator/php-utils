@@ -186,7 +186,7 @@ class ConfigValueDecrypterTest extends TestCase
         $subject->decrypt($value);
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->vfs = vfsStream::setup('anywhere');
