@@ -194,13 +194,13 @@ class CookieWrapperTest extends TestCase
         );
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->_old_cookie_var = $_COOKIE;
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         $_COOKIE = $this->_old_cookie_var;

@@ -23,14 +23,24 @@ class RealtimeClockTest extends TestCase
         $time = $this->newSubject()->getDateTime();
         $this->assertInstanceOf(\DateTimeImmutable::class, $time);
         // Allow for time changing during the test
-        $this->assertEquals(new \DateTimeImmutable, $time, 'Should be roughly the real time', 1);
+        $this->assertEqualsWithDelta(
+            new \DateTimeImmutable,
+            $time,
+            1,
+            'Should be roughly the real time'
+        );
     }
 
     public function test_it_returns_microtime()
     {
         $mt = $this->newSubject()->getMicrotime();
-        $this->assertInternalType('float', $mt);
-        $this->assertEquals(\microtime(TRUE), $mt, 'Should be roughly the real microtime', 0.2);
+        $this->assertIsFloat($mt);
+        $this->assertEqualsWithDelta(
+            \microtime(TRUE),
+            $mt,
+            0.2,
+            'Should be roughly the real microtime'
+        );
     }
 
     public function test_it_sleeps()
@@ -58,17 +68,17 @@ class RealtimeClockTest extends TestCase
         $end_ts = $subject->getDateTime();
         $end_mt = $subject->getMicrotime();
 
-        $this->assertEquals(
+        $this->assertEqualsWithDelta(
             2,
             $end_ts->getTimestamp() - $start_ts->getTimestamp(),
-            'Seconds move',
-            1
+            1,
+            'Seconds move'
         );
-        $this->assertEquals(
+        $this->assertEqualsWithDelta(
             2.5,
             $end_mt - $start_mt,
-            'microseconds should be about right',
-            0.2
+            0.2,
+            'microseconds should be about right'
         );
     }
 

@@ -66,12 +66,10 @@ class AbstractArrayRepositoryTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_its_load_with_throws_if_no_entity()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'boo']);
+        $this->expectException(\InvalidArgumentException::class);
         $subject->loadWith(function (AnyEntity $e) { return $e->getProp1() === 'baz'; });
     }
 
@@ -82,12 +80,10 @@ class AbstractArrayRepositoryTest extends TestCase
         $this->assertSame($subject->getEntities()[1], $e);
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     */
     public function test_its_load_with_throws_if_entity_not_unique()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
+        $this->expectException(\UnexpectedValueException::class);
         $subject->loadWith(function (AnyEntity $e) { return TRUE; });
     }
 
@@ -106,12 +102,10 @@ class AbstractArrayRepositoryTest extends TestCase
         $this->assertSame($subject->getEntities()[1], $e);
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     */
     public function test_its_find_with_throws_if_entity_not_unique()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
+        $this->expectException(\UnexpectedValueException::class);
         $subject->findWith(function (AnyEntity $e) { return TRUE; });
     }
 

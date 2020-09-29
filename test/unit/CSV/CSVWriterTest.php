@@ -8,6 +8,7 @@ namespace test\unit\Ingenerator\PHPUtils\CSV;
 
 
 use Ingenerator\PHPUtils\CSV\CSVWriter;
+use Ingenerator\PHPUtils\CSV\MismatchedSchemaException;
 use PHPUnit\Framework\TestCase;
 
 class CSVWriterTest extends TestCase
@@ -18,34 +19,26 @@ class CSVWriterTest extends TestCase
         $this->assertInstanceOf(CSVWriter::class, $this->newSubject());
     }
 
-    /**
-     * @expectedException \ErrorException
-     */
     public function test_it_throws_if_file_cannot_be_opened()
     {
-        $this->newSubject()->open('/invalid_csv_file');
+        $subject = $this->newSubject();
+        $this->expectException(\ErrorException::class);
+        $subject->open('/invalid_csv_file');
     }
 
-    /**
-     * @expectedException \LogicException
-     */
     public function test_it_throws_if_writing_before_opening_file()
     {
-        $this->newSubject()->write(['any' => 'junk']);
+        $subject = $this->newSubject();
+        $this->expectException(\LogicException::class);
+        $subject->write(['any' => 'junk']);
     }
 
-    /**
-     * @expectedException \LogicException
-     */
     public function test_it_throws_if_writing_after_closing_file()
     {
-        try {
-            $subj = $this->newSubject();
-            $subj->open('php://temp');
-            $subj->close();
-        } catch (\Exception $e) {
-            $this->fail('Unexpected exception '.$e);
-        }
+        $subj = $this->newSubject();
+        $subj->open('php://temp');
+        $subj->close();
+        $this->expectException(\LogicException::class);
         $subj->write(['any' => 'content']);
     }
 
@@ -63,9 +56,6 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    /**
-     * @expectedException \LogicException
-     */
     public function test_it_throws_if_writing_to_externally_closed_resource()
     {
         $file = \fopen('php://memory', 'w');
@@ -76,6 +66,7 @@ class CSVWriterTest extends TestCase
             \fclose($file);
         }
 
+        $this->expectException(\LogicException::class);
         $subj->write(['some' => 'csv']);
     }
 
@@ -146,7 +137,6 @@ class CSVWriterTest extends TestCase
     }
 
     /**
-     * @expectedException \Ingenerator\PHPUtils\CSV\MismatchedSchemaException
      * @testWith [{"is": "jumbled", "our": "up"}]
      *           [{"our": "things", "went": "bad"}]
      */
@@ -157,6 +147,7 @@ class CSVWriterTest extends TestCase
             $subj = $this->newSubject();
             $subj->open($file);
             $subj->write(['our' => 'data', 'is' => 'here']);
+            $this->expectException(MismatchedSchemaException::class);
             $subj->write($second_row);
         } finally {
             \fclose($file);
