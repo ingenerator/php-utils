@@ -1,5 +1,8 @@
 ### Unreleased
 
+* Add MutexWrapper with Mock and Db (mysql) backed implementations for preventing concurrent executions
+  of code.
+ 
 ### v1.5.0-beta2 (2020-09-24)
 
 * [BREAKING] Removed the $session_id parameter from `DefaultLogMetadata::requestTrace` - use the new
