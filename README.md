@@ -1,6 +1,6 @@
 php-utils provides common, simple, dependency-free PHP helpers
 
-[![Tests](https://github.com/ingenerator/php-utils/Run%20tests/badge.svg)](https://github.com/ingenerator/php-utils/actions)
+[![Tests](https://github.com/ingenerator/php-utils/workflows/Run%20tests/badge.svg)](https://github.com/ingenerator/php-utils/actions)
 
 
 # Installing php-utils
