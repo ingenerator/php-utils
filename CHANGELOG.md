@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Init the DeviceIdentifier to a fixed value in the CLI environment without setting any cookies, to prevent
+  errors if the process has already sent output.
 * Add MutexWrapper with Mock and Db (mysql) backed implementations for preventing concurrent executions
   of code.
  

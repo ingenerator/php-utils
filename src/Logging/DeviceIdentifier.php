@@ -45,10 +45,19 @@ class DeviceIdentifier
      * before sending any output.
      *
      * @param bool $ssl_available
+     * @param bool $is_cli
      */
-    public static function initAndEnsureCookieSet(bool $ssl_available): void
+    public static function initAndEnsureCookieSet(bool $ssl_available, bool $is_cli = (PHP_SAPI === 'cli')): void
     {
-        static::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
+        if ($is_cli) {
+            // Stub the class without setting cookies for use in a CLI environment.
+            // Note that as it's not really appropriate to inject the `is_cli` arg to `::get()`, and we can't stub
+            // PHP_SAPI for testing, that method will still return `-unset-` if it is called before
+            // ::initAndEnsureCookieSet()
+            static::forceGlobalTestValue(static::CLI_ID);
+        } else {
+            static::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
+        }
         static::$instance->init();
     }
 
@@ -68,8 +77,9 @@ class DeviceIdentifier
         return $i->getValue();
     }
 
+    const CLI_ID          = 'cli-------------------';
     const COOKIE_LIFETIME = 'P5Y';
-    const VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
+    const VALID_REGEX     = '/^[a-zA-Z0-9\-_=]{22}$/';
 
     /**
      * @var string|null
