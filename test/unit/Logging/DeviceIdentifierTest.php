@@ -154,7 +154,7 @@ class DeviceIdentifierTest extends TestCase
         $old_cookie = $_COOKIE;
         try {
             $_COOKIE['did'] = '1234567890123456789012';
-            DeviceIdentifier::initAndEnsureCookieSet(TRUE);
+            DeviceIdentifier::initAndEnsureCookieSet(TRUE, FALSE);
             $this->assertSame('1234567890123456789012', DeviceIdentifier::get());
 
             // Note that here the init method has assigned a global instance so changes to $_COOKIE
@@ -166,6 +166,18 @@ class DeviceIdentifierTest extends TestCase
             $_COOKIE = $old_cookie;
         }
         $this->assertSame('1234567890123456789012', DeviceIdentifier::get());
+    }
+
+    public function test_its_static_init_creates_instance_and_initialises_with_fixed_id_in_cli()
+    {
+        ScopeChangingCaller::call(
+            DeviceIdentifier::class,
+            function () { DeviceIdentifier::$instance = NULL; }
+        );
+
+        DeviceIdentifier::initAndEnsureCookieSet(TRUE); // Fall back to default arg
+        $this->assertSame(DeviceIdentifier::CLI_ID, DeviceIdentifier::get());
+        $this->assertRegExp(DeviceIdentifier::VALID_REGEX, DeviceIdentifier::get());
     }
 
     public function test_its_static_get_can_read_from_cookies_even_if_not_initialised()
