@@ -1,5 +1,14 @@
 ### Unreleased
 
+### v1.6.0 (2020-10-29)
+
+* Support php^7.4
+* Use new setcookie() signature
+
+### v1.5.0 (2020-10-29)
+
+* Stable release of beta3 (no changes)
+
 ### v1.5.0-beta3 (2020-10-09)
 
 * Init the DeviceIdentifier to a fixed value in the CLI environment without setting any cookies, to prevent
