@@ -77,21 +77,22 @@ class CookieWrapperTest extends TestCase
                 'domain'   => 'foo.bar.com',
                 'secure'   => FALSE,
                 'httponly' => FALSE,
-                'samesite' => NULL
             ]
         );
 
         $this->assertSame(
             [
                 [
-                    'name'     => 'anything',
-                    'value'    => 'any value',
-                    'expires'  => 1600952284,
-                    'path'     => '/somedir',
-                    'domain'   => 'foo.bar.com',
-                    'secure'   => FALSE,
-                    'httponly' => FALSE,
-                ]
+                    'name'    => 'anything',
+                    'value'   => 'any value',
+                    'options' => [
+                        'domain'   => 'foo.bar.com',
+                        'expires'  => 1600952284,
+                        'httponly' => FALSE,
+                        'path'     => '/somedir',
+                        'secure'   => FALSE,
+                    ],
+                ],
             ],
             $subject->setcookie_calls
         );
@@ -106,13 +107,15 @@ class CookieWrapperTest extends TestCase
         $this->assertSame(
             [
                 [
-                    'name'     => 'somecookie',
-                    'value'    => 'some stuff',
-                    'expires'  => 0,
-                    'path'     => '/',
-                    'domain'   => '',
-                    'secure'   => TRUE,
-                    'httponly' => TRUE,
+                    'name'    => 'somecookie',
+                    'value'   => 'some stuff',
+                    'options' => [
+                        'domain'   => '',
+                        'expires'  => 0,
+                        'httponly' => TRUE,
+                        'path'     => '/',
+                        'secure'   => TRUE,
+                    ],
                 ]
             ],
             $subject->setcookie_calls
@@ -129,7 +132,7 @@ class CookieWrapperTest extends TestCase
         );
         $this->assertSame(
             1835600522,
-            $subject->setcookie_calls[0]['expires']
+            $subject->setcookie_calls[0]['options']['expires']
         );
     }
 
@@ -144,15 +147,14 @@ class CookieWrapperTest extends TestCase
         $subject             = $this->newSubject();
         $subject->set('whatever', 'things', $opts);
 
-        $this->assertSame($expect, $subject->setcookie_calls[0]['secure']);
+        $this->assertSame($expect, $subject->setcookie_calls[0]['options']['secure']);
     }
 
     /**
-     * @testWith [true, {}, "/"]
-     *           [true, {"samesite": "Lax"}, "/;SameSite=Lax"]
-     *           [true, {"samesite": "None"}, "/;SameSite=None"]
-     *           [true, {"path": "/wierdo", "samesite": "None"}, "/wierdo;SameSite=None"]
-     *           [false, {"samesite": "None"}, "/"]
+     * @testWith [true, {}, null]
+     *           [true, {"samesite": "Lax"}, "Lax"]
+     *           [true, {"samesite": "None"}, "None"]
+     *           [false, {"samesite": "None"}, null]
      */
     public function test_it_adds_samesite_attribute_only_if_ssl_available($has_ssl, $opts, $expect)
     {
@@ -160,7 +162,11 @@ class CookieWrapperTest extends TestCase
         $subject             = $this->newSubject();
         $subject->set('whatever', 'things', $opts);
 
-        $this->assertSame($expect, $subject->setcookie_calls[0]['path']);
+        if ($expect === NULL) {
+            $this->assertArrayNotHasKey('samesite', $subject->setcookie_calls[0]['options']);
+        } else {
+            $this->assertSame($expect, $subject->setcookie_calls[0]['options']['samesite']);
+        }
     }
 
     public function test_it_deletes_cookie_by_setting_value_empty_and_expires_in_past()
@@ -171,14 +177,16 @@ class CookieWrapperTest extends TestCase
         $this->assertSame(
             [
                 [
-                    'name'     => 'myvar',
-                    'value'    => '',
-                    'expires'  => 1,
-                    'path'     => '/',
-                    'domain'   => '',
-                    'secure'   => FALSE,
-                    'httponly' => FALSE,
-                ]
+                    'name'    => 'myvar',
+                    'value'   => '',
+                    'options' => [
+                        'domain'   => '',
+                        'expires'  => 1,
+                        'httponly' => FALSE,
+                        'path'     => '/',
+                        'secure'   => FALSE,
+                    ],
+                ],
             ],
             $subject->setcookie_calls
         );
@@ -220,20 +228,12 @@ class TestableCookieWrapper extends CookieWrapper
     protected function set_cookie(
         $name,
         $value,
-        $expires,
-        $path,
-        $domain,
-        $secure,
-        $httponly
+        $options
     ): void {
         $this->setcookie_calls[] = [
-            'name'     => $name,
-            'value'    => $value,
-            'expires'  => $expires,
-            'path'     => $path,
-            'domain'   => $domain,
-            'secure'   => $secure,
-            'httponly' => $httponly
+            'name'    => $name,
+            'value'   => $value,
+            'options' => $options,
         ];
     }
 

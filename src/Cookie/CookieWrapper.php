@@ -3,11 +3,15 @@
 
 namespace Ingenerator\PHPUtils\Cookie;
 
+use function array_merge;
+use function headers_sent;
+use function setcookie;
+
 /**
  * Provides an injectable wrapper for setting and accessing cookies from other classes
  *
  * This includes:
- *  - Actually setting cookies, with sane defaults and samesite support in php < 7.3
+ *  - Actually setting cookies, with sane defaults
  *  - Automatically downgrading secure cookies and dropping SameSite when SSL is not available
  *    (assumed to be a dev env)
  *  - Accessing the current value of a cookie whether it was provided by the client (in $_COOKIE) or
@@ -40,11 +44,7 @@ class CookieWrapper
     /**
      * @param string $name
      * @param string $value
-     * @param int    $expire
-     * @param string $path
-     * @param string $domain
-     * @param bool   $secure Note this will be toggled off if running in a dev/CI environment without SSL
-     * @param bool   $httponly
+     * @param array  $options
      */
     public function set(string $name, ?string $value = NULL, array $options = []): void
     {
@@ -52,25 +52,27 @@ class CookieWrapper
             throw new HeadersSentException($name, $file, $line);
         }
 
-        $path = $options['path'] ?? '/';
-        if ($this->has_ssl_available and ($options['samesite'] ?? NULL)) {
-            $path .= ';SameSite='.$options['samesite'];
+        $default_options = [
+            'domain' => '',
+            'expires' => 0,
+            'httponly'=> TRUE,
+            'path' => '/',
+            'secure' => $this->has_ssl_available,
+        ];
+        $options = array_merge($default_options, $options);
+
+        // convert expires DateTime to timestamp
+        if ($options['expires'] instanceof \DateTimeImmutable) {
+            $options['expires'] = $options['expires']->getTimestamp();
         }
 
-        $expires = $options['expires'] ?? 0;
-        if ($expires instanceof \DateTimeImmutable) {
-            $expires = $expires->getTimestamp();
-        }
+        // downgrade secure cookies if SSL is not available
+        if (!$this->has_ssl_available) { $options['secure'] = FALSE;}
 
-        $this->set_cookie(
-            $name,
-            $value,
-            $expires,
-            $path,
-            $options['domain'] ?? '',
-            $this->has_ssl_available && ($options['secure'] ?? TRUE),
-            $options['httponly'] ?? TRUE
-        );
+        // remove samesite option if SSL is not available
+        if (!$this->has_ssl_available) { unset($options['samesite']);}
+
+        $this->set_cookie($name, $value, $options);
 
         $this->cookies[$name] = $value;
     }
@@ -99,17 +101,7 @@ class CookieWrapper
         unset($this->cookies[$name]);
     }
 
-    protected function set_cookie(
-        $name,
-        $value,
-        $expires,
-        $path,
-        $domain,
-        $secure,
-        $httponly
-    ): void {
-        \setcookie($name, $value, $expires, $path, $domain, $secure, $httponly);
-    }
+    protected function set_cookie($name, $value, $options) { setcookie($name, $value, $options); }
 
     protected function headers_sent(&$file, &$line): bool
     {

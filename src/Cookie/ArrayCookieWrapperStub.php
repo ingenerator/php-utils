@@ -19,7 +19,7 @@ class ArrayCookieWrapperStub extends CookieWrapper
         $this->set_cookie_calls[$name][] = ['value' => $value, 'opts' => $options];
     }
     
-    protected function set_cookie($name, $value, $expires, $path, $domain, $secure, $httponly): void
+    protected function set_cookie($name, $value, $options): void
     {
         // No-op
     }
