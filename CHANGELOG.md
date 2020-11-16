@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add DateTimeImmutableFactory and DateString methods for dealing with microsecond-precision 
+  date/time values
 * Improve test assertion API on the MockMutexWrapper
 
 ### v1.6.0 (2020-10-29)

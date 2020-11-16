@@ -32,6 +32,19 @@ class DateString
     }
 
     /**
+     * Formats to ISO8601 (the real one not the PHP one :-O) with microsecond precision
+     *
+     * @param \DateTimeImmutable|null $date
+     * @param string                  $empty_value
+     *
+     * @return string
+     */
+    public static function isoMS(?\DateTimeImmutable $date, ?string $empty_value = ''): ?string
+    {
+        return static::format($date, 'Y-m-d\TH:i:s.uP', $empty_value);
+    }
+
+    /**
      * Formats as Y-m-d H:i:s
      *
      * @param \DateTimeImmutable|NULL $date

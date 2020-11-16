@@ -62,4 +62,22 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::ymd($date, $fallback));
     }
 
+    public function provider_isoms()
+    {
+        $lndn = new \DateTimeZone('Europe/London');
+
+        return [
+            [NULL, 'nothing', 'nothing'],
+            [new \DateTimeImmutable('2020-08-21 12:15:54.643214', $lndn), '', '2020-08-21T12:15:54.643214+01:00'],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_isoms
+     */
+    public function test_it_formats_to_iso8601_with_milliseconds($date, $fallback, $expect)
+    {
+        $this->assertSame($expect, DateString::isoMS($date, $fallback));
+    }
+
 }

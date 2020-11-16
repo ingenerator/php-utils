@@ -22,6 +22,34 @@ class DateTimeImmutableFactory
     }
 
     /**
+     * Create from a unix timestamp with microsecond precision (e.g. a microtime() float) in current timezone
+     *
+     * As with ::atUnixSeconds this works round the default PHP behaviour that creating from a timestampy value
+     * always uses UTC rather than the default / current timezone.
+     *
+     * It further works round a PHP edge case that a float with a .00 casts to a string with no decimal point,
+     * which causes createFromFormat('U.u') to fail on exact seconds unless you format the string with sprintf
+     * to have the expected number of decimal places.
+     *
+     * @param float $microtime
+     *
+     * @return DateTimeImmutable
+     */
+    public static function atMicrotime(float $microtime): \DateTimeImmutable
+    {
+        // Work round some PHP edge cases.
+        // First, a float with a .00 casts to string with no decimal point, which causes the createFromFormat to fail
+        // on exact seconds. Use sprintf to ensure there's always a decimal present
+        $dt = \DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', $microtime));
+
+        // Second, creating from unix timestamp of any kind always sets the TZ to UTC (*even* if you specify a timezone
+        // in the constructor).
+        // So cast it back to the default timezone for consistency with other date time constructor formats
+        return $dt->setTimezone(new \DateTimeZone(\date_default_timezone_get()));
+    }
+
+
+    /**
      * Create from a unix timestamp (in seconds) in the current timezone
      *
      * PHP default behaviour when creating from a timestamp is to make the object UTC, this is a
@@ -33,9 +61,7 @@ class DateTimeImmutableFactory
      */
     public static function atUnixSeconds(int $timestamp): \DateTimeImmutable
     {
-        $dt = new \DateTimeImmutable;
-
-        return $dt->setTimestamp($timestamp);
+        return static::atMicrotime($timestamp);
     }
 
     /**
