@@ -134,4 +134,24 @@ class DateTimeImmutableFactoryTest extends TestCase
         }
     }
 
+    /**
+     * @testWith [1598008554.643, "2020-08-21T12:15:54.643000+01:00"]
+     *           ["1598008554.64321424", "2020-08-21T12:15:54.643214+01:00"]
+     *           ["1274437650", "2010-05-21T11:27:30.000000+01:00"]
+     *           [1274437650, "2010-05-21T11:27:30.000000+01:00"]
+     *           [1274437650.0, "2010-05-21T11:27:30.000000+01:00"]
+     */
+    public function test_it_factories_from_microtime_in_default_tz($val, $expect)
+    {
+        try {
+            $old_default = \date_default_timezone_get();
+            \date_default_timezone_set('Europe/London');
+            $actual = DateTimeImmutableFactory::atMicrotime($val);
+            $this->assertSame('Europe/London', $actual->getTimezone()->getName());
+            $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
+        } finally {
+            \date_default_timezone_set($old_default);
+        }
+    }
+
 }
