@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Improve test assertion API on the MockMutexWrapper
+
 ### v1.6.0 (2020-10-29)
 
 * Support php^7.4
