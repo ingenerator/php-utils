@@ -32,12 +32,34 @@ class ObjectPropertyRipperTest extends TestCase
         );
     }
 
+    public function test_it_rips_all_properties()
+    {
+        $this->assertEquals(
+            [
+                'something_private'   => 'precious',
+                'something_protected' => 'water',
+                'something_else'      => 'else',
+            ],
+            ObjectPropertyRipper::ripAll(new TestRippingClass)
+        );
+    }
+
+    public function test_it_throws_if_ripping_all_from_an_object_with_private_parent_properties()
+    {
+        $this->expectException(\DomainException::class);
+        ObjectPropertyRipper::ripAll(new ExtensionRippingClass);
+    }
+
 }
 
 class TestRippingClass
 {
-    private $something_private = 'precious';
+    private   $something_private   = 'precious';
     protected $something_protected = 'water';
-    protected $something_else = 'else';
+    protected $something_else      = 'else';
 }
 
+class ExtensionRippingClass extends TestRippingClass
+{
+    private $child_private = 'other-private';
+}

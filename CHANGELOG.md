@@ -1,5 +1,8 @@
 ### Unreleased
 
+* Add ObjectPropertyRipper::ripAll to grab all variables (from simple objects with no private props in
+  parent classes).
+
 ### v1.7.0 (2020-11-16)
 
 * Add DateTimeImmutableFactory and DateString methods for dealing with microsecond-precision 
