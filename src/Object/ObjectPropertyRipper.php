@@ -34,6 +34,42 @@ class ObjectPropertyRipper
     }
 
     /**
+     * Grab the values of all properties from inside the object
+     *
+     * Note it does not support objects where a parent class has any private properties, as these cannot be reliably
+     * exported.
+     *
+     * @param object $object
+     *
+     * @return array
+     */
+    public static function ripAll(object $object): array
+    {
+        // We can't use the cached `ripper` as we don't know in advance what properties to ask for
+        // We also shouldn't cache, as individual objects may have variable field names (e.g. with public vars)
+        // that are not present on other instances of the same class
+
+        $props = (\Closure::bind(
+            fn() => \get_object_vars($object),
+            NULL,
+            $object
+        ))();
+
+        // Safety check - the method above is efficient but can't return private props from parent classes
+        // And actually, turning complex classes like that into arrays is probelematic anyway because there's
+        // a risk of name collisions between private props at different levels of inheritance. So treat this as an
+        // unsupported usage and throw to indicate the data is incomplete.
+        $array_vals = (array) $object;
+        if (count($array_vals) !== count($props)) {
+            throw new \DomainException(
+                'Cannot rip all variables from '.\get_class($object).' - does it have inherited private props?'
+            );
+        }
+
+        return $props;
+    }
+
+    /**
      * Grab a single property value from the object
      *
      * @param object $object
