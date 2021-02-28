@@ -7,6 +7,7 @@
 namespace Ingenerator\PHPUtils\DateTime\Clock;
 
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use PHPUnit\Framework\Assert;
 
 class StoppedMockClock extends RealtimeClock
@@ -26,7 +27,7 @@ class StoppedMockClock extends RealtimeClock
      */
     protected function __construct(\DateTimeImmutable $start_time)
     {
-        $this->current_microtime = (float) $start_time->getTimestamp();
+        $this->current_microtime = (float) $start_time->format('U.u');
     }
 
     /**
@@ -36,10 +37,7 @@ class StoppedMockClock extends RealtimeClock
      */
     public static function atMicrotime($microtime)
     {
-        $inst                    = new static(new \DateTimeImmutable);
-        $inst->current_microtime = $microtime;
-
-        return $inst;
+        return new static(DateTimeImmutableFactory::atMicrotime($microtime));
     }
 
     /**
@@ -79,7 +77,7 @@ class StoppedMockClock extends RealtimeClock
 
     public function getDateTime()
     {
-        return (new \DateTimeImmutable)->setTimestamp(\floor($this->current_microtime));
+        return DateTimeImmutableFactory::atMicrotime($this->current_microtime);
     }
 
     public function getMicrotime()

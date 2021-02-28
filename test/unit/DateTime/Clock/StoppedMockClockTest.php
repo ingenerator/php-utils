@@ -34,6 +34,11 @@ class StoppedMockClockTest extends TestCase
                 new \DateTimeImmutable('2019-03-04 10:02:03'),
                 1551693723.0
             ],
+            [
+                new \DateTimeImmutable('2019-03-04 10:02:03.248123'),
+                new \DateTimeImmutable('2019-03-04 10:02:03.248123'),
+                1551693723.248123
+            ],
         ];
     }
 
@@ -52,7 +57,7 @@ class StoppedMockClockTest extends TestCase
     {
         $clock = StoppedMockClock::atMicrotime(1551693723.1239);
         $this->assertSame(1551693723.1239, $clock->getMicrotime());
-        $this->assertSame('2019-03-04 10:02:03', $clock->getDateTime()->format('Y-m-d H:i:s'));
+        $this->assertSame('2019-03-04 10:02:03.123900', $clock->getDateTime()->format('Y-m-d H:i:s.u'));
     }
 
     public function test_it_is_initialisable_at_a_date_interval_in_the_past()
@@ -85,16 +90,16 @@ class StoppedMockClockTest extends TestCase
     public function test_it_advances_time_after_each_tick_microseconds()
     {
         $clock = StoppedMockClock::atMicrotime(1546682582.150);
-        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02'), $clock->getDateTime());
+        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02.150'), $clock->getDateTime());
 
         $clock->tickMicroseconds(150000);
         $this->assertSame(1546682582.300, \round($clock->getMicrotime(), 3));
-        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02'), $clock->getDateTime(), 'DateTime not changed by sub-second tick');
+        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02.300'), $clock->getDateTime(), 'DateTime not changed by sub-second tick');
 
 
         $clock->tickMicroseconds(750000);
         $this->assertSame(1546682583.050, \round($clock->getMicrotime(), 3));
-        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:03'), $clock->getDateTime(), 'DateTime changed after second boundary');
+        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:03.050'), $clock->getDateTime(), 'DateTime changed after second boundary');
     }
 
     public function test_its_usleep_is_immediate_but_advances_time()

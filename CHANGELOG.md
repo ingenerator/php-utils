@@ -1,5 +1,9 @@
 ### Unreleased
 
+* [CAUTION] StoppedMockClock now stores / returns fractional seconds for consistency with real DateTimeImmutable
+  PHP DateTime objects now always carry microseconds - the StoppedMockClock should therefore always include them
+  in the times it accepts and returns. There is a possibility this will cause some strict equality checks in
+  unit tests to fail. Not treated as a package breaking release as it only affects testcase code.
 * Add ObjectPropertyRipper::ripAll to grab all variables (from simple objects with no private props in
   parent classes).
 
