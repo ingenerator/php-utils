@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.8.0 (2021-03-15)
+
 * [CAUTION] StoppedMockClock now stores / returns fractional seconds for consistency with real DateTimeImmutable
   PHP DateTime objects now always carry microseconds - the StoppedMockClock should therefore always include them
   in the times it accepts and returns. There is a possibility this will cause some strict equality checks in
