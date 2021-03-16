@@ -1,5 +1,8 @@
 ### Unreleased
 
+* Barebones metrics interface which will be fleshed out in a further release
+* OperationTimer for capturing timer metrics
+
 ### v1.8.0 (2021-03-15)
 
 * [CAUTION] StoppedMockClock now stores / returns fractional seconds for consistency with real DateTimeImmutable
