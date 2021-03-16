@@ -1,7 +1,7 @@
 <?php
 /**
  * @author    Craig Gosman <craig@ingenerator.com>
- * @licence   proprietary
+ * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Session;
