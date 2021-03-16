@@ -1,7 +1,7 @@
 <?php
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
- * @licence   proprietary
+ * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\DateTime\Clock;

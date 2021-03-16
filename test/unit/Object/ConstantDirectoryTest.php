@@ -1,7 +1,7 @@
 <?php
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
- * @licence   proprietary
+ * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Object;
@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
- * @licence   proprietary
+ * @licence   BSD-3-Clause
  */
 class ConstantDirectoryTest extends TestCase
 {
