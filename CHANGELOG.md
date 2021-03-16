@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.9.0 (2021-03-16)
+
 * Barebones metrics interface which will be fleshed out in a further release
 * OperationTimer for capturing timer metrics
 * Correct @license tags
