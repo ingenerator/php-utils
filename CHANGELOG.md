@@ -1,5 +1,9 @@
 ### Unreleased
 
+* Thin interface for running a block of code inside an explicit database transaction
+  Provides a null implementation for use in testing, and a Doctrine2 implementation that can be used
+  if you're using Doctrine2 in your project. Alternatively you can implement your own wrapper as required.
+
 ### v1.9.0 (2021-03-16)
 
 * Barebones metrics interface which will be fleshed out in a further release
