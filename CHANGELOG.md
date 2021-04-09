@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.10.0 (2021-04-09)
+
 * Thin interface for running a block of code inside an explicit database transaction
   Provides a null implementation for use in testing, and a Doctrine2 implementation that can be used
   if you're using Doctrine2 in your project. Alternatively you can implement your own wrapper as required.
