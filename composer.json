@@ -16,9 +16,9 @@
   ],
   "require": {
     "ext-json": "*",
-    "ext-pdo": "^7",
-    "ext-sodium": "^7.2",
-    "php": "^7.4",
+    "ext-pdo": "^7 || ~8.0.0",
+    "ext-sodium": "^7.4 || ~8.0.0",
+    "php": "^7.4 || ~8.0.0",
     "psr/log": "^1.1"
   },
   "require-dev": {
