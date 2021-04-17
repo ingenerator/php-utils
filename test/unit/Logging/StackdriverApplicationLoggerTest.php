@@ -10,6 +10,7 @@ use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use const PHP_MAJOR_VERSION;
 
 class StackdriverApplicationLoggerTest extends TestCase
 {
@@ -231,15 +232,28 @@ class StackdriverApplicationLoggerTest extends TestCase
             );
             $actual[] = $line['severity'].': '.$line['message'];
         }
-        $this->assertSame(
-            [
-                'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct() expects parameter 1 to be string, object given',
-                'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
-                'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
-                'INFO: I am an info',
-            ],
-            $actual
-        );
+
+        if (PHP_MAJOR_VERSION < 8){
+            $this->assertSame(
+                [
+                    'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct() expects parameter 1 to be string, object given',
+                    'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
+                    'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
+                    'INFO: I am an info',
+                ],
+                $actual
+            );
+        } else {
+            $this->assertSame(
+                [
+                    'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct(): Argument #1 ($datetime) must be of type string, stdClass given',
+                    'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
+                    'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
+                    'INFO: I am an info',
+                ],
+                $actual
+            );
+        }
     }
 
     /**
