@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v1.11.0 (2021-04-19)
+
+* Support PHP8
+
 ### v1.10.0 (2021-04-09)
 
 * Thin interface for running a block of code inside an explicit database transaction
