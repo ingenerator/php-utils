@@ -34,7 +34,7 @@ class Base64UrlTest extends TestCase
     {
         $encoded = Base64Url::encode($value);
         $this->assertIsString($encoded);
-        $this->assertRegExp('/^[a-zA-Z0-9\-\_]+$/', $encoded);
+        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\-\_]+$/', $encoded);
     }
 
 }

@@ -19,6 +19,10 @@ class ValidNumber
      */
     public static function minimum($number, $min)
     {
+        if ( ! is_numeric($number)) {
+            return FALSE;
+        }
+
         return ($number >= $min);
     }
 

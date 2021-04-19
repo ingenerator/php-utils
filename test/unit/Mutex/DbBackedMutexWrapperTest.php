@@ -7,8 +7,6 @@ namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 use Ingenerator\PHPUtils\Mutex\DbBackedMutexWrapper;
 use Ingenerator\PHPUtils\Mutex\MutexTimedOutException;
 use Ingenerator\PHPUtils\Mutex\MutexWrapper;
-use PDO;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 class DbBackedMutexWrapperTest extends TestCase
@@ -111,68 +109,5 @@ class DbBackedMutexWrapperTest extends TestCase
     {
         return new DbBackedMutexWrapper($this->pdo);
     }
-
-}
-
-class BasicPDOStub extends PDO
-{
-    protected $query_stack = [];
-
-    public static function withQueryStack(array $stack)
-    {
-        $i              = new static;
-        $i->query_stack = $stack;
-
-        return $i;
-    }
-
-    public function __construct() { }
-
-    public function quote($string, $parameter_type = PDO::PARAM_STR)
-    {
-        return '{quoted-'.$string.'}';
-    }
-
-    public function query(
-        $statement,
-        $mode = PDO::ATTR_DEFAULT_FETCH_MODE,
-        $arg3 = NULL,
-        array $ctorargs = []
-    ) {
-        Assert::assertNotEmpty($this->query_stack, 'No expectation defined for query '.$statement);
-        $next_query = array_shift($this->query_stack);
-        Assert::assertSame($next_query['sql'], $statement);
-
-        return new BasicPDOStatementStub($next_query['result']);
-    }
-
-    public function assertAllQueriesRan()
-    {
-        Assert::assertEquals([], $this->query_stack);
-    }
-}
-
-class BasicPDOStatementStub extends \PDOStatement
-{
-    protected $result;
-
-    public function __construct(array $result) { $this->result = $result; }
-
-    public function fetchAll($fetch_style = NULL, $fetch_argument = NULL, $ctor_args = NULL)
-    {
-        if ($fetch_style === NULL) {
-            return $this->result;
-        } elseif ($fetch_style === PDO::FETCH_COLUMN) {
-            return array_map(
-                function ($row) use ($fetch_argument) {
-                    return $row[$fetch_argument];
-                },
-                $this->result
-            );
-        } else {
-            throw new \UnexpectedValueException('Not mocked '.$fetch_style);
-        }
-    }
-
 
 }
