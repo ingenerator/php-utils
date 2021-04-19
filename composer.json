@@ -24,7 +24,7 @@
   "require-dev": {
     "johnkary/phpunit-speedtrap": "^3.0",
     "mikey179/vfsstream": "^1.6.8",
-    "phpunit/phpunit": "^8"
+    "phpunit/phpunit": "^9.5"
   },
   "support": {
     "source": "https://github.com/ingenerator/php-utils",

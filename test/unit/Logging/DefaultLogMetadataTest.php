@@ -72,7 +72,7 @@ class DefaultLogMetadataTest extends TestCase
     public function test_its_request_tracing_data_adds_random_request_id()
     {
         $result1 = DefaultLogMetadata::requestTrace();
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             '/^[a-z0-9]+\.[0-9]+$/',
             $result1['context']['req'],
             'Should match expected format'

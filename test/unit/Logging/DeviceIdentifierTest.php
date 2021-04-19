@@ -63,7 +63,7 @@ class DeviceIdentifierTest extends TestCase
         $subject = $this->newSubject();
         $subject->init();
 
-        $this->assertRegExp(DeviceIdentifier::VALID_REGEX, $subject->getValue());
+        $this->assertMatchesRegularExpression(DeviceIdentifier::VALID_REGEX, $subject->getValue());
         $cookies_set = $this->cookies->inspectSetCookies();
         $this->assertSame($subject->getValue(), $cookies_set['did'][0]['value']);
         $this->assertSame($subject->getValue(), $cookies_set['didf'][0]['value']);
@@ -141,7 +141,7 @@ class DeviceIdentifierTest extends TestCase
         $subj          = $this->newSubject();
         $subj->init();
         $value = $subj->getValue();
-        $this->assertRegExp(DeviceIdentifier::VALID_REGEX, $value);
+        $this->assertMatchesRegularExpression(DeviceIdentifier::VALID_REGEX, $value);
     }
 
     public function test_its_static_init_creates_instance_and_initialises()
@@ -177,7 +177,7 @@ class DeviceIdentifierTest extends TestCase
 
         DeviceIdentifier::initAndEnsureCookieSet(TRUE); // Fall back to default arg
         $this->assertSame(DeviceIdentifier::CLI_ID, DeviceIdentifier::get());
-        $this->assertRegExp(DeviceIdentifier::VALID_REGEX, DeviceIdentifier::get());
+        $this->assertMatchesRegularExpression(DeviceIdentifier::VALID_REGEX, DeviceIdentifier::get());
     }
 
     public function test_its_static_get_can_read_from_cookies_even_if_not_initialised()

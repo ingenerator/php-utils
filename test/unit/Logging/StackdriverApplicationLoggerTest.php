@@ -578,7 +578,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $logger->logRequest([], $start);
         $end   = \microtime(TRUE);
         $entry = $this->assertLoggedOneLine();
-        $this->assertRegExp('/^(0\.[0-9]+)s$/', $entry['httpRequest']['latency']);
+        $this->assertMatchesRegularExpression('/^(0\.[0-9]+)s$/', $entry['httpRequest']['latency']);
         $seconds = (float) \str_replace('s', '', $entry['httpRequest']['latency']);
         $this->assertEqualsWithDelta($end - $start, $seconds, 0.1);
     }
