@@ -122,10 +122,10 @@ class OperationTimerTest extends TestCase
 
     private function assertTimerMilliseconds(int $expected_time_millis)
     {
-        $metric = $this->metrics->getTimers()[0];
-        $start  = $metric['start'];
+        $payload = $this->metrics->getMetrics()[0]['payload'];
+        $start  = $payload['start'];
         /** @var $start DateTimeImmutable */
-        $end = $metric['end'];
+        $end = $payload['end'];
         /** @var $end DateTimeImmutable */
         $this->assertSame(
             $expected_time_millis / 1000,
