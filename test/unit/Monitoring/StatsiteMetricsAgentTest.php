@@ -63,10 +63,10 @@ class StatsiteMetricsAgentTest extends TestCase
         $subject = $this->newSubject();
         $subject->addTimer(
             new MetricId('email_sent', 'test'),
-            new \DateTimeImmutable('2020-03-30 10:01:02.345'),
-            new \DateTimeImmutable('2020-03-30 10:01:03.500')
+            new \DateTimeImmutable('2020-03-30 10:01:02.3455'),
+            new \DateTimeImmutable('2020-03-30 10:01:03.5000')
         );
-        $this->assertSame(['email_sent=test:1154.9999713898|ms'], $subject->getMessages());
+        $this->assertSame(['email_sent=test:1154.5|ms'], $subject->getMessages());
     }
 
     public function test_it_adds_sample()

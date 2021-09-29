@@ -11,6 +11,7 @@ use DateTimeImmutable;
 use function socket_sendto;
 use function sprintf;
 use function strlen;
+use Ingenerator\PHPUtils\DateTime\DateTimeDiff;
 
 class StatsiteMetricsAgent implements MetricsAgent
 {
@@ -50,7 +51,7 @@ class StatsiteMetricsAgent implements MetricsAgent
 
     public function addTimer(MetricId $metric, DateTimeImmutable $start_time, DateTimeImmutable $end_time): void
     {
-        $time_ms = ((float) $end_time->format('U.u') - (float) $start_time->format('U.u')) * 1000;
+        $time_ms = DateTimeDiff::microsBetween($start_time, $end_time) / 1000;
         $this->pushMetric(self::TYPE_TIMER, $metric, $time_ms);
     }
 

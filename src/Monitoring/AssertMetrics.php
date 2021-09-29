@@ -6,6 +6,7 @@
 
 namespace Ingenerator\PHPUtils\Monitoring;
 
+use Ingenerator\PHPUtils\DateTime\DateTimeDiff;
 use PHPUnit\Framework\Assert;
 use function array_filter;
 use function array_map;
@@ -90,11 +91,9 @@ class AssertMetrics
         Assert::assertCount(count($expected_times), $filtered_metrics);
 
         foreach ($filtered_metrics as $index => $actual) {
-            $start_time = $actual['payload']['start'];
-            $end_time   = $actual['payload']['end'];
             Assert::assertEqualsWithDelta(
                 $expected_times[$index],
-                ((float) $end_time->format('U.u') - (float) $start_time->format('U.u')) * 1000,
+                DateTimeDiff::microsBetween($actual['payload']['start'], $actual['payload']['end']) / 1000,
                 $tolerance_ms,
                 'Time #'.$index.' should be '.$expected_times[$index].' +/- '.$tolerance_ms.'ms',
             );

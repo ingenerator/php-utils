@@ -133,41 +133,28 @@ class ArrayMetricsAgentTest extends TestCase
     }
 
     /**
-     * @param string            $name
-     * @param string            $source
-     * @param DateTimeImmutable $start
-     * @param DateTimeImmutable $end
-     * @param array             $expected_times
-     * @param float             $tolerance
-     *
-     * @dataProvider timer_values
+     * @testWith ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0, [0], true]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0, [0.001], false]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123457", 0, [0.001], true]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123455", 0.001, [0.001], false]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0.001, [0.001], true]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123458", 0.001, [0.001], true]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123459", 0.001, [0.001], false]
      */
     public function test_assertTimerValues(
-        string $name,
-        string $source,
-        DateTimeImmutable $start,
-        DateTimeImmutable $end,
+        string $start,
+        string $end,
+        float $tolerance,
         array $expected_times,
-        float $tolerance
+        bool $expect_success
     ) {
         $subject = $this->newSubject();
-        $metric  = new MetricId($name, $source);
-        $subject->addTimer($metric, $start, $end);
-        AssertMetrics::assertTimerValues($subject->getMetrics(), $metric, $expected_times, $tolerance);
-    }
-
-    public function timer_values(): array
-    {
-        return [
-            [
-                "process",
-                "test",
-                new DateTimeImmutable("2018-10-01 02:03:04"),
-                new DateTimeImmutable("2018-10-01 02:03:07"),
-                [3000.0],
-                0,
-            ],
-        ];
+        $metric  = new MetricId('timer', 'test');
+        $subject->addTimer($metric, new \DateTimeImmutable($start), new \DateTimeImmutable($end));
+        $this->assertAssertionResult(
+            $expect_success,
+            fn() => AssertMetrics::assertTimerValues($subject->getMetrics(), $metric, $expected_times, $tolerance)
+        );
     }
 
     /**
