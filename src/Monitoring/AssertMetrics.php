@@ -44,40 +44,34 @@ class AssertMetrics
         );
     }
 
-    public static function assertSample(
-        array $metrics,
-        MetricId $metric,
-        float $expected_value,
-        ?string $msg = NULL
-    ): void {
-        $filtered = self::findMetrics($metrics, $metric);
-        Assert::assertCount(1, $filtered, 'Expected exactly 1 metric');
-        Assert::assertSame('sample', $filtered[0]['type']);
-        Assert::assertSame($expected_value, $filtered[0]['payload']);
+    private static function assertOnlyOneMetricTypeAndPayload(array $metrics, string $type, $expected_payload)
+    {
+        Assert::assertCount(1, $metrics, 'Expected only 1 metric recorded');
+        Assert::assertSame($type, $metrics[0]['type'], 'Expected metric to be of type '.$type);
+        Assert::assertSame($expected_payload, $metrics[0]['payload'], 'Expected metric value to be '.$expected_payload);
     }
 
-    public static function assertGauge(
-        array $metrics,
-        MetricId $metric,
-        float $expected_value,
-        ?string $msg = NULL
-    ): void {
+    public static function assertSample(array $metrics, MetricId $metric, float $expected_value): void
+    {
         $filtered = self::findMetrics($metrics, $metric);
-        Assert::assertCount(1, $filtered, 'Expected exactly 1 metric');
-        Assert::assertSame('gauge', $filtered[0]['type']);
-        Assert::assertSame($expected_value, $filtered[0]['payload']);
+        self::assertOnlyOneMetricTypeAndPayload($filtered, 'sample', $expected_value);
     }
 
-    public static function assertCounterIncrementsByOne(array $metrics, MetricId $metric): void {
+    public static function assertGauge(array $metrics, MetricId $metric, float $expected_value): void
+    {
         $filtered = self::findMetrics($metrics, $metric);
-        Assert::assertCount(1, $filtered, 'Expected exactly 1 metric');
-        Assert::assertSame('counter', $filtered[0]['type']);
-        Assert::assertSame(1, $filtered[0]['payload']);
+        self::assertOnlyOneMetricTypeAndPayload($filtered, 'gauge', $expected_value);
+    }
+
+    public static function assertCounterIncrementsByOne(array $metrics, MetricId $metric): void
+    {
+        $filtered = self::findMetrics($metrics, $metric);
+        self::assertOnlyOneMetricTypeAndPayload($filtered, 'counter', 1);
     }
 
     public static function assertNoMetricsCaptured(array $metrics): void
     {
-        Assert::assertEmpty($metrics, "Expected no metrics captured");
+        Assert::assertEmpty($metrics, "Expected no metrics to be captured");
     }
 
     public static function assertNoMetricsFor(array $metrics, string $metric_name)
