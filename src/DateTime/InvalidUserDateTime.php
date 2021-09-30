@@ -7,8 +7,6 @@
 namespace Ingenerator\PHPUtils\DateTime;
 
 
-use DateTime;
-
 /**
  * Holds a user-entered invalid date string that could not be parsed, to allow overall entity
  * validation to catch it and legacy forms to re-display it.

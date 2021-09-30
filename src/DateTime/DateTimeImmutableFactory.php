@@ -6,7 +6,7 @@
 
 namespace Ingenerator\PHPUtils\DateTime;
 
-use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
+use DateTimeImmutable;
 
 
 /**
@@ -35,12 +35,12 @@ class DateTimeImmutableFactory
      *
      * @return DateTimeImmutable
      */
-    public static function atMicrotime(float $microtime): \DateTimeImmutable
+    public static function atMicrotime(float $microtime): DateTimeImmutable
     {
         // Work round some PHP edge cases.
         // First, a float with a .00 casts to string with no decimal point, which causes the createFromFormat to fail
         // on exact seconds. Use sprintf to ensure there's always a decimal present
-        $dt = \DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', $microtime));
+        $dt = DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', $microtime));
 
         // Second, creating from unix timestamp of any kind always sets the TZ to UTC (*even* if you specify a timezone
         // in the constructor).
@@ -57,9 +57,9 @@ class DateTimeImmutableFactory
      *
      * @param int $timestamp
      *
-     * @return \DateTimeImmutable
+     * @return DateTimeImmutable
      */
-    public static function atUnixSeconds(int $timestamp): \DateTimeImmutable
+    public static function atUnixSeconds(int $timestamp): DateTimeImmutable
     {
         return static::atMicrotime($timestamp);
     }
@@ -69,7 +69,7 @@ class DateTimeImmutableFactory
      *
      * @param string $input
      *
-     * @return \DateTimeImmutable|InvalidUserDateTime|null
+     * @return DateTimeImmutable|InvalidUserDateTime|null
      */
     public static function fromUserDateInput($input)
     {
@@ -82,7 +82,7 @@ class DateTimeImmutableFactory
             return NULL;
         }
         foreach ($formats as $format) {
-            $date = \DateTimeImmutable::createFromFormat('!'.$format, $input);
+            $date = DateTimeImmutable::createFromFormat('!'.$format, $input);
             if ($date AND $date->format($format) === $input) {
                 return $date;
             }
@@ -94,7 +94,7 @@ class DateTimeImmutableFactory
     /**
      * @param string $input
      *
-     * @return \DateTimeImmutable|InvalidUserDateTime|null
+     * @return DateTimeImmutable|InvalidUserDateTime|null
      */
     public static function fromUserDateTimeInput($input)
     {
@@ -103,7 +103,8 @@ class DateTimeImmutableFactory
 
     /**
      * @param string $input
-     * @return  \DateTimeImmutable|InvalidUserDateTime|null
+     *
+     * @return  DateTimeImmutable|InvalidUserDateTime|null
      */
     public static function fromYmdInput($input)
     {
