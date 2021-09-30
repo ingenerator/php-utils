@@ -9,6 +9,8 @@ namespace Ingenerator\PHPUtils\Monitoring;
 
 
 use DateTimeImmutable;
+use function array_filter;
+use function array_values;
 
 class ArrayMetricsAgent implements MetricsAgent
 {
@@ -52,5 +54,31 @@ class ArrayMetricsAgent implements MetricsAgent
             'source'  => $metric->getSource(),
             'payload' => $payload,
         ];
+    }
+
+    /**
+     * @deprecated use AssertMetrics::assertCapturedOneTimer
+     */
+    public function assertCapturedOneTimer(string $name, ?string $source = NULL, ?string $msg = NULL): void
+    {
+        AssertMetrics::assertCapturedOneTimer($this->metrics, $name, $source, $msg);
+    }
+
+    /**
+     * @deprecated
+     */
+    public function getTimers(): array
+    {
+        $all_timers = array_values(array_filter($this->metrics, fn(array $m) => ($m['type'] === 'timer')));
+
+        return array_map(
+            fn(array $m) => ([
+                'name'   => $m['name'],
+                'source' => $m['source'],
+                'start'  => $m['payload']['start'],
+                'end'    => $m['payload']['end'],
+            ]),
+            $all_timers
+        );
     }
 }
