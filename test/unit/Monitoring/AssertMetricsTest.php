@@ -135,6 +135,44 @@ class AssertMetricsTest extends TestCase
      *           ["something_else", "test", 15.5, false]
      *           ["something", "another_system", 15.5, false]
      */
+    public function test_assert_sample_asserts_correct_metric(string $name, string $source, float $value, bool $success)
+    {
+        $agent = new ArrayMetricsAgent();
+        $agent->addSample(new MetricId($name, $source), $value);
+        $this->assertAssertionResult(
+            $success,
+            fn() => AssertMetrics::assertSample($agent->getMetrics(), new MetricId('something', 'test'), 15.5)
+        );
+    }
+
+    /**
+     * @testWith [[1.2, 1.2], 1.2, false]
+     *           [[1.2, 2.3], 2.3, false]
+     *           [[1.2], 1.2, true]
+     */
+    public function test_assert_sample_fails_if_same_metric_recorded_more_than_once(
+        array $values,
+        float $assert_value,
+        bool $success
+    ) {
+        $agent  = new ArrayMetricsAgent();
+        $metric = new MetricId('anything', 'somewhere');
+        foreach ($values as $value) {
+            $agent->addSample($metric, $value);
+        }
+
+        $this->assertassertionresult(
+            $success,
+            fn() => AssertMetrics::assertSample($agent->getMetrics(), $metric, $assert_value)
+        );
+    }
+
+    /**
+     * @testWith ["something", "test", 15.5, true]
+     *           ["something", "test", 18, false]
+     *           ["something_else", "test", 15.5, false]
+     *           ["something", "another_system", 15.5, false]
+     */
     public function test_assert_gauge_asserts_correct_metric(string $name, string $source, float $value, bool $success)
     {
         $agent = new ArrayMetricsAgent();

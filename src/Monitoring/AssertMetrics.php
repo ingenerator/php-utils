@@ -13,6 +13,9 @@ use function array_map;
 use function array_values;
 use function count;
 
+/**
+ * Intended to be used exclusively to assert metrics captured by ArrayMetricsAgent
+ */
 class AssertMetrics
 {
     private static function findMetrics(array $metrics, MetricId $metric): array
@@ -39,6 +42,18 @@ class AssertMetrics
             ),
             $msg ?? 'Expected exactly one timer matching the expectation'
         );
+    }
+
+    public static function assertSample(
+        array $metrics,
+        MetricId $metric,
+        float $expected_value,
+        ?string $msg = NULL
+    ): void {
+        $filtered = self::findMetrics($metrics, $metric);
+        Assert::assertCount(1, $filtered, 'Expected exactly 1 metric');
+        Assert::assertSame('sample', $filtered[0]['type']);
+        Assert::assertSame($expected_value, $filtered[0]['payload']);
     }
 
     public static function assertGauge(
