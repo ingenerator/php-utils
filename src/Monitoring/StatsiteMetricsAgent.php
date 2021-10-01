@@ -29,7 +29,7 @@ class StatsiteMetricsAgent implements MetricsAgent
 
     protected int $statsite_port;
 
-    protected string $hostname;
+    protected string $source_hostname;
 
     public function __construct(string $statsite_host = '127.0.0.1', int $statsite_port = 8125)
     {
@@ -38,8 +38,8 @@ class StatsiteMetricsAgent implements MetricsAgent
         $this->socket        = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
         // We have to take just the first part of hostname - periods are not allowed
-        $host           = explode('.', gethostname());
-        $this->hostname = array_shift($host);
+        $host                  = explode('.', gethostname());
+        $this->source_hostname = array_shift($host);
     }
 
     public function __destruct()
@@ -75,6 +75,11 @@ class StatsiteMetricsAgent implements MetricsAgent
         $this->pushMetric(self::TYPE_KEYVALUE, $metric, $value);
     }
 
+    public function setSourceHostname(string $source_hostname): void
+    {
+        $this->source_hostname = $source_hostname;
+    }
+
     /**
      * Pushes a metric into statsite. Metrics can be one of a number of types:
      *
@@ -91,9 +96,9 @@ class StatsiteMetricsAgent implements MetricsAgent
      */
     private function pushMetric(string $type, MetricId $metric, $value): void
     {
-        // Add hostname as the source if required
-        if ($metric->getSource() === NULL) {
-            $metric->setSource($this->hostname);
+        // Replace source with hostname if required
+        if ($metric->getSource() === MetricId::SOURCE_HOST_REPLACEMENT) {
+            $metric->setSource($this->source_hostname);
         }
 
         $message = sprintf("%s=%s:%s|%s", $metric->getName(), $metric->getSource(), $value, $type);

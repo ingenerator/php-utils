@@ -21,7 +21,7 @@ class AssertMetricsTest extends TestCase
     {
         $agent = new ArrayMetricsAgent();
         AssertMetrics::assertNoMetricsCaptured($agent->getMetrics());
-        $agent->incrementCounterByOne(new MetricId('duff', 'test'));
+        $agent->incrementCounterByOne(MetricId::nameAndSource('duff', 'test'));
         try {
             AssertMetrics::assertNoMetricsCaptured($agent->getMetrics());
         } catch (ExpectationFailedException $e) {
@@ -32,8 +32,8 @@ class AssertMetricsTest extends TestCase
     public function test_assertNoMetricsFor()
     {
         $agent = new ArrayMetricsAgent();
-        $agent->incrementCounterByOne(new MetricId('foo', 'bar'));
-        $agent->setGauge(new MetricId('foo', 'bar'), 10.9);
+        $agent->incrementCounterByOne(MetricId::nameAndSource('foo', 'bar'));
+        $agent->setGauge(MetricId::nameAndSource('foo', 'bar'), 10.9);
         AssertMetrics::assertNoMetricsFor($agent->getMetrics(), 'bar');
         try {
             AssertMetrics::assertNoMetricsFor($agent->getMetrics(), 'foo');
@@ -47,7 +47,7 @@ class AssertMetricsTest extends TestCase
         $agent = new ArrayMetricsAgent();
         $start = new DateTimeImmutable();
         $end   = new DateTimeImmutable();
-        $agent->addTimer(new MetricId('queries', 'mysql'), $start, $end);
+        $agent->addTimer(MetricId::nameAndSource('queries', 'mysql'), $start, $end);
         AssertMetrics::assertCapturedOneTimer($agent->getMetrics(), 'queries', 'mysql');
         $this->addToAssertionCount(1);
     }
@@ -64,7 +64,7 @@ class AssertMetricsTest extends TestCase
         $agent = new ArrayMetricsAgent();
         foreach ($metrics as $metric) {
             $agent->addTimer(
-                new MetricId($metric['name'], $metric['source']),
+                MetricId::nameAndSource($metric['name'], $metric['source']),
                 new DateTimeImmutable,
                 new DateTimeImmutable
             );
@@ -94,8 +94,8 @@ class AssertMetricsTest extends TestCase
         bool $expect_success
     ) {
         $agent  = new ArrayMetricsAgent();
-        $metric = new MetricId('timer', 'test');
-        $agent->addTimer($metric, new \DateTimeImmutable($start), new \DateTimeImmutable($end));
+        $metric = MetricId::nameAndSource('timer', 'test');
+        $agent->addTimer($metric, new DateTimeImmutable($start), new DateTimeImmutable($end));
         $this->assertAssertionResult(
             $expect_success,
             fn() => AssertMetrics::assertTimerValues($agent->getMetrics(), $metric, $expected_times, $tolerance)
@@ -110,17 +110,20 @@ class AssertMetricsTest extends TestCase
     public function test_assert_counter_increments_asserts_correct_metric(string $name, string $source, bool $success)
     {
         $agent = new ArrayMetricsAgent();
-        $agent->incrementCounterByOne(new MetricId($name, $source));
+        $agent->incrementCounterByOne(MetricId::nameAndSource($name, $source));
         $this->assertAssertionResult(
             $success,
-            fn() => AssertMetrics::assertCounterIncrementsByOne($agent->getMetrics(), new MetricId('something', 'test'))
+            fn() => AssertMetrics::assertCounterIncrementsByOne(
+                $agent->getMetrics(),
+                MetricId::nameAndSource('something', 'test')
+            )
         );
     }
 
     public function test_assert_counter_increments_fails_if_same_metric_recorded_more_than_once()
     {
         $agent  = new ArrayMetricsAgent();
-        $metric = new MetricId('anything', 'somewhere');
+        $metric = MetricId::nameAndSource('anything', 'somewhere');
         $agent->incrementCounterByOne($metric);
         $agent->incrementCounterByOne($metric);
 
@@ -138,10 +141,14 @@ class AssertMetricsTest extends TestCase
     public function test_assert_sample_asserts_correct_metric(string $name, string $source, float $value, bool $success)
     {
         $agent = new ArrayMetricsAgent();
-        $agent->addSample(new MetricId($name, $source), $value);
+        $agent->addSample(MetricId::nameAndSource($name, $source), $value);
         $this->assertAssertionResult(
             $success,
-            fn() => AssertMetrics::assertSample($agent->getMetrics(), new MetricId('something', 'test'), 15.5)
+            fn() => AssertMetrics::assertSample(
+                $agent->getMetrics(),
+                MetricId::nameAndSource('something', 'test'),
+                15.5
+            )
         );
     }
 
@@ -156,7 +163,7 @@ class AssertMetricsTest extends TestCase
         bool $success
     ) {
         $agent  = new ArrayMetricsAgent();
-        $metric = new MetricId('anything', 'somewhere');
+        $metric = MetricId::nameAndSource('anything', 'somewhere');
         foreach ($values as $value) {
             $agent->addSample($metric, $value);
         }
@@ -176,10 +183,10 @@ class AssertMetricsTest extends TestCase
     public function test_assert_gauge_asserts_correct_metric(string $name, string $source, float $value, bool $success)
     {
         $agent = new ArrayMetricsAgent();
-        $agent->setGauge(new MetricId($name, $source), $value);
+        $agent->setGauge(MetricId::nameAndSource($name, $source), $value);
         $this->assertAssertionResult(
             $success,
-            fn() => AssertMetrics::assertGauge($agent->getMetrics(), new MetricId('something', 'test'), 15.5)
+            fn() => AssertMetrics::assertGauge($agent->getMetrics(), MetricId::nameAndSource('something', 'test'), 15.5)
         );
     }
 
@@ -194,7 +201,7 @@ class AssertMetricsTest extends TestCase
         bool $success
     ) {
         $agent  = new ArrayMetricsAgent();
-        $metric = new MetricId('anything', 'somewhere');
+        $metric = MetricId::nameAndSource('anything', 'somewhere');
         foreach ($values as $value) {
             $agent->setGauge($metric, $value);
         }
@@ -214,9 +221,9 @@ class AssertMetricsTest extends TestCase
     public function test_assert_gauge_fails_if_any_other_metric_with_same_name_and_source(array $m, bool $success)
     {
         $agent  = new ArrayMetricsAgent();
-        $metric = new MetricId($m['name'], $m['source']);
+        $metric = MetricId::nameAndSource($m['name'], $m['source']);
         $agent->setGauge($metric, 2);
-        $agent->incrementCounterByOne(new MetricId('same', 'same'));
+        $agent->incrementCounterByOne(MetricId::nameAndSource('same', 'same'));
         $this->assertassertionresult($success, fn() => AssertMetrics::assertGauge($agent->getMetrics(), $metric, 2));
     }
 

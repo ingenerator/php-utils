@@ -58,7 +58,7 @@ class OperationTimer
         ?string $default_metric_name = NULL,
         ?string $default_source = NULL
     ) {
-        $metric     = new MetricId($default_metric_name, $default_source);
+        $metric     = MetricId::nameAndSource($default_metric_name, $default_source);
         $start_time = $this->realtime_clock->getDateTime();
         try {
             return $operation($metric);

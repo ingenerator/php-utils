@@ -14,6 +14,7 @@ use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\PHPUtils\Monitoring\OperationTimer;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class OperationTimerTest extends TestCase
@@ -72,7 +73,7 @@ class OperationTimerTest extends TestCase
     public function test_timeOperation_throws_if_no_metric_name_or_source($name, $src)
     {
         $subject = $this->newSubject();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $subject->timeOperation(function () { }, $name, $src);
     }
 
@@ -96,7 +97,7 @@ class OperationTimerTest extends TestCase
         $subject               = $this->newSubject();
         $clock                 = $this->real_time_clock;
 
-        $e = new \InvalidArgumentException('testing');
+        $e = new InvalidArgumentException('testing');
         try {
             $subject->timeOperation(
                 function () use ($clock, $e) {
@@ -107,7 +108,7 @@ class OperationTimerTest extends TestCase
                 'default_source'
             );
 
-        } catch (\InvalidArgumentException $got_e) {
+        } catch (InvalidArgumentException $got_e) {
             $this->assertSame($e, $got_e, 'sanity check in case of something else');
         }
 
@@ -123,7 +124,7 @@ class OperationTimerTest extends TestCase
     private function assertTimerMilliseconds(int $expected_time_millis)
     {
         $payload = $this->metrics->getMetrics()[0]['payload'];
-        $start  = $payload['start'];
+        $start   = $payload['start'];
         /** @var $start DateTimeImmutable */
         $end = $payload['end'];
         /** @var $end DateTimeImmutable */
