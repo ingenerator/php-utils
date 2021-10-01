@@ -1,5 +1,9 @@
 ### Unreleased
 
+* Extend MetricsAgent to handle additional metric types
+* Add StatsiteAgent capable of formatting and sending UDP messages to [statsite](https://github.com/statsite/statsite)
+* Add DateTimeDiff::microsBetween() to calculate the exact number of microseconds between two DateTimeImmutable values without any risk of floating point precision errors
+
 ### v1.11.0 (2021-04-19)
 
 * Support PHP8
