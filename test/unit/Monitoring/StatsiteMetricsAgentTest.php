@@ -33,6 +33,18 @@ class StatsiteMetricsAgentTest extends TestCase
         $this->assertInstanceOf(StatsiteMetricsAgent::class, $this->newSubject());
     }
 
+    /**
+     * @testWith ["simple", "simple"]
+     *           ["fully.qualified.hostname", "fully"]
+     *           ["fully-qualified-hostname", "fully-qualified-hostname"]
+     */
+    public function test_it_sanitises_source_hostname(string $hostname, string $expect_hostname){
+        $subject = $this->newSubject();
+        $subject->setSourceHostname($hostname);
+        $subject->incrementCounterByOne(MetricId::forHost('test_metric'));
+        $this->assertSame(['test_metric='.$expect_hostname.':1|c'], $subject->getMessages());
+    }
+
     public function test_it_increments_counter_by_one()
     {
         $subject = $this->newSubject();

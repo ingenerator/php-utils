@@ -8,10 +8,13 @@
 namespace Ingenerator\PHPUtils\Monitoring;
 
 use DateTimeImmutable;
+use Ingenerator\PHPUtils\DateTime\DateTimeDiff;
+use function array_shift;
+use function explode;
+use function gethostname;
 use function socket_sendto;
 use function sprintf;
 use function strlen;
-use Ingenerator\PHPUtils\DateTime\DateTimeDiff;
 
 class StatsiteMetricsAgent implements MetricsAgent
 {
@@ -37,9 +40,7 @@ class StatsiteMetricsAgent implements MetricsAgent
         $this->statsite_port = $statsite_port;
         $this->socket        = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
-        // We have to take just the first part of hostname - periods are not allowed
-        $host                  = explode('.', gethostname());
-        $this->source_hostname = array_shift($host);
+        $this->setSourceHostname(gethostname());
     }
 
     public function __destruct()
@@ -77,7 +78,9 @@ class StatsiteMetricsAgent implements MetricsAgent
 
     public function setSourceHostname(string $source_hostname): void
     {
-        $this->source_hostname = $source_hostname;
+        // We have to take just the first part of hostname - periods are not allowed
+        $host                  = explode('.', $source_hostname);
+        $this->source_hostname = array_shift($host);
     }
 
     /**
