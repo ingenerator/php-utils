@@ -16,6 +16,17 @@ use function socket_sendto;
 use function sprintf;
 use function strlen;
 
+/**
+ * Supports:
+ *  - COUNTER
+ *  - GAUGE
+ *  - KEY VALUE
+ *  - TIMER
+ *
+ * See https://github.com/statsite/statsite
+ * for more info on metric types supported by statsite
+ *
+ */
 class StatsiteMetricsAgent implements MetricsAgent
 {
     private const TYPE_COUNTER  = 'c';
@@ -50,32 +61,55 @@ class StatsiteMetricsAgent implements MetricsAgent
         }
     }
 
+    /**
+     * Traditional timer metric calculated stored as floating point in milliseconds
+     * Use addSample for other measurable values which do not represent time.
+     */
     public function addTimer(MetricId $metric, DateTimeImmutable $start_time, DateTimeImmutable $end_time): void
     {
         $time_ms = DateTimeDiff::microsBetween($start_time, $end_time) / 1000;
         $this->pushMetric(self::TYPE_TIMER, $metric, $time_ms);
     }
 
+    /**
+     * Coalesced to timer on statsite as can be any measurable value where min, max, mean are useful
+     */
     public function addSample(MetricId $metric, float $value): void
     {
         $this->pushMetric(self::TYPE_TIMER, $metric, $value);
     }
 
+    /**
+     * Simple incremental-only counter
+     */
     public function incrementCounterByOne(MetricId $metric): void
     {
         $this->pushMetric(self::TYPE_COUNTER, $metric, 1);
     }
 
+    /**
+     * Gauge, similar to key value but only the last value per key is retained by statsite at each flush interval
+     */
     public function setGauge(MetricId $metric, float $value): void
     {
         $this->pushMetric(self::TYPE_GAUGE, $metric, $value);
     }
 
+    /**
+     * Not at all a counter from the perspective of statsite but a key-value store
+     * Up to the user to interpret these when statsite flushes them.
+     */
     public function recordCounterIntegral(MetricId $metric, float $value): void
     {
         $this->pushMetric(self::TYPE_KEYVALUE, $metric, $value);
     }
 
+    /**
+     * MetricIds can be created with a placeholder as the source for hostname replacement
+     * The current system hostname is set in the construction of this class but can be overridden using this setter
+     *
+     * NB hostnames cannot contain periods so are split and only the first segment used.
+     */
     public function setSourceHostname(string $source_hostname): void
     {
         // We have to take just the first part of hostname - periods are not allowed
@@ -83,20 +117,6 @@ class StatsiteMetricsAgent implements MetricsAgent
         $this->source_hostname = array_shift($host);
     }
 
-    /**
-     * Pushes a metric into statsite. Metrics can be one of a number of types:
-     *
-     *   TYPE_KEYVALUE - a simple key/value store
-     *   TYPE_GAUGE    - like key/value but only the most recent received metric is stored
-     *   TYPE_TIMER    - traditionally a timing, but can be any measurable value where min, max, mean are useful
-     *   TYPE_COUNTER  - simple counter, value is a positive or negative increment
-     *
-     * @param string   $type   The type - one of the TYPE_XXX constants
-     * @param MetricId $metric The source. If NULL, will be set to hostname, if FALSE will be left empty
-     * @param mixed    $value  The value of the metric - int or float for most things, string for set
-     *
-     * @return void
-     */
     private function pushMetric(string $type, MetricId $metric, $value): void
     {
         // Replace source with hostname if required

@@ -9,6 +9,7 @@ namespace Ingenerator\PHPUtils\Monitoring;
 
 
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use InvalidArgumentException;
 
 class OperationTimer
 {
@@ -59,7 +60,7 @@ class OperationTimer
         } finally {
             $end_time = $this->realtime_clock->getDateTime();
             if (empty($metric->getName()) or empty($metric->getSource())) {
-                throw new \InvalidArgumentException('Must specify `metric_name` and `source` in args or callback');
+                throw new InvalidArgumentException('Must specify `metric_name` and `source` in args or callback');
             }
             $this->metrics_agent->addTimer($metric, $start_time, $end_time);
         }

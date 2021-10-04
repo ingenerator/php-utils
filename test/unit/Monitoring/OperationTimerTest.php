@@ -8,7 +8,6 @@
 namespace test\unit\Ingenerator\PHPUtils\unit\Monitoring;
 
 
-use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;

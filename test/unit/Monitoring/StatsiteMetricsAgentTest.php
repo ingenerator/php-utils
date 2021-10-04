@@ -1,7 +1,7 @@
 <?php
 /**
  * @author    Craig Gosman <craig@ingenerator.com>
- * @licence   proprietary
+ * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\unit\Monitoring;
@@ -38,7 +38,8 @@ class StatsiteMetricsAgentTest extends TestCase
      *           ["fully.qualified.hostname", "fully"]
      *           ["fully-qualified-hostname", "fully-qualified-hostname"]
      */
-    public function test_it_sanitises_source_hostname(string $hostname, string $expect_hostname){
+    public function test_it_sanitises_source_hostname(string $hostname, string $expect_hostname)
+    {
         $subject = $this->newSubject();
         $subject->setSourceHostname($hostname);
         $subject->incrementCounterByOne(MetricId::forHost('test_metric'));
