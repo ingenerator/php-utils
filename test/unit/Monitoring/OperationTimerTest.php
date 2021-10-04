@@ -12,6 +12,7 @@ use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;
+use Ingenerator\PHPUtils\Monitoring\AssertMetrics;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\PHPUtils\Monitoring\OperationTimer;
 use InvalidArgumentException;
@@ -66,9 +67,9 @@ class OperationTimerTest extends TestCase
 
     /**
      * @testWith ["", ""]
-     *              [null, null]
-     *              ["foo", null]
-     *              [null, "bar"]
+     *           [null, null]
+     *           ["foo", null]
+     *           [null, "bar"]
      **/
     public function test_timeOperation_throws_if_no_metric_name_or_source($name, $src)
     {
@@ -82,13 +83,14 @@ class OperationTimerTest extends TestCase
         $this->real_time_clock = StoppedMockClock::atNow();
         $subject               = $this->newSubject();
         $clock                 = $this->real_time_clock;
+        $metric                = MetricId::nameAndSource('test', 'test-source');
 
         $subject->timeOperation(
             function () use ($clock) { $clock->tickMicroseconds(250 * 1000); },
-            'test',
-            'test-source'
+            $metric->getName(),
+            $metric->getSource()
         );
-        $this->assertTimerMilliseconds(250);
+        AssertMetrics::assertTimerValues($this->metrics->getMetrics(), $metric, [250]);
     }
 
     public function test_times_operation_on_child_exception()
@@ -96,6 +98,7 @@ class OperationTimerTest extends TestCase
         $this->real_time_clock = StoppedMockClock::atNow();
         $subject               = $this->newSubject();
         $clock                 = $this->real_time_clock;
+        $metric                = MetricId::nameAndSource('default_name', 'default_source');
 
         $e = new InvalidArgumentException('testing');
         try {
@@ -104,34 +107,20 @@ class OperationTimerTest extends TestCase
                     $clock->tickMicroseconds(500 * 1000);
                     throw $e;
                 },
-                'default_name',
-                'default_source'
+                $metric->getName(),
+                $metric->getSource()
             );
 
         } catch (InvalidArgumentException $got_e) {
             $this->assertSame($e, $got_e, 'sanity check in case of something else');
         }
-
-        $this->assertTimerMilliseconds(500);
+        AssertMetrics::assertTimerValues($this->metrics->getMetrics(), $metric, [500]);
     }
 
     private function assertMetricMatches(string $expect_name, string $expect_source, MetricId $metric)
     {
         $this->assertSame($expect_name, $metric->getName());
         $this->assertSame($expect_source, $metric->getSource());
-    }
-
-    private function assertTimerMilliseconds(int $expected_time_millis)
-    {
-        $payload = $this->metrics->getMetrics()[0]['payload'];
-        $start   = $payload['start'];
-        /** @var $start DateTimeImmutable */
-        $end = $payload['end'];
-        /** @var $end DateTimeImmutable */
-        $this->assertSame(
-            $expected_time_millis / 1000,
-            (float) $end->format('U.u') - (float) $start->format('U.u')
-        );
     }
 
     protected function setUp(): void

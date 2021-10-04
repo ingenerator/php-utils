@@ -12,14 +12,8 @@ use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 
 class OperationTimer
 {
-    /**
-     * @var MetricsAgent
-     */
     protected MetricsAgent $metrics_agent;
 
-    /**
-     * @var RealtimeClock
-     */
     protected RealtimeClock $realtime_clock;
 
     public function __construct(MetricsAgent $metrics_agent, RealtimeClock $realtime_clock = NULL)

@@ -24,8 +24,13 @@ class MetricId
      */
     public function __construct(?string $name, ?string $source)
     {
-        $this->name   = $name;
-        $this->source = $source;
+        $this->name = $name;
+
+        if ($source === NULL) {
+            $this->source = self::SOURCE_HOST_REPLACEMENT;
+        } else {
+            $this->source = $source;
+        }
     }
 
     public static function forHost(string $name): MetricId
@@ -35,12 +40,18 @@ class MetricId
 
     public static function nameOnly(string $name): MetricId
     {
-        return new MetricId($name, NULL);
+        $m = new MetricId($name, NULL);
+        $m->setSource(NULL);
+
+        return $m;
     }
 
     public static function nameAndSource(?string $name, ?string $source): MetricId
     {
-        return new MetricId($name, $source);
+        $m = new MetricId($name, $source);
+        $m->setSource($source);
+
+        return $m;
     }
 
     public function getName(): ?string
@@ -58,7 +69,7 @@ class MetricId
         return $this->source;
     }
 
-    public function setSource(string $source): void
+    public function setSource(?string $source): void
     {
         $this->source = $source;
     }
