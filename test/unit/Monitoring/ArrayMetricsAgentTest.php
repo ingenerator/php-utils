@@ -21,12 +21,12 @@ class ArrayMetricsAgentTest extends TestCase
         $this->assertInstanceOf(ArrayMetricsAgent::class, $this->newSubject());
     }
 
-    public function test_it_can_assert_only_one_metric_recorded()
+    public function test_it_can_assert_only_one_timer_recorded()
     {
         $subject = $this->newSubject();
         $start   = new DateTimeImmutable();
         $end     = new DateTimeImmutable();
-        $subject->addTimer(new MetricId('queries', 'mysql'), $start, $end);
+        $subject->addTimer(MetricId::nameAndSource('queries', 'mysql'), $start, $end);
         $subject->assertCapturedOneTimer('queries', 'mysql');
         $this->addToAssertionCount(1);
     }
@@ -43,9 +43,9 @@ class ArrayMetricsAgentTest extends TestCase
         $subject = $this->newSubject();
         foreach ($metrics as $metric) {
             $subject->addTimer(
-                new MetricId($metric['name'], $metric['source']),
-                new \DateTimeImmutable,
-                new \DateTimeImmutable
+                MetricId::nameAndSource($metric['name'], $metric['source']),
+                new DateTimeImmutable,
+                new DateTimeImmutable
             );
         }
         try {
@@ -61,14 +61,87 @@ class ArrayMetricsAgentTest extends TestCase
         $subject = $this->newSubject();
         $start   = new DateTimeImmutable();
         $end     = new DateTimeImmutable();
-        $subject->addTimer(new MetricId('queries', 'mysql'), $start, $end);
-        $subject->addTimer(new MetricId('queries', 'mysql.slave'), $start, $end);
+        $subject->addTimer(MetricId::nameAndSource('queries', 'mysql'), $start, $end);
+        $subject->addTimer(MetricId::nameAndSource('queries', 'mysql.slave'), $start, $end);
         $this->assertSame(
             [
                 ['name' => 'queries', 'source' => 'mysql', 'start' => $start, 'end' => $end],
                 ['name' => 'queries', 'source' => 'mysql.slave', 'start' => $start, 'end' => $end],
             ],
             $subject->getTimers()
+        );
+    }
+
+    public function test_returns_all_metrics_captured()
+    {
+        $subject = $this->newSubject();
+
+        $start = new DateTimeImmutable();
+        $end   = new DateTimeImmutable();
+
+        $subject->addTimer(MetricId::nameAndSource('queries', 'mysql'), $start, $end);
+        $subject->addTimer(MetricId::nameAndSource('queries', 'mysql.slave'), $start, $end);
+        $subject->incrementCounterByOne(MetricId::nameAndSource('email_sent', 'test'));
+        $subject->recordCounterIntegral(MetricId::nameAndSource('opcache-restarts-oom', 'test'), 5);
+        $subject->setGauge(MetricId::nameAndSource('number_in_queue', 'test'), 16.5);
+        $subject->addSample(MetricId::nameAndSource('mem_used', 'test'), 224.56);
+        $this->assertSame(
+            [
+                [
+                    'type'    => 'timer',
+                    'name'    => 'queries',
+                    'source'  => 'mysql',
+                    'payload' => ['start' => $start, 'end' => $end],
+                ],
+                [
+                    'type'    => 'timer',
+                    'name'    => 'queries',
+                    'source'  => 'mysql.slave',
+                    'payload' => ['start' => $start, 'end' => $end],
+                ],
+                ['type' => 'counter', 'name' => 'email_sent', 'source' => 'test', 'payload' => 1],
+                ['type' => 'counter-integral', 'name' => 'opcache-restarts-oom', 'source' => 'test', 'payload' => 5.0],
+                ['type' => 'gauge', 'name' => 'number_in_queue', 'source' => 'test', 'payload' => 16.5],
+                ['type' => 'sample', 'name' => 'mem_used', 'source' => 'test', 'payload' => 224.56],
+            ],
+            $subject->getMetrics()
+        );
+    }
+
+    public function test_it_records_each_counter_increment_by_one()
+    {
+        $subject = $this->newSubject();
+        $subject->incrementCounterByOne(MetricId::nameAndSource('email_sent', 'test'));
+        $subject->incrementCounterByOne(MetricId::nameAndSource('email_sent', 'test'));
+        $subject->incrementCounterByOne(MetricId::nameAndSource('email_sent', 'test'));
+        $this->assertSame(
+            [
+                ['type' => 'counter', 'name' => 'email_sent', 'source' => 'test', 'payload' => 1],
+                ['type' => 'counter', 'name' => 'email_sent', 'source' => 'test', 'payload' => 1],
+                ['type' => 'counter', 'name' => 'email_sent', 'source' => 'test', 'payload' => 1],
+            ],
+            $subject->getMetrics()
+        );
+    }
+
+    public function test_for_host_includes_placeholder()
+    {
+        $subject = $this->newSubject();
+        $subject->incrementCounterByOne(MetricId::forHost('for_host'));
+        $subject->incrementCounterByOne(MetricId::nameOnly('name_only'));
+        $subject->incrementCounterByOne(MetricId::nameAndSource('my_name', 'my_source'));
+        $this->assertSame(
+            [
+                [
+                    'type'    => 'counter',
+                    'name'    => 'for_host',
+                    'source'  => MetricId::SOURCE_HOST_REPLACEMENT,
+                    'payload' => 1,
+                ],
+                ['type' => 'counter', 'name' => 'name_only', 'source' => NULL, 'payload' => 1],
+                ['type' => 'counter', 'name' => 'my_name', 'source' => 'my_source', 'payload' => 1],
+            ],
+            $subject->getMetrics()
         );
     }
 

@@ -9,17 +9,12 @@ namespace Ingenerator\PHPUtils\Monitoring;
 
 
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use InvalidArgumentException;
 
 class OperationTimer
 {
-    /**
-     * @var MetricsAgent
-     */
     protected MetricsAgent $metrics_agent;
 
-    /**
-     * @var RealtimeClock
-     */
     protected RealtimeClock $realtime_clock;
 
     public function __construct(MetricsAgent $metrics_agent, RealtimeClock $realtime_clock = NULL)
@@ -58,14 +53,14 @@ class OperationTimer
         ?string $default_metric_name = NULL,
         ?string $default_source = NULL
     ) {
-        $metric     = new MetricId($default_metric_name, $default_source);
+        $metric     = MetricId::nameAndSource($default_metric_name, $default_source);
         $start_time = $this->realtime_clock->getDateTime();
         try {
             return $operation($metric);
         } finally {
             $end_time = $this->realtime_clock->getDateTime();
             if (empty($metric->getName()) or empty($metric->getSource())) {
-                throw new \InvalidArgumentException('Must specify `metric_name` and `source` in args or callback');
+                throw new InvalidArgumentException('Must specify `metric_name` and `source` in args or callback');
             }
             $this->metrics_agent->addTimer($metric, $start_time, $end_time);
         }

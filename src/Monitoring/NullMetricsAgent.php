@@ -16,4 +16,24 @@ class NullMetricsAgent implements MetricsAgent
     {
         //no-op
     }
+
+    public function addSample(MetricId $metric, float $value): void
+    {
+        //no-op
+    }
+
+    public function incrementCounterByOne(MetricId $metric, int $increment = 1): void
+    {
+        //no-op
+    }
+
+    public function setGauge(MetricId $metric, float $value): void
+    {
+        //no-op
+    }
+
+    public function recordCounterIntegral(MetricId $metric, float $value): void
+    {
+        //no-op
+    }
 }
