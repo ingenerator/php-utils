@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add support to DateTimeImmutableFactory for creation from common 'Y-m-d H:i:s' format
+
 ### v1.12.0 (2021-10-04)
 
 * Extend MetricsAgent to handle additional metric types

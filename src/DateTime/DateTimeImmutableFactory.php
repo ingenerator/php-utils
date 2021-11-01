@@ -111,4 +111,14 @@ class DateTimeImmutableFactory
         return static::fromPossibleFormats($input, ['Y-m-d']);
     }
 
+    public static function fromYmdHis(string $input): DateTimeImmutable
+    {
+        $format = 'Y-m-d H:i:s';
+        $date   = DateTimeImmutable::createFromFormat('!'.$format, $input);
+        if ($date and $date->format($format) === $input) {
+            return $date;
+        }
+        throw new \InvalidArgumentException($input.' is not in the format Y-m-d H:i:s');
+    }
+
 }
