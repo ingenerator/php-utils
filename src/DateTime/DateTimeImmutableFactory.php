@@ -70,6 +70,8 @@ class DateTimeImmutableFactory
      * @param string $input
      *
      * @return DateTimeImmutable|InvalidUserDateTime|null
+     *
+     * @deprecated Validate your input and create a DateTimeImmutable adhering to a strict format
      */
     public static function fromUserDateInput($input)
     {
@@ -95,6 +97,8 @@ class DateTimeImmutableFactory
      * @param string $input
      *
      * @return DateTimeImmutable|InvalidUserDateTime|null
+     *
+     * @deprecated Validate your input and create a DateTimeImmutable adhering to a strict format
      */
     public static function fromUserDateTimeInput($input)
     {
@@ -105,6 +109,8 @@ class DateTimeImmutableFactory
      * @param string $input
      *
      * @return  DateTimeImmutable|InvalidUserDateTime|null
+     *
+     * @deprecated Validate your input and create a DateTimeImmutable adhering to a strict format
      */
     public static function fromYmdInput($input)
     {

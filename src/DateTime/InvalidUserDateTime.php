@@ -12,6 +12,8 @@ namespace Ingenerator\PHPUtils\DateTime;
  * validation to catch it and legacy forms to re-display it.
  *
  * @package Ingenerator\Support\DateTime
+ *
+ * @deprecated You should be throwing an exception if the user input is not valid
  */
 class InvalidUserDateTime extends \DateTimeImmutable
 {
