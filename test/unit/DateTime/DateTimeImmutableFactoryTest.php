@@ -121,6 +121,37 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($input, $actual->format('anything'));
     }
 
+    /**
+     * @testWith ["2017-07-09 10:01:02", "2017-07-09T10:01:02.000000+01:00"]
+     */
+    public function test_it_factories_correct_object_from_valid_ymdhis_in_default_tz($input, $expect)
+    {
+        $old_default = \date_default_timezone_get();
+        try {
+            \date_default_timezone_set('Europe/London');
+            $actual = DateTimeImmutableFactory::fromYmdHis($input);
+            $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+            $this->assertSame('Europe/London', $actual->getTimezone()->getName());
+            $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
+        } finally {
+            \date_default_timezone_set($old_default);
+        }
+    }
+
+    /**
+     * @testWith [""]
+     *           ["yesterday"]
+     *           ["2017-11-10"]
+     *           ["2017-11-10 26:10:10"]
+     *           ["2017-14-10"]
+     *           ["10/11/2017"]
+     */
+    public function test_it_throws_from_invalid_ymdhis_input($input)
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        DateTimeImmutableFactory::fromYmdHis($input);
+    }
+
     public function test_it_factories_from_unix_timestamp_in_default_tz()
     {
         try {
