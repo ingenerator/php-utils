@@ -1,5 +1,6 @@
 ### Unreleased
 
+* StackdriverApplicationLogger: add the peak memory usage to the context info of the request logger (context.mem_mb).
 
 ### v1.13.0 (2021-11-04)
 

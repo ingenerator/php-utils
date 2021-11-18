@@ -543,10 +543,8 @@ class StackdriverApplicationLoggerTest extends TestCase
         $logger = $this->newSubject();
         $logger->logRequest([]);
         $entry = $this->assertLoggedOneLine();
-        $this->assertSame(
-            ['user' => 'john@do.com'],
-            $entry['context']
-        );
+        $this->assertSame(['mem_mb', 'user'], array_keys($entry['context']));
+        $this->assertSame('john@do.com', $entry['context']['user']);
     }
 
     public function test_its_request_logger_logs_http_response_code()
@@ -589,6 +587,31 @@ class StackdriverApplicationLoggerTest extends TestCase
         $logger->logRequest([]);
         $entry = $this->assertLoggedOneLine();
         $this->assertNull($entry['httpRequest']['latency']);
+    }
+
+    public function test_its_request_logger_logs_peak_memory_usage_in_mb()
+    {
+        $logger      = $this->newSubject();
+        $peak_before = \memory_get_peak_usage();
+        $logger->logRequest([]);
+        $peak_after = \memory_get_peak_usage();
+        $entry      = $this->assertLoggedOneLine();
+        $this->assertIsString(
+            $entry['context']['mem_mb'],
+            'Encode memory as string to avoid risk of JSON serialization precision increasing payload size'
+        );
+        $this->assertMatchesRegularExpression('/^\d+\.\d{2}$/', $entry['context']['mem_mb']);
+
+        $logged_meg = $entry['context']['mem_mb'];
+        // Sanity check that it's definitely logging in megabytes. This is tricky as there's no way to stub the actual
+        // memory usage that the logger saw - but it must be no less than the value before we called it, and no more
+        // than the value immediately after we called it
+        $this->assertTrue(
+            ($logged_meg >= round($peak_before / 1000 / 1000, 2))
+            and
+            ($logged_meg <= round($peak_after / 1000 / 1000, 2)),
+            "Logged value should be within $peak_before and $peak_after and in the right units"
+        );
     }
 
     /**

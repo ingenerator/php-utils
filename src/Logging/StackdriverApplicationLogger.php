@@ -377,6 +377,9 @@ class StackdriverApplicationLogger extends AbstractLogger
                 'severity'            => strtoupper($this->getLogPriorityForHttpCode($http_code)),
                 self::PROP_INGEN_TYPE => 'rqst',
                 'httpRequest'         => $meta['context']['httpRequest'] ?? [],
+                'context' => [
+                    'mem_mb' => sprintf('%.2f',\memory_get_peak_usage() / 1_000_000),
+                ],
             ],
             $meta,
             [
