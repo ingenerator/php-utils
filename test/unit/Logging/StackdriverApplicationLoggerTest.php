@@ -569,6 +569,16 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
 
+    public function test_its_request_logger_truncates_long_user_agents()
+    {
+        $ua_val = 'abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 long ※ note the utf8 safe truncation and trimming';
+        $expect = 'abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 long…';
+        $logger = $this->newSubject();
+        $logger->logRequest(['HTTP_USER_AGENT' => $ua_val]);
+        $entry = $this->assertLoggedOneLine();
+        $this->assertSame($expect, $entry['httpRequest']['userAgent']);
+    }
+
     public function test_its_request_logger_logs_latency_since_start_time_if_provided()
     {
         $start  = \microtime(TRUE);
