@@ -17,8 +17,10 @@ use function get_class;
 use function http_response_code;
 use function is_callable;
 use function json_encode;
+use function mb_strcut;
 use function microtime;
 use function sprintf;
+use function strlen;
 use function strtoupper;
 use function substr;
 
@@ -377,6 +379,9 @@ class StackdriverApplicationLogger extends AbstractLogger
                 'severity'            => strtoupper($this->getLogPriorityForHttpCode($http_code)),
                 self::PROP_INGEN_TYPE => 'rqst',
                 'httpRequest'         => $meta['context']['httpRequest'] ?? [],
+                'context' => [
+                    'mem_mb' => sprintf('%.2f',\memory_get_peak_usage() / 1_000_000),
+                ],
             ],
             $meta,
             [
@@ -384,7 +389,7 @@ class StackdriverApplicationLogger extends AbstractLogger
                     // requestMethod, requestUrl, remoteIp are expected to come from metadata provider as they are
                     // shared with application log entry context
                     'status'    => $http_code,
-                    'userAgent' => $server['HTTP_USER_AGENT'] ?? NULL,
+                    'userAgent' => $this->truncate($server['HTTP_USER_AGENT'] ?? NULL, 500),
                     'latency'   => $this->calculateRequestLatency($request_start_time),
                 ],
             ]
@@ -393,6 +398,22 @@ class StackdriverApplicationLogger extends AbstractLogger
         unset($log_entry['context']['httpRequest']);
 
         $this->writeLog($log_entry);
+    }
+
+    private function truncate(?string $value, int $max_byte_length): ?string
+    {
+        if ($value === NULL) {
+            return NULL;
+        }
+
+        if (strlen($value) <= $max_byte_length) {
+            return $value;
+        }
+
+        // Use mb_strcut because we want to limit the byte size but keep a utf-8 valid string:
+        // * substr might split a utf8 character and cause an encoding error.
+        // * mb_substr could allow a much longer byte length if the string was entirely composed of unicode characters.
+        return trim(mb_strcut($value, 0, $max_byte_length)).'…';
     }
 
     protected function getLogPriorityForHttpCode(string $code): string
