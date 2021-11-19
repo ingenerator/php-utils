@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.14.0 (2021-11-19)
+
 * StackdriverApplicationLogger: limit length of user-agent string in request logs to a maximum of 500 bytes.
 * Now requires the `mbstring` PHP extension to be present.
 * StackdriverApplicationLogger: add the peak memory usage to the context info of the request logger (context.mem_mb).
