@@ -602,9 +602,9 @@ class StackdriverApplicationLoggerTest extends TestCase
     public function test_its_request_logger_logs_peak_memory_usage_in_mb()
     {
         $logger      = $this->newSubject();
-        $peak_before = \memory_get_peak_usage();
+        $peak_before = \memory_get_peak_usage(TRUE);
         $logger->logRequest([]);
-        $peak_after = \memory_get_peak_usage();
+        $peak_after = \memory_get_peak_usage(TRUE);
         $entry      = $this->assertLoggedOneLine();
         $this->assertIsString(
             $entry['context']['mem_mb'],
