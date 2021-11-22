@@ -1,5 +1,11 @@
 ### Unreleased
 
+### v1.14.1 (2021-11-22)
+
+* [BUG] Request memory usage logs introduced in 1.14 should have been reporting the "real" memory usage
+  e.g. `memory_get_peak_usage(TRUE)` rather than the less reliable emalloc based allocations php returns by
+  default.
+
 ### v1.14.0 (2021-11-19)
 
 * StackdriverApplicationLogger: limit length of user-agent string in request logs to a maximum of 500 bytes.

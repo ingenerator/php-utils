@@ -380,7 +380,7 @@ class StackdriverApplicationLogger extends AbstractLogger
                 self::PROP_INGEN_TYPE => 'rqst',
                 'httpRequest'         => $meta['context']['httpRequest'] ?? [],
                 'context' => [
-                    'mem_mb' => sprintf('%.2f',\memory_get_peak_usage() / 1_000_000),
+                    'mem_mb' => sprintf('%.2f',\memory_get_peak_usage(TRUE) / 1_000_000),
                 ],
             ],
             $meta,
