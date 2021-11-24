@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v1.15.0 (2021-11-24)
+
+* Optionally report the count of log entries to a MetricsAgent- see `StackdriverApplicationLogger::withMetrics()`
+
 ### v1.14.1 (2021-11-22)
 
 * [BUG] Request memory usage logs introduced in 1.14 should have been reporting the "real" memory usage

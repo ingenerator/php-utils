@@ -5,6 +5,8 @@ namespace Ingenerator\PHPUtils\Logging;
 
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
+use Ingenerator\PHPUtils\Monitoring\MetricId;
+use Ingenerator\PHPUtils\Monitoring\MetricsAgent;
 use Ingenerator\PHPUtils\Object\InitialisableSingletonTrait;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
@@ -61,7 +63,36 @@ class StackdriverApplicationLogger extends AbstractLogger
     /**
      * @var array
      */
-    protected $metadata_sources;
+    protected               $metadata_sources;
+
+    protected ?MetricsAgent $metrics_agent = NULL;
+
+    protected string        $metric_name   = 'application-logs';
+
+    /**
+     * Create an instance that also reports a metric counter on each log entry.
+     *
+     * @param MetricsAgent                       $agent
+     * @param string                             $metric_name
+     * @param string                             $log_destination
+     * @param array|callable|LogMetadataProvider ...$metadata_sources
+     *
+     * @return StackdriverApplicationLogger
+     * @see __construct for the usage of the log_destination and metadata_sources arguments
+     *
+     */
+    public static function withMetrics(
+        MetricsAgent $agent,
+        string       $metric_name,
+        string       $log_destination,
+                     ...$metadata_sources
+    ): StackdriverApplicationLogger {
+        $i                = new static($log_destination, ...$metadata_sources);
+        $i->metrics_agent = $agent;
+        $i->metric_name   = $metric_name;
+
+        return $i;
+    }
 
     /**
      * Create an instance of the logger and provide metadata
@@ -98,6 +129,9 @@ class StackdriverApplicationLogger extends AbstractLogger
      *                // etc
      *           );
      *
+     *           // Optional - if you want to report stats on the number of log entries logged
+     *           $logger->reportLogCounts(new StatsiteMetricsAgent, 'app-log-entries');
+     *
      *           if (PHP_SAPI !== 'cli') {
      *             register_shutdown_function(
      *               function () use ($logger) {
@@ -118,7 +152,7 @@ class StackdriverApplicationLogger extends AbstractLogger
      */
     public function __construct(
         string $log_destination,
-        ...$metadata_sources
+               ...$metadata_sources
     ) {
         $this->metadata_sources = array_pad($metadata_sources, 2, []);
         $this->log_destination  = $log_destination;
@@ -212,6 +246,11 @@ class StackdriverApplicationLogger extends AbstractLogger
         }
 
         $this->writeLog($log_entry);
+
+        if ($this->metrics_agent) {
+            // Report the log entry metric if they've configured an agent to collect it
+            $this->metrics_agent->incrementCounterByOne(MetricId::nameAndSource($this->metric_name, $level));
+        }
     }
 
     /**
