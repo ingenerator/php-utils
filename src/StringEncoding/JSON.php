@@ -3,13 +3,18 @@
 namespace Ingenerator\PHPUtils\StringEncoding;
 
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
+use function json_last_error_msg;
 
 class JSON
 {
 
     public static function decode(?string $json)
     {
-        $result = json_decode($json, TRUE);
+        try {
+            $result = json_decode($json, TRUE);
+        } catch (\ErrorException $e){
+            throw new InvalidJSONException('Invalid JSON: ' . json_last_error_msg());
+        }
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new InvalidJSONException('Invalid JSON: ' . json_last_error_msg());
         }
