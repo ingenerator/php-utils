@@ -1,5 +1,10 @@
 ### Unreleased
 
+### v1.16.0 (2022-10-10)
+
+* Support PHP 8.1
+* Drop support for PHP 7.4
+
 ### v1.15.0 (2021-11-24)
 
 * Optionally report the count of log entries to a MetricsAgent- see `StackdriverApplicationLogger::withMetrics()`
