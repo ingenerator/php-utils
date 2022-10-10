@@ -16,16 +16,16 @@
   ],
   "require": {
     "ext-json": "*",
-    "ext-mbstring": "^7 || ~8.0.0",
-    "ext-pdo": "^7 || ~8.0.0",
-    "ext-sodium": "^7.4 || ~8.0.0",
-    "php": "^7.4 || ~8.0.0",
+    "ext-mbstring": "~8.0.0 || ~8.1.0",
+    "ext-pdo": "~8.0.0 || ~8.1.0",
+    "ext-sodium": "~8.0.0 || ~8.1.0",
+    "php": "~8.0.0 || ~8.1.0",
     "psr/log": "^1.1"
   },
   "require-dev": {
     "johnkary/phpunit-speedtrap": "^3.3",
-    "mikey179/vfsstream": "^1.6.8",
-    "phpunit/phpunit": "^9.5"
+    "mikey179/vfsstream": "^1.6.10",
+    "phpunit/phpunit": "^9.5.5"
   },
   "support": {
     "source": "https://github.com/ingenerator/php-utils",

@@ -3,6 +3,7 @@
 namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 
 use PDO;
+use function array_map;
 use const PHP_MAJOR_VERSION;
 
 if (PHP_MAJOR_VERSION < 8) {
@@ -12,7 +13,7 @@ if (PHP_MAJOR_VERSION < 8) {
 
         public function __construct(array $result) { $this->result = $result; }
 
-        public function fetchAll($fetch_style = NULL, $fetch_argument = NULL, $ctor_args = NULL)
+        public function fetchAll($fetch_style = NULL, $fetch_argument = NULL, $ctor_args = NULL): array
         {
             if ($fetch_style === NULL) {
                 return $this->result;
@@ -37,7 +38,7 @@ if (PHP_MAJOR_VERSION < 8) {
 
         public function __construct(array $result) { $this->result = $result; }
 
-        public function fetchAll(int $fetch_style = NULL, mixed ...$fetch_argument)
+        public function fetchAll(int $fetch_style = NULL, mixed ...$fetch_argument): array
         {
             if ($fetch_style === NULL) {
                 return $this->result;

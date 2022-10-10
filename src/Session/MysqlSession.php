@@ -72,7 +72,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * @return void
      */
-    public function initialise()
+    public function initialise(): void
     {
         // strict mode is required both for general security, and to enable the create_sid and
         // validateId methods in this handler interface, which won't otherwise be called.
@@ -83,7 +83,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function close()
+    public function close(): bool
     {
         return $this->releaseLock();
     }
@@ -91,7 +91,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function destroy($session_id)
+    public function destroy($session_id): bool
     {
         return $this->db->prepare("DELETE FROM `sessions` WHERE `id` = :id")
             ->execute(['id' => $session_id]);
@@ -102,7 +102,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      *
      * @return int
      */
-    public function garbageCollect()
+    public function garbageCollect(): bool|int
     {
         return $this->gc($this->session_lifetime);
     }
@@ -110,7 +110,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function gc($maxlifetime)
+    public function gc($maxlifetime): int|false
     {
         $now = new \DateTimeImmutable();
         $gc  = $this->db->prepare("DELETE FROM `sessions` WHERE `last_active` < :expire");
@@ -124,7 +124,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function open($save_path, $name)
+    public function open($save_path, $name): bool
     {
         return TRUE;
     }
@@ -134,7 +134,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      *
      * {@inheritDoc}
      */
-    public function create_sid()
+    public function create_sid(): string
     {
         $session_id = \session_create_id();
 
@@ -183,7 +183,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritDoc}
      */
-    public function validateId($session_id)
+    public function validateId($session_id): bool
     {
         $now = new \DateTimeImmutable();
         $this->getLock($session_id);
@@ -232,7 +232,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * {@inheritdoc}
      */
-    public function read($session_id)
+    public function read($session_id): string|false
     {
         if ( ! isset($this->data_cache[$session_id])) {
             // This cannot realistically ever happen in real life. PHP will *always* have called
@@ -258,7 +258,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      *
      * {@inheritdoc}
      */
-    public function write($session_id, $session_data)
+    public function write($session_id, $session_data): bool
     {
         // There is no reason to update user_agent or hash
         // If user_agent has changed the hash will have changed
@@ -282,7 +282,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * Called to mark a session still active even if the data hasn't changed
      */
-    public function updateTimestamp($session_id, $session_data)
+    public function updateTimestamp($session_id, $session_data): bool
     {
         // There is no reason to update user_agent or hash
         // If user_agent has changed the hash will have changed
@@ -305,7 +305,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * @return string
      */
-    protected function calculateHash()
+    protected function calculateHash(): string
     {
         $hash = $this->client_user_agent.$this->hash_salt;
 
@@ -318,7 +318,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      * @return bool
      * @throws \ErrorException
      */
-    protected function getLock($session_id)
+    protected function getLock($session_id): bool
     {
         $this->session_lock = 'session_'.$session_id;
 
@@ -336,7 +336,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     /**
      * @return bool
      */
-    protected function releaseLock()
+    protected function releaseLock(): bool
     {
         if ( ! $this->session_lock) {
             // The lock has already been released e.g. due to validateSid releasing it because
