@@ -30,12 +30,12 @@ class InvalidUserDateTime extends \DateTimeImmutable
         $this->input_string = $input_string;
     }
 
-    public static function createFromFormat($format, $time, $timezone = NULL): \DateTimeImmutable
+    public static function createFromFormat($format, $time, $timezone = NULL): static
     {
         throw new \BadMethodCallException('Invalid call to '.__METHOD__);
     }
 
-    public static function createFromMutable($dateTime): \DateTimeImmutable
+    public static function createFromMutable(\DateTime $dateTime): static
     {
         throw new \BadMethodCallException('Invalid call to '.__METHOD__);
     }
