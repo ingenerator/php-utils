@@ -131,7 +131,7 @@ class StrictDate
 
     protected static function is_datetime_format($format, $value)
     {
-        $dt = \DateTimeImmutable::createFromFormat($format, $value);
+        $dt = \DateTimeImmutable::createFromFormat($format, (string) $value);
 
         return ($dt AND ($dt->format($format) === $value));
     }
