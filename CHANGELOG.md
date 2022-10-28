@@ -5,6 +5,8 @@
 * Fix deprecation warning when passing NULL to date validator by casting 
   to empty string to maintain current behaviour.
 
+* Make DbBackedMutexWrapper locking type-safe across PHP versions
+
 ### v1.17.0 (2022-10-14)
 
 * Support PHP 8.2
