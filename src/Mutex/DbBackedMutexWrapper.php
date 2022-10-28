@@ -40,7 +40,10 @@ class DbBackedMutexWrapper implements MutexWrapper
             ->query("SELECT GET_LOCK($name_param, $timeout_seconds)")
             ->fetchAll(PDO::FETCH_COLUMN, 0);
 
-        if ($result[0] !== '1') {
+        // Need to explicitly cast the result to an int for comparison as PDO value types vary between 8.0 and 8.1+
+        // And we should keep this cast even when we drop 8.0, because the PDO int/string mode is actually
+        // configurable with a PDO attribute so could vary at runtime too.
+        if (1 !== (int) $result[0]) {
             throw new MutexTimedOutException($name, $timeout_seconds, $result);
         }
     }

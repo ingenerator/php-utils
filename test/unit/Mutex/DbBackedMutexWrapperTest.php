@@ -29,11 +29,11 @@ class DbBackedMutexWrapperTest extends TestCase
             [
                 [
                     'sql'    => 'SELECT GET_LOCK({quoted-mylock}, 5)',
-                    'result' => [['0']]
+                    'result' => [[0]]
                 ],
                 [
                     'sql'    => 'SELECT RELEASE_LOCK({quoted-mylock})',
-                    'result' => [['0']]
+                    'result' => [[0]]
                 ],
             ]
         );
@@ -53,11 +53,11 @@ class DbBackedMutexWrapperTest extends TestCase
             [
                 [
                     'sql'    => 'SELECT GET_LOCK({quoted-somelock}, 2)',
-                    'result' => [['1']]
+                    'result' => [[1]]
                 ],
                 [
                     'sql'    => 'SELECT RELEASE_LOCK({quoted-somelock})',
-                    'result' => [['0']]
+                    'result' => [[0]]
                 ],
             ]
         );
@@ -80,11 +80,11 @@ class DbBackedMutexWrapperTest extends TestCase
             [
                 [
                     'sql'    => 'SELECT GET_LOCK({quoted-somelock}, 2)',
-                    'result' => [['1']]
+                    'result' => [[1]]
                 ],
                 [
                     'sql'    => 'SELECT RELEASE_LOCK({quoted-somelock})',
-                    'result' => [['0']]
+                    'result' => [[0]]
                 ],
             ]
         );
