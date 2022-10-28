@@ -16,6 +16,7 @@ class StrictDateTest extends TestCase
 
     /**
      * @testWith ["", false]
+     *           [null, false]
      *           ["junk", false]
      *           ["01/10/01", false]
      *           ["2016-01-01", false]
@@ -32,6 +33,7 @@ class StrictDateTest extends TestCase
 
     /**
      * @testWith ["", false]
+     *           [null, false]
      *           ["junk", false]
      *           ["01/10/01", false]
      *           ["2016-01-45", false]
@@ -107,28 +109,10 @@ class StrictDateTest extends TestCase
         );
     }
 
-    public function provider_date_after_date()
-    {
-        return [
-            // Invalid inputs all true as they should be caught by other rules
-            // Simple > the first one
-            [
-                ['a' => new \DateTimeImmutable, 'b' => new \DateTimeImmutable('-5 mins')],
-                'a',
-                'b',
-                FALSE
-            ],
-            [
-                ['a' => new \DateTimeImmutable('-5 mins'), 'b' => new \DateTimeImmutable],
-                'a',
-                'b',
-                TRUE
-            ],
-        ];
-    }
-
     /**
      * @testWith ["", "-5 mins", false]
+     *           [null, "", true]
+     *           ["", null, true]
      *           ["-5 mins", "", true]
      */
     public function test_it_validates_date_after_date($from, $to, $expect)
@@ -138,8 +122,8 @@ class StrictDateTest extends TestCase
             StrictDate::date_after(
                 new \ArrayObject(
                     [
-                        'from' => new \DateTimeImmutable($from),
-                        'to'   => new \DateTimeImmutable($to)
+                        'from' => new \DateTimeImmutable((string) $from),
+                        'to'   => new \DateTimeImmutable((string) $to)
                     ]
                 ),
                 'from',
