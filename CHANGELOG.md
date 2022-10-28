@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.17.1 (2022-10-28)
+
 * Fix deprecation warning when passing NULL to date validator by casting 
   to empty string to maintain current behaviour.
 
