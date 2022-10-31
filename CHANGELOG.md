@@ -1,6 +1,16 @@
 ### Unreleased
 
+### v1.17.2 (2022-10-31)
+
+* Update `JSON::decode` to throw an explicit exception on NULL input
+  This has always actually thrown an InvalidJSONException, but it used to be indistinguishable
+  from the `Syntax error` produced by empty/invalid JSON strings.
+
+* Revert change in v1.16.0 that caught all `ErrorException` in `JSON::decode` - these will now
+  bubble as previously.
+
 * Fix tests for StrictDate::date_after
+
 * Deprecate all StrictDate:: validation methods related to the deprecated `InvalidUserDateTime` object - validate
   date inputs either as strings *or* as (valid) date objects, not both.
 

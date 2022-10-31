@@ -31,13 +31,14 @@ class JSONTest extends TestCase
     }
 
     /**
-     * @testWith [null]
-     *           [""]
-     *           ["i am not json"]
+     * @testWith [null, "Cannot decode a null value"]
+     *           ["", "Syntax error"]
+     *           ["i am not json", "Syntax error"]
      */
-    public function test_it_throws_on_parsing_invalid_json($value)
+    public function test_it_throws_on_parsing_invalid_json($value, $expect_msg)
     {
         $this->expectException(InvalidJSONException::class);
+        $this->expectExceptionMessage($expect_msg);
         JSON::decode($value);
     }
 

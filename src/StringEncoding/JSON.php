@@ -10,14 +10,18 @@ class JSON
 
     public static function decode(?string $json)
     {
-        try {
-            $result = json_decode($json, TRUE);
-        } catch (\ErrorException $e){
-            throw new InvalidJSONException('Invalid JSON: ' . json_last_error_msg());
+        // NOTE: it is deprecated to call this with a null argument, which has always thrown an InvalidJSONException.
+        // The typehint is left as ?string for backwards compatibility
+        if ($json === NULL) {
+            throw new InvalidJSONException('Invalid JSON: Cannot decode a null value');
         }
+
+        $result = json_decode($json, TRUE);
+
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidJSONException('Invalid JSON: ' . json_last_error_msg());
+            throw new InvalidJSONException('Invalid JSON: '.json_last_error_msg());
         }
+
         return $result;
     }
 
