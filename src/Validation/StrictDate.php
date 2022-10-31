@@ -19,6 +19,8 @@ class StrictDate
      * @param string       $from_field
      * @param string       $to_field
      *
+     * @deprecated validate input before creating DateTimeImmutable objects
+     *
      * @return bool
      */
     public static function date_after(\ArrayAccess $validation, $from_field, $to_field)
@@ -40,6 +42,8 @@ class StrictDate
      * @param string       $from_field
      * @param string       $to_field
      *
+     * @deprecated validate input before creating DateTimeImmutable objects
+     *
      * @return bool
      */
     public static function date_on_or_after(\ArrayAccess $validation, $from_field, $to_field)
@@ -58,6 +62,8 @@ class StrictDate
      * @param \ArrayAccess $validation
      * @param string       $from_field
      * @param string       $to_field
+     *
+     * @deprecated validate input before creating DateTimeImmutable objects
      *
      * @return \DateTimeImmutable[]
      */
@@ -82,6 +88,8 @@ class StrictDate
      *
      * @param mixed $value
      *
+     * @deprecated validate input before creating DateTimeImmutable objects
+     *
      * @return bool
      */
     public static function date_immutable($value)
@@ -93,6 +101,8 @@ class StrictDate
      * Value is NULL or a valid DateTimeImmutable - not an InvalidUserDateTime
      *
      * @param mixed $value
+     *
+     * @deprecated validate input before creating DateTimeImmutable objects
      *
      * @return bool
      */

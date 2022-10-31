@@ -109,11 +109,20 @@ class StrictDateTest extends TestCase
         );
     }
 
+    public function provider_date_after_date()
+    {
+        return [
+            'long before'   => ['2022-10-02 13:04:03', '2015-11-02 10:03:02', FALSE],
+            'just before'   => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:03.999998', FALSE],
+            'exact moment'  => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:03.999999', FALSE],
+            'just after'    => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:04.000000', TRUE],
+            'seconds after' => ['2022-10-02 13:01:03', '2022-10-02 13:01:06.000000', TRUE],
+            'long after'    => ['2022-10-02 13:01:03', '2023-03-05 18:01:06.000000', TRUE],
+        ];
+    }
+
     /**
-     * @testWith ["", "-5 mins", false]
-     *           [null, "", true]
-     *           ["", null, true]
-     *           ["-5 mins", "", true]
+     * @dataProvider provider_date_after_date
      */
     public function test_it_validates_date_after_date($from, $to, $expect)
     {
@@ -122,8 +131,8 @@ class StrictDateTest extends TestCase
             StrictDate::date_after(
                 new \ArrayObject(
                     [
-                        'from' => new \DateTimeImmutable((string) $from),
-                        'to'   => new \DateTimeImmutable((string) $to)
+                        'from' => new \DateTimeImmutable($from),
+                        'to'   => new \DateTimeImmutable($to),
                     ]
                 ),
                 'from',

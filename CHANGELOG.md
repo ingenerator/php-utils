@@ -1,5 +1,9 @@
 ### Unreleased
 
+* Fix tests for StrictDate::date_after
+* Deprecate all StrictDate:: validation methods related to the deprecated `InvalidUserDateTime` object - validate
+  date inputs either as strings *or* as (valid) date objects, not both.
+
 ### v1.17.1 (2022-10-28)
 
 * Fix deprecation warning when passing NULL to date validator by casting 
