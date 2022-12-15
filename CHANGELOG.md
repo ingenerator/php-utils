@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add method to factory a DateTimeImmutable from a strict format and throw if it doesn't comply
+
 * Add TemporaryDirectoryManager to simplify the creation and destruction of temporary directories
 
 ### v1.17.2 (2022-10-31)

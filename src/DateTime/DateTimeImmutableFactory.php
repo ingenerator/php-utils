@@ -48,7 +48,6 @@ class DateTimeImmutableFactory
         return $dt->setTimezone(new \DateTimeZone(\date_default_timezone_get()));
     }
 
-
     /**
      * Create from a unix timestamp (in seconds) in the current timezone
      *
@@ -125,6 +124,16 @@ class DateTimeImmutableFactory
             return $date;
         }
         throw new \InvalidArgumentException($input.' is not in the format Y-m-d H:i:s');
+    }
+
+    public static function fromStrictFormat(string $value, string $format): \DateTimeImmutable
+    {
+        $date = \DateTimeImmutable::createFromFormat('!'.$format, $value);
+        if ($date && ($date->format($format) === $value)) {
+            return $date;
+        }
+
+        throw new \InvalidArgumentException("`$value` is not a valid date/time in the format `$format`");
     }
 
 }
