@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add a ConsistentStringScrambler - Consistently "randomise" the words in a string to be the same for the same random seed value using a Seeded Fisher-Yates shuffle
+
 * Add classes to simplify the creation and parsing of XML sitemaps
 
 * Add method to factory a DateTimeImmutable from a strict format and throw if it doesn't comply
