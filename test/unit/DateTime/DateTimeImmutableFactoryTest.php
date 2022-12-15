@@ -185,4 +185,26 @@ class DateTimeImmutableFactoryTest extends TestCase
         }
     }
 
+    /**
+     * @testWith ["2020-03-04 10:11:12", "Y-m-d H:i:s", "2020-03-04T10:11:12.000000+00:00"]
+     *           ["2020-08-21 12:15:54.643214+01:00", "Y-m-d H:i:s.uP", "2020-08-21T12:15:54.643214+01:00"]
+     */
+    public function test_it_factories_from_strict_date_format(string $val, string $format, string $expect): void
+    {
+        $actual = DateTimeImmutableFactory::fromStrictFormat($val, $format);
+        $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+        $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
+    }
+
+    /**
+     * @testWith ["01-02-2020 10:20:30", "Y-m-d H:i:s"]
+     * @testWith ["2021-02-23 15:16:17", "Y-m-d\TH:i:s.uP"]
+     */
+    public function test_it_throws_from_strict_date_format(string $val, string $format): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("`$val` is not a valid date/time in the format `$format`");
+        DateTimeImmutableFactory::fromStrictFormat($val, $format);
+    }
+
 }

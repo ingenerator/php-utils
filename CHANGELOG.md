@@ -1,5 +1,17 @@
 ### Unreleased
 
+### v1.18.0 (2022-12-15)
+
+* Fix - the /tests directory was badly configured in the gitattributes and not actually excluded from the package.
+
+* Add a ConsistentStringScrambler - Consistently "randomise" the words in a string to be the same for the same random seed value using a Seeded Fisher-Yates shuffle
+
+* Add classes to simplify the creation and parsing of XML sitemaps
+
+* Add method to factory a DateTimeImmutable from a strict format and throw if it doesn't comply
+
+* Add TemporaryDirectoryManager to simplify the creation and destruction of temporary directories
+
 ### v1.17.2 (2022-10-31)
 
 * Update `JSON::decode` to throw an explicit exception on NULL input
