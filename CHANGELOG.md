@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add classes to simplify the creation and parsing of XML sitemaps
+
 * Add method to factory a DateTimeImmutable from a strict format and throw if it doesn't comply
 
 * Add TemporaryDirectoryManager to simplify the creation and destruction of temporary directories
