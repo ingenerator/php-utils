@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.18.0 (2022-12-15)
+
 * Fix - the /tests directory was badly configured in the gitattributes and not actually excluded from the package.
 
 * Add a ConsistentStringScrambler - Consistently "randomise" the words in a string to be the same for the same random seed value using a Seeded Fisher-Yates shuffle
