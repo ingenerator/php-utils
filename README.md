@@ -1,19 +1,9 @@
-php-utils provides common, simple, dependency-free PHP helpers
+php-utils provides common, simple, dependency-free PHP helpers. Note that the selection and operation of utility functions is (and always will be) opinionated based on our needs.
 
 [![Tests](https://github.com/ingenerator/php-utils/workflows/Run%20tests/badge.svg)](https://github.com/ingenerator/php-utils/actions)
 
 
 # Installing php-utils
-
-This isn't in packagist yet : you'll need to add our package repository to your composer.json:
-
-```json
-{
-  "repositories": [
-    {"type": "composer", "url": "https://php-packages.ingenerator.com"}
-  ]
-}
-```
 
 `$> composer require ingenerator/php-utils`
 
