@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Drop support for PHP 8.0
+
 ### v1.18.0 (2022-12-15)
 
 * Fix - the /tests directory was badly configured in the gitattributes and not actually excluded from the package.
