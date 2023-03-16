@@ -1,5 +1,6 @@
 ### Unreleased
 
+* Add a UniqueMap data structure class, for a strict associative array that throws on attempt to overwrite a key.
 * Drop support for PHP 8.0
 
 ### v1.18.0 (2022-12-15)
