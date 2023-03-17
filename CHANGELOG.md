@@ -1,5 +1,12 @@
 ### Unreleased
 
+* Add very light wrapper around the native sodium_crypto_box_seal... functions for anonymous public-key encryption.
+  See the CryptoBox... classes. Provides strict typing, some automatic handling of secret memory (e.g. calling
+  memzero on sensitive variables after use), a simple implementation of converting keys & ciphertexts to / from
+  url-safe base64, and a basic mechanism to support key rotation with a fixed list of active keypairs.
+
+* Add a UniqueMap data structure class, for a strict associative array that throws on attempt to overwrite a key.
+
 * Drop support for PHP 8.0
 
 ### v1.18.0 (2022-12-15)
