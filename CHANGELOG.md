@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v1.19.0 (2023-03-17)
+
 * Add very light wrapper around the native sodium_crypto_box_seal... functions for anonymous public-key encryption.
   See the CryptoBox... classes. Provides strict typing, some automatic handling of secret memory (e.g. calling
   memzero on sensitive variables after use), a simple implementation of converting keys & ciphertexts to / from
