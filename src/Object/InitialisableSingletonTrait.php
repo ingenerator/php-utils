@@ -14,7 +14,7 @@ trait  InitialisableSingletonTrait
     /**
      * Return the singleton instance
      *
-     * @return object
+     * @return static
      * @throws SingletonNotInitialisedException if the class has not been initialised
      */
     public static function instance()
