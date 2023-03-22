@@ -20,10 +20,12 @@ class UniqueMapTest extends TestCase
             [
                 'foo' => 'some-foo',
                 'bar' => $bar,
+                'nully' => null,
             ]
         );
         $this->assertSame($bar, $subject['bar']);
         $this->assertSame('some-foo', $subject['foo']);
+        $this->assertSame(null, $subject['nully']);
     }
 
     public function test_it_throws_on_access_to_undefined_key()
@@ -39,9 +41,11 @@ class UniqueMapTest extends TestCase
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new1'] = $new1;
         $subject['new2'] = 'some-string';
+        $subject['new3'] = null;
 
         $this->assertSame($new1, $subject['new1']);
         $this->assertSame('some-string', $subject['new2']);
+        $this->assertSame(null, $subject['new3']);
     }
 
     public function test_it_throws_on_attempt_to_overwrite_key()
@@ -95,9 +99,10 @@ class UniqueMapTest extends TestCase
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
         $subject['other'] = 'new2';
+        $subject['nully'] = null;
 
         $this->assertSame(
-            ['any' => 'item', 'new' => 'new1', 'other' => 'new2'],
+            ['any' => 'item', 'new' => 'new1', 'other' => 'new2', 'nully' => null],
             iterator_to_array($subject)
         );
     }

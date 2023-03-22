@@ -37,7 +37,7 @@ class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetGet(mixed $offset): mixed
     {
-        if ( ! isset($this->items[$offset])) {
+        if ( ! array_key_exists($offset, $this->items)) {
             throw new \OutOfBoundsException('No item with key '.$offset);
         }
 
