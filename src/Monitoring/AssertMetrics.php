@@ -44,7 +44,7 @@ class AssertMetrics
         );
     }
 
-    private static function assertOnlyOneMetricTypeAndPayload(array $metrics, string $type, $expected_payload)
+    private static function assertOnlyOneMetricTypeAndPayload(array $metrics, string $type, $expected_payload): void
     {
         Assert::assertCount(1, $metrics, 'Expected only 1 metric recorded');
         Assert::assertSame($type, $metrics[0]['type'], 'Expected metric to be of type '.$type);
@@ -74,7 +74,7 @@ class AssertMetrics
         Assert::assertEmpty($metrics, "Expected no metrics to be captured");
     }
 
-    public static function assertNoMetricsFor(array $metrics, string $metric_name)
+    public static function assertNoMetricsFor(array $metrics, string $metric_name): void
     {
         Assert::assertNotContains(
             $metric_name,
@@ -83,12 +83,26 @@ class AssertMetrics
         );
     }
 
+    public static function assertCapturedOneExactTimer(
+        array $metrics,
+        float $expect_millis,
+        string $name,
+        ?string $source = NULL
+    ): void {
+        AssertMetrics::assertCapturedOneTimer($metrics, $name, $source);
+        AssertMetrics::assertTimerValues(
+            $metrics,
+            MetricId::nameAndSource($name, $source),
+            [$expect_millis]
+        );
+    }
+
     public static function assertTimerValues(
         array $metrics,
         MetricId $metric,
         array $expected_times,
         float $tolerance_ms = 0
-    ) {
+    ): void {
         $filtered_metrics = array_values(
             array_filter($metrics,
                 fn($m) => ($m['type'] === 'timer' and
