@@ -103,6 +103,55 @@ class AssertMetricsTest extends TestCase
     }
 
     /**
+     * @testWith [[], "no metrics"]
+     *           [[{"name": "foo", "source": "wrong"}], "wrong source"]
+     *           [[{"name": "wrong", "source": "bar"}], "wrong name"]
+     *           [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "bar"}], "duplicate metric"]
+     *           [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "other"}], "extra metric"]
+     **/
+    public function test_assertCapturedOneExactTimer_fails_if_no_match(array $metrics)
+    {
+        $agent = new ArrayMetricsAgent();
+        foreach ($metrics as $metric) {
+            $agent->addTimer(
+                MetricId::nameAndSource($metric['name'], $metric['source']),
+                new DateTimeImmutable(),
+            new DateTimeImmutable()
+            );
+        }
+        try {
+            AssertMetrics::assertCapturedOneExactTimer($agent->getMetrics(), 0,'foo', 'bar');
+            $this->fail('Expected assertion failure');
+        } catch (ExpectationFailedException $e) {
+            // we're expecting this - increment the assertion count
+            $this->assertTrue(true);
+        }
+    }
+
+    /**
+     * @testWith ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0, true]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0.001, false]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123457", 0.001, true]
+     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123455", 0.001, false]
+     */
+    public function test_assertCapturedOneExactTimer_asserts_correct_time(
+        string $start,
+        string $end,
+        float $expected_time,
+        bool $expect_success
+    ) {
+        $agent  = new ArrayMetricsAgent();
+        $metric = MetricId::nameAndSource('timer', 'test');
+        $agent->addTimer($metric, new DateTimeImmutable($start), new DateTimeImmutable($end));
+        $this->assertAssertionResult(
+            $expect_success,
+            fn() => AssertMetrics::assertCapturedOneExactTimer(
+                $agent->getMetrics(),
+                $expected_time, 'timer', 'test')
+        );
+    }
+
+    /**
      * @testWith ["something", "test", true]
      *           ["something_else", "test", false]
      *           ["something", "another_system", false]

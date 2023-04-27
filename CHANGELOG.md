@@ -1,5 +1,8 @@
 ### Unreleased
 
+* Add assertCapturedOneExactTimer helper. Allowing you to simultaneously assert only 
+  one timer was recorded and the timer duration in a single method.
+
 ### v1.19.1 (2023-03-22)
 
 * Fix a bug in UniqueMap where it throws on attempt to access an offset with a null value
