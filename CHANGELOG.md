@@ -1,5 +1,6 @@
 ### Unreleased
 
+* Add DateTimeImmutableFactory::fromIso() to strictly parse ISO 8601 / RFC 3339 date-time strings
 * Fix bug where devices with long user agents generated a database exception when attempting to create a session. 
 
 ### v1.19.2 (2023-04-27)

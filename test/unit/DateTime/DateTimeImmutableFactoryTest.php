@@ -7,6 +7,7 @@
 namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
 
+use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
 use PHPUnit\Framework\TestCase;
@@ -35,7 +36,8 @@ class DateTimeImmutableFactoryTest extends TestCase
     public function test_it_factories_null_from_empty_user_date_input($input)
     {
         $this->assertNull(
-            DateTimeImmutableFactory::fromUserDateInput($input));
+            DateTimeImmutableFactory::fromUserDateInput($input)
+        );
     }
 
     /**
@@ -198,13 +200,62 @@ class DateTimeImmutableFactoryTest extends TestCase
 
     /**
      * @testWith ["01-02-2020 10:20:30", "Y-m-d H:i:s"]
-     * @testWith ["2021-02-23 15:16:17", "Y-m-d\TH:i:s.uP"]
+     *           ["2021-02-23 15:16:17", "Y-m-d\\TH:i:s.uP"]
      */
     public function test_it_throws_from_strict_date_format(string $val, string $format): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("`$val` is not a valid date/time in the format `$format`");
         DateTimeImmutableFactory::fromStrictFormat($val, $format);
+    }
+
+    public function provider_from_iso_ms()
+    {
+        return [
+            '6 millis in +00:00'         => ['2023-02-02T10:03:02.123456+00:00', '2023-02-02T10:03:02.123456+00:00'],
+            '6 millis in +01:00'         => ['2024-01-10T12:23:42.456789+01:00', '2024-01-10T12:23:42.456789+01:00'],
+            '6 millis in -06:30'         => ['2023-04-30T15:56:15.987654-06:30', '2023-04-30T15:56:15.987654-06:30'],
+            '6 millis, Zulu time'        => ['2023-02-02T10:03:02.123456Z', '2023-02-02T10:03:02.123456+00:00'],
+            '6 millis, zulu time'        => ['2023-02-02T10:03:02.123456z', '2023-02-02T10:03:02.123456+00:00'],
+            'without millis in +01:00'   => ['2023-04-30T15:56:15+01:00', '2023-04-30T15:56:15.000000+01:00'],
+            'without millis in zulu'     => ['2023-04-30T15:56:15Z', '2023-04-30T15:56:15.000000+00:00'],
+            '3-digit millis in zulu'     => ['2023-04-30T15:56:15.123Z', '2023-04-30T15:56:15.123000+00:00'],
+            '9-digit millis in zulu'     => ['2023-04-30T15:56:15.1234561239Z', '2023-04-30T15:56:15.123456+00:00'],
+            '8-digit millis numeric tz'  => ['2023-04-30T15:56:15.12345642-03:30', '2023-04-30T15:56:15.123456-03:30'],
+            // We don't want to round, because if this represents "now" we don't want to risk getting even a ms into the
+            // future. Also, lower-precision clocks don't round time, they wait till the next full tick and roll over
+            'extra millis are truncated' => ['2023-04-30T15:56:15.1234566-03:30', '2023-04-30T15:56:15.123456-03:30'],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_from_iso_ms
+     */
+    public function test_it_factories_from_iso_format(string $input, string $expect)
+    {
+        $actual = DateTimeImmutableFactory::fromIso($input);
+        $this->assertSame($expect, DateString::isoMS($actual));
+    }
+
+    public function provider_throws_from_invalid_iso()
+    {
+        return [
+            'missing T separator' => ['2023-04-30 15:56:15.12345642-03:30'],
+            'named timezone'      => ['2023-04-30T15:56:15.12345642 Europe/London'],
+            'nonsense date'       => ['2023-02-31T15:56:15.12345642+00:00'],
+            'nonsense date, zulu' => ['2023-02-31T15:56:15.12345642Z'],
+            'nonsense time'       => ['2023-02-28T45:23:59+00:00'],
+        ];
+    }
+
+    /**
+     * @dataProvider provider_throws_from_invalid_iso
+     */
+    public function test_it_throws_from_invalid_iso_format($input)
+    {
+        $this->expectExceptionMessage("`$input` cannot be parsed as a valid ISO date-time");
+        $this->expectException(\InvalidArgumentException::class);
+        DateTimeImmutableFactory::fromIso($input);
     }
 
 }

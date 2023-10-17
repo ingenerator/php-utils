@@ -84,7 +84,7 @@ class DateTimeImmutableFactory
         }
         foreach ($formats as $format) {
             $date = DateTimeImmutable::createFromFormat('!'.$format, $input);
-            if ($date AND $date->format($format) === $input) {
+            if ($date and $date->format($format) === $input) {
                 return $date;
             }
         }
@@ -126,14 +126,60 @@ class DateTimeImmutableFactory
         throw new \InvalidArgumentException($input.' is not in the format Y-m-d H:i:s');
     }
 
-    public static function fromStrictFormat(string $value, string $format): \DateTimeImmutable
+    public static function fromStrictFormat(string $value, string $format): DateTimeImmutable
     {
-        $date = \DateTimeImmutable::createFromFormat('!'.$format, $value);
+        $date = DateTimeImmutable::createFromFormat('!'.$format, $value);
         if ($date && ($date->format($format) === $value)) {
             return $date;
         }
 
         throw new \InvalidArgumentException("`$value` is not a valid date/time in the format `$format`");
+    }
+
+    /**
+     * Parses a time string in full ISO 8601 / RFC3339 format with optional milliseconds and timezone offset
+     *
+     * Can parse strings with any millisecond precision, truncating anything beyond 6 digits (which is the maximum
+     * precision PHP supports). Copes with either `Z` or `+00:00` for the UTC timezone.
+     *
+     * Example valid inputs:
+     *   - 2023-05-03T10:02:03Z
+     *   - 2023-05-03T10:02:03.123456Z
+     *   - 2023-05-03T10:02:03.123456789Z
+     *   - 2023-05-03T10:02:03.123456789+01:00
+     *   - 2023-05-03T10:02:03.123456789-01:30
+     *
+     * @param string $value
+     *
+     * @return DateTimeImmutable
+     */
+    public static function fromIso(string $value): DateTimeImmutable
+    {
+        // Cope with Z for Zulu time instead of +00:00 - PHP offers `p` for this, but that then doesn't accept '+00:00'
+        $fixed_value = preg_replace('/Z/i', '+00:00', $value);
+
+        // Pad / truncate milliseconds to 6 digits as that's the precision PHP can support
+        // Regex is a bit dull here, but we need to be sure we can reliably find the (possibly absent)
+        // millisecond segment without the risk of modifying unexpected parts of the string especially in
+        // invalid values. Note that this will always replace the millis even in a 6-digit string, but it's simpler
+        // than making the regex test for 0-5 or 7+ digits.
+        $fixed_value = preg_replace_callback(
+            '/(?P<hms>T\d{2}:\d{2}:\d{2})(\.(?P<millis>\d+))?(?P<tz_prefix>[+-])/',
+            // Can't use sprintf because we want to truncate the milliseconds, not round them
+            // So it's simpler to just handle this as a string and cut / pad as required.
+            fn($matches) => $matches['hms']
+                            .'.'
+                            .substr(str_pad($matches['millis'], 6, '0'), 0, 6)
+                            .$matches['tz_prefix'],
+            $fixed_value
+        );
+
+        // Not using fromStrictFormat as I want to throw with the original value, not the parsed value
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i:s.uP', $fixed_value);
+        if (DateString::isoMS($date ?: NULL) === $fixed_value) {
+            return $date;
+        }
+        throw new \InvalidArgumentException("`$value` cannot be parsed as a valid ISO date-time");
     }
 
 }
