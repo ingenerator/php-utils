@@ -182,4 +182,21 @@ class DateTimeImmutableFactory
         throw new \InvalidArgumentException("`$value` cannot be parsed as a valid ISO date-time");
     }
 
+    /**
+     * Remove microseconds from a time (or current time, if nothing passed)
+     *
+     * @param DateTimeImmutable $time
+     *
+     * @return DateTimeImmutable
+     */
+    public static function zeroMicros(DateTimeImmutable $time = new DateTimeImmutable()): DateTimeImmutable
+    {
+        return $time->setTime(
+            hour:        $time->format('H'),
+            minute:      $time->format('i'),
+            second:      $time->format('s'),
+            microsecond: 0
+        );
+    }
+
 }

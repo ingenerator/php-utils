@@ -7,6 +7,7 @@
 namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
 
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
@@ -24,7 +25,7 @@ class DateTimeImmutableFactoryTest extends TestCase
     public function test_it_factories_correct_object_from_valid_user_date_input($input, $expect)
     {
         $actual = DateTimeImmutableFactory::fromUserDateInput($input);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+        $this->assertInstanceOf(DateTimeImmutable::class, $actual);
         $this->assertNotInstanceOf(InvalidUserDateTime::class, $actual);
         $this->assertEquals($expect.' 00:00:00', $actual->format('Y-m-d H:i:s'));
     }
@@ -63,7 +64,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         $expect
     ) {
         $actual = DateTimeImmutableFactory::fromUserDateTimeInput($input);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+        $this->assertInstanceOf(DateTimeImmutable::class, $actual);
         $this->assertNotInstanceOf(InvalidUserDateTime::class, $actual);
         $this->assertEquals($expect, $actual->format('Y-m-d H:i:s'));
     }
@@ -95,7 +96,7 @@ class DateTimeImmutableFactoryTest extends TestCase
     public function test_it_factories_correct_object_from_valid_ymd_input($input, $expect)
     {
         $actual = DateTimeImmutableFactory::fromYmdInput($input);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+        $this->assertInstanceOf(DateTimeImmutable::class, $actual);
         $this->assertNotInstanceOf(InvalidUserDateTime::class, $actual);
         $this->assertEquals($expect, $actual->format('Y-m-d H:i:s'));
 
@@ -132,7 +133,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         try {
             \date_default_timezone_set('Europe/London');
             $actual = DateTimeImmutableFactory::fromYmdHis($input);
-            $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+            $this->assertInstanceOf(DateTimeImmutable::class, $actual);
             $this->assertSame('Europe/London', $actual->getTimezone()->getName());
             $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
         } finally {
@@ -194,7 +195,7 @@ class DateTimeImmutableFactoryTest extends TestCase
     public function test_it_factories_from_strict_date_format(string $val, string $format, string $expect): void
     {
         $actual = DateTimeImmutableFactory::fromStrictFormat($val, $format);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $actual);
+        $this->assertInstanceOf(DateTimeImmutable::class, $actual);
         $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
     }
 
@@ -256,6 +257,24 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->expectExceptionMessage("`$input` cannot be parsed as a valid ISO date-time");
         $this->expectException(\InvalidArgumentException::class);
         DateTimeImmutableFactory::fromIso($input);
+    }
+
+    public function test_it_can_factory_with_zero_micros()
+    {
+        $result = DateTimeImmutableFactory::zeroMicros(
+            DateTimeImmutableFactory::fromIso('2023-01-03T10:02:03.123456+01:00')
+        );
+        $this->assertSame('2023-01-03T10:02:03.000000+01:00', DateString::isoMS($result));
+    }
+
+    public function test_zero_micros_uses_current_time_by_default()
+    {
+        $before = DateTimeImmutableFactory::fromYmdHis(date('Y-m-d H:i:s'));
+        $result = DateTimeImmutableFactory::zeroMicros();
+        $after  = new DateTimeImmutable();
+        $this->assertSame('000000', $result->format('u'), 'Micros are zero');
+        $this->assertLessThanOrEqual($after, $result, 'Should be before now');
+        $this->assertGreaterThanOrEqual($before, $result, 'Should be after start of test (ignoring micros)');
     }
 
 }
