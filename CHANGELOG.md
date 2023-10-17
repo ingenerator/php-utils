@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Fix bug where devices with long user agents generated a database exception when attempting to create a session. 
+
 ### v1.19.2 (2023-04-27)
 
 * Add assertCapturedOneExactTimer helper. Allowing you to simultaneously assert only 

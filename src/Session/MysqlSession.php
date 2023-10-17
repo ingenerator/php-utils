@@ -168,7 +168,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
                 'hash'       => $this->calculateHash(),
                 'data'       => '',
                 'now'        => \date('Y-m-d H:i:s'),
-                'user_agent' => $this->client_user_agent,
+                'user_agent' => mb_substr($this->client_user_agent, 0, 255),
                 'ip'         => $this->client_ip,
             ]
         );
