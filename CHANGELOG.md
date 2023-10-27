@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v2.0.0 (2023-10-27)
+
+* Support psr/log ^1.1 || ^2.0 || ^3.0
+
 ### v1.20.0 (2023-10-17)
 
 * Add DateIntervalUtils to stringify a DateInterval, and DateIntervalFactory for shorthand creation

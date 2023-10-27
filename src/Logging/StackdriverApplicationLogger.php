@@ -195,7 +195,7 @@ class StackdriverApplicationLogger extends AbstractLogger
      * @param string $message
      * @param array  $context
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         // These are the only `context` keys that will be used as top-level properties. Anything else is moved to a
         // `custom_context` key to prevent it overwriting internal metadata and low-level log entry properties e.g.
