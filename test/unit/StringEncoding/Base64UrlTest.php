@@ -10,7 +10,7 @@ use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 class Base64UrlTest extends TestCase
 {
 
-    public function provider_encode_decode()
+    public static function provider_encode_decode()
     {
         return [
             ['1'],

@@ -29,7 +29,7 @@ class DateIntervalUtilsTest extends TestCase
         );
     }
 
-    public function provider_unsupported_human_intervals()
+    public static function provider_unsupported_human_intervals()
     {
         $diff = fn(string $dt1, string $dt2) => (new DateTimeImmutable($dt1))->diff(new DateTimeImmutable($dt2));
 

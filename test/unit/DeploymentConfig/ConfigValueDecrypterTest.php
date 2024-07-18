@@ -30,7 +30,7 @@ class ConfigValueDecrypterTest extends TestCase
         $this->assertSame($value, $this->newSubject()->decrypt($value));
     }
 
-    public function provider_decrypt()
+    public static function provider_decrypt()
     {
         // A mix of pre-encrypted static values and runtime tests that encrypt / decrypt still works as expected
         $slightly    = 'IbW8swma2gi59n7XQn64gN3EH00ymsZcQaF9/J0Bm1UIXSX92RRCr4idGuAOfz0K0KNQsjXoCAgy/f1YgdcrIQ==';
@@ -113,7 +113,7 @@ class ConfigValueDecrypterTest extends TestCase
         );
     }
 
-    public function provider_corrupt_key()
+    public static function provider_corrupt_key()
     {
         return [
             ['I am not base64!!!'],
@@ -152,7 +152,7 @@ class ConfigValueDecrypterTest extends TestCase
         $subject->decrypt("#SECRET-$other_keypair_name#$valid_encrypted_val");
     }
 
-    public function provider_failed_decrypt()
+    public static function provider_failed_decrypt()
     {
         $lost_key_pub = sodium_crypto_box_publickey(sodium_crypto_box_keypair());
 

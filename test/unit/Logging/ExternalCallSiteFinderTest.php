@@ -87,7 +87,7 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public function provider_source_location_call_sites()
+    public static function provider_source_location_call_sites()
     {
         return [
             [

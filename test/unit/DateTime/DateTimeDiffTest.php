@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 class DateTimeDiffTest extends TestCase
 {
-    public function date_time_diff()
+    public static function date_time_diff()
     {
         return [
             [

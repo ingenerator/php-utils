@@ -86,7 +86,7 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function provider_invalid_declarations()
+    public static function provider_invalid_declarations()
     {
         // Compose like this because by the time you nest the different levels of data provider cases and argument arrays
         // it's hard to see what the actual test values are...

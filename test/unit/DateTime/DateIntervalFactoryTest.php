@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class DateIntervalFactoryTest extends TestCase
 {
-    public function provider_shorthand_single_part()
+    public static function provider_shorthand_single_part()
     {
         return [
             'seconds' => [fn() => DateIntervalFactory::seconds(15), new DateInterval('PT15S')],

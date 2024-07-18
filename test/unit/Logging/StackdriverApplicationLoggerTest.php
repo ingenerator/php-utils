@@ -44,7 +44,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $subject->info('Anything breaks it');
     }
 
-    public function provider_log_lines()
+    public static function provider_log_lines()
     {
         return [
             [
@@ -86,7 +86,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame('Another message appended', \array_shift($entries)['message']);
     }
 
-    public function provider_severity_levels()
+    public static function provider_severity_levels()
     {
         return [
             [LogLevel::DEBUG, 'DEBUG'],
@@ -338,7 +338,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
-    public function provider_exception_chains()
+    public static function provider_exception_chains()
     {
         $e1      = new \InvalidArgumentException('I am an exception', 102);
         $e1_line = __LINE__ - 1;
@@ -358,7 +358,7 @@ class StackdriverApplicationLoggerTest extends TestCase
                     'code'  => 102,
                     'file'  => __FILE__,
                     'line'  => $e1_line,
-                    'trace' => $this->makeExpectedSanitisedTrace($e1),
+                    'trace' => self::makeExpectedSanitisedTrace($e1),
                 ],
             ],
             [
@@ -369,21 +369,21 @@ class StackdriverApplicationLoggerTest extends TestCase
                     'code'     => 02,
                     'file'     => __FILE__,
                     'line'     => $e3_line,
-                    'trace'    => $this->makeExpectedSanitisedTrace($e1),
+                    'trace'    => self::makeExpectedSanitisedTrace($e1),
                     'previous' => [
                         'class'    => \RuntimeException::class,
                         'msg'      => 'It went wrong',
                         'code'     => 02,
                         'file'     => __FILE__,
                         'line'     => $e2_line,
-                        'trace'    => $this->makeExpectedSanitisedTrace($e2),
+                        'trace'    => self::makeExpectedSanitisedTrace($e2),
                         'previous' => [
                             'class' => \InvalidArgumentException::class,
                             'msg'   => 'I am an exception',
                             'code'  => 102,
                             'file'  => __FILE__,
                             'line'  => $e1_line,
-                            'trace' => $this->makeExpectedSanitisedTrace($e3),
+                            'trace' => self::makeExpectedSanitisedTrace($e3),
                         ],
                     ],
                 ],
@@ -436,7 +436,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         // over time...
         $expect_text = 'PHP Warning: '.\preg_replace(
                 '/Stack trace:.+$/s',
-                "Stack trace:\n".$this->makeExpectedSanitisedTrace($e),
+                "Stack trace:\n".self::makeExpectedSanitisedTrace($e),
                 (string) $e
             );
         $this->assertSame($expect_text, $entry['stack_trace']);
@@ -480,7 +480,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame('rqst', $entry['@ingenType']);
     }
 
-    public function provider_request_status_level()
+    public static function provider_request_status_level()
     {
         return [
             [200, 'INFO'],
@@ -709,7 +709,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         return \array_shift($entries);
     }
 
-    protected function makeExpectedSanitisedTrace(\Throwable $e): string
+    protected static function makeExpectedSanitisedTrace(\Throwable $e): string
     {
         // Build an expected trace by cleaning up the args from the original exception string
         // This makes our test safe against changes in the PHPUnit callstack above this method,

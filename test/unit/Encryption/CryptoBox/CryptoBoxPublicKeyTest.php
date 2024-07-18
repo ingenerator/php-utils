@@ -29,7 +29,7 @@ class CryptoBoxPublicKeyTest extends TestCase
         );
     }
 
-    public function provider_invalid_keypair_string()
+    public static function provider_invalid_keypair_string()
     {
         return [
             'empty' => [''],

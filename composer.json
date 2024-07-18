@@ -23,9 +23,9 @@
     "psr/log": "^1.1 || ^2.0 || ^3.0"
   },
   "require-dev": {
-    "johnkary/phpunit-speedtrap": "^3.3",
     "mikey179/vfsstream": "^1.6.11",
-    "phpunit/phpunit": "^9.5.5"
+    "phpunit/phpunit": "^10.0",
+    "ergebnis/phpunit-slow-test-detector": "^2.15"
   },
   "support": {
     "source": "https://github.com/ingenerator/php-utils",

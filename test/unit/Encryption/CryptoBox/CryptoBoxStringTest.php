@@ -15,7 +15,7 @@ class CryptoBoxStringTest extends TestCase
      * Heavily tested through the tests for CryptoBoxKeypair and CryptoBoxPublicKey
      */
 
-    public function provider_invalid_string_format()
+    public static function provider_invalid_string_format()
     {
         return [
             'empty' => [''],

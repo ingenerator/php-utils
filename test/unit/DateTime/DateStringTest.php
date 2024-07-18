@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class DateStringTest extends TestCase
 {
 
-    public function provider_generic_format()
+    public static function provider_generic_format()
     {
         return [
             [NULL, 'Y-m-d', 'nothing', 'nothing'],
@@ -30,7 +30,7 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::format($date, $format, $empty));
     }
 
-    public function provider_ymdhis()
+    public static function provider_ymdhis()
     {
         return [
             [NULL, 'nothing', 'nothing'],
@@ -46,7 +46,7 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::ymdhis($date, $fallback));
     }
 
-    public function provider_ymd()
+    public static function provider_ymd()
     {
         return [
             [NULL, 'nothing', 'nothing'],
@@ -62,7 +62,7 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::ymd($date, $fallback));
     }
 
-    public function provider_isoms()
+    public static function provider_isoms()
     {
         $lndn = new \DateTimeZone('Europe/London');
 

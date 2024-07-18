@@ -54,7 +54,7 @@ class DeploymentConfigTest extends TestCase
         }
     }
 
-    public function provider_is_current_env()
+    public static function provider_is_current_env()
     {
         return [
             // Simples, single case

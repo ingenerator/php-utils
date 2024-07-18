@@ -60,7 +60,7 @@ class CryptoBoxKeypairTest extends TestCase
         );
     }
 
-    public function provider_invalid_keypair_string()
+    public static function provider_invalid_keypair_string()
     {
         return [
             'empty' => [''],
@@ -95,7 +95,7 @@ class CryptoBoxKeypairTest extends TestCase
         CryptoBoxKeypair::fromString($keypair_string)->decrypt($enc);
     }
 
-    public function provider_bad_decryption()
+    public static function provider_bad_decryption()
     {
         return [
             'valid as a key, but not for this message' => [

@@ -96,7 +96,7 @@ class DefaultLogMetadataTest extends TestCase
         );
     }
 
-    public function provider_trace_header()
+    public static function provider_trace_header()
     {
         return [
             [

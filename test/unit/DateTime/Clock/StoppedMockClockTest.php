@@ -21,7 +21,7 @@ class StoppedMockClockTest extends TestCase
         );
     }
 
-    public function provider_at_fixed()
+    public static function provider_at_fixed()
     {
         return [
             [
@@ -112,7 +112,7 @@ class StoppedMockClockTest extends TestCase
         $this->assertSame(1546682582.95, \round($clock->getMicrotime(), 3), 'Should update time');
     }
 
-    public function provider_assert_slept_fails()
+    public static function provider_assert_slept_fails()
     {
         return [
             [

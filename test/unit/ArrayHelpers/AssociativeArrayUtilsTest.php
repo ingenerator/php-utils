@@ -8,8 +8,9 @@ namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
 
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
+use PHPUnit\Framework\TestCase;
 
-class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
+class AssociativeArrayUtilsTest extends TestCase
 {
 
     /**
@@ -25,7 +26,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function provider_paths_to_nested()
+    public static function provider_paths_to_nested(): array
     {
         return [
             [
@@ -59,7 +60,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expect, AssociativeArrayUtils::pathsToNested($input));
     }
 
-    public function provider_pop_keys()
+    public static function provider_pop_keys(): array
     {
         return [
             [
@@ -104,7 +105,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
      *
      * @return array
      */
-    public function provider_set_path()
+    public static function provider_set_path(): array
     {
         return [
             // Tests returns normal values
@@ -136,7 +137,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
     }
 
 
-    public function provider_merge()
+    public static function provider_merge(): array
     {
         return [
             // Test how it merges arrays and sub arrays with assoc keys

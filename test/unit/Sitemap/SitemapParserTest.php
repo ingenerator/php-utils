@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class SitemapParserTest extends TestCase
 {
-    public function provider_invalid(): array
+    public static function provider_invalid(): array
     {
         return [
             [
@@ -72,7 +72,7 @@ class SitemapParserTest extends TestCase
         );
     }
 
-    public function provider_parse(): array
+    public static function provider_parse(): array
     {
         return [
             [

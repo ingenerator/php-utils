@@ -11,7 +11,7 @@ use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
 class JSONTest extends TestCase
 {
 
-    public function provider_valid_json()
+    public static function provider_valid_json()
     {
         return [
             ['1', 1],
@@ -62,7 +62,7 @@ class JSONTest extends TestCase
         $this->assertSame([], JSON::decodeArray($input));
     }
 
-    public function provider_valid_encode()
+    public static function provider_valid_encode()
     {
         return [
             [1, FALSE, '1'],

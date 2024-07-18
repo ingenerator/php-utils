@@ -210,7 +210,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         DateTimeImmutableFactory::fromStrictFormat($val, $format);
     }
 
-    public function provider_from_iso_ms()
+    public static function provider_from_iso_ms()
     {
         return [
             '6 millis in +00:00'         => ['2023-02-02T10:03:02.123456+00:00', '2023-02-02T10:03:02.123456+00:00'],
@@ -238,7 +238,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertSame($expect, DateString::isoMS($actual));
     }
 
-    public function provider_throws_from_invalid_iso()
+    public static function provider_throws_from_invalid_iso()
     {
         return [
             'missing T separator' => ['2023-04-30 15:56:15.12345642-03:30'],

@@ -46,7 +46,7 @@ class StrictDateTest extends TestCase
         $this->assertSame($expect, StrictDate::iso_date($value));
     }
 
-    public function provider_datetime_immutable()
+    public static function provider_datetime_immutable()
     {
         return [
             [NULL, TRUE],
@@ -74,7 +74,7 @@ class StrictDateTest extends TestCase
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
-    public function provider_date_before_after_invalid_inputs()
+    public static function provider_date_before_after_invalid_inputs()
     {
         return [
             [['from' => NULL, 'to' => NULL], 'from', 'to', TRUE],
@@ -109,7 +109,7 @@ class StrictDateTest extends TestCase
         );
     }
 
-    public function provider_date_after_date()
+    public static function provider_date_after_date()
     {
         return [
             'long before'   => ['2022-10-02 13:04:03', '2015-11-02 10:03:02', FALSE],
