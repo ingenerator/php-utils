@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Support PHP 8.3
+
 ### v2.0.0 (2023-10-27)
 
 * Support psr/log ^1.1 || ^2.0 || ^3.0
