@@ -3,6 +3,8 @@
 
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
+use BadMethodCallException;
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\Logging\LoggingFailureException;
 use Ingenerator\PHPUtils\Logging\LogMetadataProvider;
 use Ingenerator\PHPUtils\Logging\StackdriverApplicationLogger;
@@ -10,10 +12,30 @@ use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\PHPUtils\Monitoring\NullMetricsAgent;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use InvalidArgumentException;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use RuntimeException;
+use stdClass;
+use Throwable;
+use TypeError;
+use function array_intersect_key;
+use function array_map;
+use function array_pop;
+use function array_shift;
+use function call_user_func_array;
+use function explode;
+use function file_get_contents;
+use function http_response_code;
+use function is_file;
+use function memory_get_peak_usage;
+use function microtime;
+use function preg_replace;
+use function str_replace;
 use const PHP_MAJOR_VERSION;
 
 class StackdriverApplicationLoggerTest extends TestCase
@@ -56,9 +78,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_log_lines
-     */
+    #[DataProvider('provider_log_lines')]
     public function test_it_logs_to_specified_location_as_json_line_with_expected_message($messages)
     {
         $subject = $this->newSubject();
@@ -67,7 +87,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         }
 
         $entries = $this->assertLoggedJSONLines();
-        $actual  = \array_map(function (array $msg) { return $msg['message']; }, $entries);
+        $actual  = array_map(function (array $msg) { return $msg['message']; }, $entries);
         $this->assertSame($messages, $actual, 'Expect correct log messages');
     }
 
@@ -82,8 +102,8 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->newSubject()->info('Another message appended');
 
         $entries = $this->assertLoggedJSONLines();
-        $this->assertSame(['previous' => 'content'], \array_shift($entries));
-        $this->assertSame('Another message appended', \array_shift($entries)['message']);
+        $this->assertSame(['previous' => 'content'], array_shift($entries));
+        $this->assertSame('Another message appended', array_shift($entries)['message']);
     }
 
     public static function provider_severity_levels()
@@ -94,9 +114,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_severity_levels
-     */
+    #[DataProvider('provider_severity_levels')]
     public function test_it_logs_with_expected_severity($psr_level, $stackdriver_level)
     {
         $this->newSubject()->log($psr_level, 'A message');
@@ -167,7 +185,7 @@ class StackdriverApplicationLoggerTest extends TestCase
 
     public function test_it_can_lazily_retrieve_metadata_from_provider_class()
     {
-        $meta_provider_class = new class implements \Ingenerator\PHPUtils\Logging\LogMetadataProvider {
+        $meta_provider_class = new class implements LogMetadataProvider {
             protected $call_count = 0;
 
             public function getMetadata(): array
@@ -210,14 +228,14 @@ class StackdriverApplicationLoggerTest extends TestCase
     {
         $this->meta_args = [
             ['sources' => ['first_ok']],
-            function () { return new \DateTimeImmutable(new \stdClass); },
+            function () { return new DateTimeImmutable(new stdClass); },
             ['sources' => ['third_ok']],
-            function () { throw new \InvalidArgumentException('Broken'); },
+            function () { throw new InvalidArgumentException('Broken'); },
             ['sources' => ['fifth_ok']],
-            new class implements \Ingenerator\PHPUtils\Logging\LogMetadataProvider {
+            new class implements LogMetadataProvider {
                 public function getMetadata(): array
                 {
-                    throw new \BadMethodCallException('The class broke');
+                    throw new BadMethodCallException('The class broke');
                 }
             },
             ['sources' => ['seventh_ok']],
@@ -260,10 +278,8 @@ class StackdriverApplicationLoggerTest extends TestCase
         }
     }
 
-    /**
-     * @testWith [[], "app"]
-     *           [{"@ingenType": "rqst"}, "rqst"]
-     */
+    #[TestWith([[], 'app'])]
+    #[TestWith([['@ingenType' => 'rqst'], 'rqst'])]
     public function test_it_assigns_ingenerator_type_unless_overridden($context, $expect_type)
     {
         $this->newSubject()->warning('Anything', $context);
@@ -271,14 +287,12 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame($expect_type, $entry['@ingenType']);
     }
 
-    /**
-     * @testWith ["log", ["info", "Some info"]]
-     *           ["info", ["Some info"]]
-     */
+    #[TestWith(['log', ['info', 'Some info']])]
+    #[TestWith(['info', ['Some info']])]
     public function test_it_logs_with_source_location_as_immediate_caller($log_method, $args)
     {
         $expect_line = __LINE__ + 1;
-        \call_user_func_array([$this->newSubject(), $log_method], $args);
+        call_user_func_array([$this->newSubject(), $log_method], $args);
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             [
@@ -340,20 +354,20 @@ class StackdriverApplicationLoggerTest extends TestCase
 
     public static function provider_exception_chains()
     {
-        $e1      = new \InvalidArgumentException('I am an exception', 102);
+        $e1      = new InvalidArgumentException('I am an exception', 102);
         $e1_line = __LINE__ - 1;
 
-        $e2      = new \RuntimeException('It went wrong', 02, $e1);
+        $e2      = new RuntimeException('It went wrong', 02, $e1);
         $e2_line = __LINE__ - 1;
 
-        $e3      = new \TypeError('Stuff happened', 02, $e2);
+        $e3      = new TypeError('Stuff happened', 02, $e2);
         $e3_line = __LINE__ - 1;
 
         return [
             [
                 $e1,
                 [
-                    'class' => \InvalidArgumentException::class,
+                    'class' => InvalidArgumentException::class,
                     'msg'   => 'I am an exception',
                     'code'  => 102,
                     'file'  => __FILE__,
@@ -364,21 +378,21 @@ class StackdriverApplicationLoggerTest extends TestCase
             [
                 $e3,
                 [
-                    'class'    => \TypeError::class,
+                    'class'    => TypeError::class,
                     'msg'      => 'Stuff happened',
                     'code'     => 02,
                     'file'     => __FILE__,
                     'line'     => $e3_line,
                     'trace'    => self::makeExpectedSanitisedTrace($e1),
                     'previous' => [
-                        'class'    => \RuntimeException::class,
+                        'class'    => RuntimeException::class,
                         'msg'      => 'It went wrong',
                         'code'     => 02,
                         'file'     => __FILE__,
                         'line'     => $e2_line,
                         'trace'    => self::makeExpectedSanitisedTrace($e2),
                         'previous' => [
-                            'class' => \InvalidArgumentException::class,
+                            'class' => InvalidArgumentException::class,
                             'msg'   => 'I am an exception',
                             'code'  => 102,
                             'file'  => __FILE__,
@@ -391,9 +405,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_exception_chains
-     */
+    #[DataProvider('provider_exception_chains')]
     public function test_it_recursively_formats_exception_chain_as_structs_with_trace_excluding_args($e, $expect)
     {
         $this->newSubject()->info('Broken', ['exception' => $e]);
@@ -405,7 +417,7 @@ class StackdriverApplicationLoggerTest extends TestCase
     {
         // https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext
         // https://cloud.google.com/error-reporting/reference/rest/v1beta1/projects.events/report#ReportedErrorEvent
-        $e = new \RuntimeException('There was a problem');
+        $e = new RuntimeException('There was a problem');
 
         $this->newSubject()->info('Arg', ['exception' => $e]);
         $entry = $this->assertLoggedOneLine();
@@ -434,7 +446,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         // Stackdriver Errors looks first.
         // This does mean we are duplicating this text on every log entry that contains an exception, which will add up
         // over time...
-        $expect_text = 'PHP Warning: '.\preg_replace(
+        $expect_text = 'PHP Warning: '.preg_replace(
                 '/Stack trace:.+$/s',
                 "Stack trace:\n".self::makeExpectedSanitisedTrace($e),
                 (string) $e
@@ -444,7 +456,7 @@ class StackdriverApplicationLoggerTest extends TestCase
 
     public function test_it_does_not_report_exception_as_stackdriver_error_if_flag_overriden()
     {
-        $e = new \RuntimeException('There was a problem');
+        $e = new RuntimeException('There was a problem');
         $this->newSubject()->info(
             'Arg',
             ['exception' => $e, StackdriverApplicationLogger::PROP_REPORT_STACKDRIVER_ERROR => FALSE]
@@ -493,13 +505,11 @@ class StackdriverApplicationLoggerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_request_status_level
-     */
+    #[DataProvider('provider_request_status_level')]
     public function test_its_request_logger_assigns_loglevel_based_on_http_response_code($http_status, $expect)
     {
         $logger = $this->newSubject();
-        \http_response_code($http_status);
+        http_response_code($http_status);
         $logger->logRequest([]);
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect, $entry['severity'], 'Expect correct severity');
@@ -521,16 +531,14 @@ class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             $original_http_meta,
-            \array_intersect_key($entry['httpRequest'], $original_http_meta),
+            array_intersect_key($entry['httpRequest'], $original_http_meta),
             'Should include metadata in top-level httpRequest struct'
         );
         $this->assertFalse(isset($entry['context']['httpRequest']), 'Should not duplicate httpRequest meta in context');
     }
 
-    /**
-     * @testWith ["message"]
-     *           ["logging.googleapis.com/sourceLocation"]
-     */
+    #[TestWith(['message'])]
+    #[TestWith(['logging.googleapis.com/sourceLocation'])]
     public function test_its_request_logger_does_not_log_irrelevant_properties($prop)
     {
         $this->newSubject()->logRequest([]);
@@ -553,20 +561,18 @@ class StackdriverApplicationLoggerTest extends TestCase
 
     public function test_its_request_logger_logs_http_response_code()
     {
-        \http_response_code(402);
+        http_response_code(402);
         $logger = $this->newSubject();
         $logger->logRequest([]);
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
 
-    /**
-     * @testWith [[], null]
-     *           [{"HTTP_USER_AGENT": "chrome 10"}, "chrome 10"]
-     */
+    #[TestWith([[], null])]
+    #[TestWith([['HTTP_USER_AGENT' => 'chrome 10'], 'chrome 10'])]
     public function test_its_request_logger_logs_user_agent_from_global_array($server, $expect)
     {
-        \http_response_code(402);
+        http_response_code(402);
         $logger = $this->newSubject();
         $logger->logRequest($server);
         $entry = $this->assertLoggedOneLine();
@@ -585,13 +591,13 @@ class StackdriverApplicationLoggerTest extends TestCase
 
     public function test_its_request_logger_logs_latency_since_start_time_if_provided()
     {
-        $start  = \microtime(TRUE);
+        $start  = microtime(TRUE);
         $logger = $this->newSubject();
         $logger->logRequest([], $start);
-        $end   = \microtime(TRUE);
+        $end   = microtime(TRUE);
         $entry = $this->assertLoggedOneLine();
         $this->assertMatchesRegularExpression('/^(0\.[0-9]+)s$/', $entry['httpRequest']['latency']);
-        $seconds = (float) \str_replace('s', '', $entry['httpRequest']['latency']);
+        $seconds = (float) str_replace('s', '', $entry['httpRequest']['latency']);
         $this->assertEqualsWithDelta($end - $start, $seconds, 0.1);
     }
 
@@ -606,9 +612,9 @@ class StackdriverApplicationLoggerTest extends TestCase
     public function test_its_request_logger_logs_peak_memory_usage_in_mb()
     {
         $logger      = $this->newSubject();
-        $peak_before = \memory_get_peak_usage(TRUE);
+        $peak_before = memory_get_peak_usage(TRUE);
         $logger->logRequest([]);
-        $peak_after = \memory_get_peak_usage(TRUE);
+        $peak_after = memory_get_peak_usage(TRUE);
         $entry      = $this->assertLoggedOneLine();
         $this->assertIsString(
             $entry['context']['mem_mb'],
@@ -684,15 +690,15 @@ class StackdriverApplicationLoggerTest extends TestCase
      */
     protected function assertLoggedJSONLines(): array
     {
-        if ( ! \is_file($this->log_stream)) {
+        if ( ! is_file($this->log_stream)) {
             $this->fail('Log stream '.$this->log_stream.' does not exist');
         }
 
-        $content = \file_get_contents($this->log_stream);
-        $lines   = \explode("\n", $content);
-        $this->assertSame("", \array_pop($lines), 'Expect trailing newline after last message');
+        $content = file_get_contents($this->log_stream);
+        $lines   = explode("\n", $content);
+        $this->assertSame("", array_pop($lines), 'Expect trailing newline after last message');
 
-        return \array_map(
+        return array_map(
             function (string $line) { return JSON::decodeArray($line); },
             $lines
         );
@@ -706,10 +712,10 @@ class StackdriverApplicationLoggerTest extends TestCase
         $entries = $this->assertLoggedJSONLines();
         $this->assertCount(1, $entries, 'Expected a single log entry');
 
-        return \array_shift($entries);
+        return array_shift($entries);
     }
 
-    protected static function makeExpectedSanitisedTrace(\Throwable $e): string
+    protected static function makeExpectedSanitisedTrace(Throwable $e): string
     {
         // Build an expected trace by cleaning up the args from the original exception string
         // This makes our test safe against changes in the PHPUnit callstack above this method,
@@ -722,7 +728,7 @@ class StackdriverApplicationLoggerTest extends TestCase
                     $parts = explode(' ', $trace_line, 3);
                     if (isset($parts[2])) {
                         // Strip args from the string
-                        $parts[2] = \preg_replace('/\(.+\)$/', '()', $parts[2]);
+                        $parts[2] = preg_replace('/\(.+\)$/', '()', $parts[2]);
                     }
 
                     return implode(' ', $parts);
@@ -762,7 +768,7 @@ class StackdriverApplicationLoggerTest extends TestCase
 
     protected function newSubject(): StackdriverApplicationLogger
     {
-        return new \Ingenerator\PHPUtils\Logging\StackdriverApplicationLogger(
+        return new StackdriverApplicationLogger(
             $this->log_stream,
             ...$this->meta_args
         );

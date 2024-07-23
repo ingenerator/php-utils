@@ -4,6 +4,8 @@
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
@@ -22,19 +24,15 @@ class JSONTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_valid_json
-     */
+    #[DataProvider('provider_valid_json')]
     public function test_it_parses_valid_json_with_objects_as_arrays($json, $expect)
     {
         $this->assertSame($expect, JSON::decode($json));
     }
 
-    /**
-     * @testWith [null, "Cannot decode a null value"]
-     *           ["", "Syntax error"]
-     *           ["i am not json", "Syntax error"]
-     */
+    #[TestWith([null, 'Cannot decode a null value'])]
+    #[TestWith(['', 'Syntax error'])]
+    #[TestWith(['i am not json', 'Syntax error'])]
     public function test_it_throws_on_parsing_invalid_json($value, $expect_msg)
     {
         $this->expectException(InvalidJSONException::class);
@@ -54,12 +52,9 @@ class JSONTest extends TestCase
         JSON::decodeArray('"foo"');
     }
 
-    /**
-     * @testWith ["null"]
-     */
-    public function test_decode_array_returns_empty_array_for_json_null_input($input)
+    public function test_decode_array_returns_empty_array_for_json_null_input()
     {
-        $this->assertSame([], JSON::decodeArray($input));
+        $this->assertSame([], JSON::decodeArray(json_encode(null)));
     }
 
     public static function provider_valid_encode()
@@ -72,9 +67,7 @@ class JSONTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_valid_encode
-     */
+    #[DataProvider('provider_valid_encode')]
     public function test_encode_encodes_json_prettily_or_not($val, $pretty, $expect)
     {
         $this->assertSame($expect, JSON::encode($val, $pretty));

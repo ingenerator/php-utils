@@ -3,9 +3,15 @@
 
 namespace test\unit\Ingenerator\PHPUtils\unit\DateTime\Clock;
 
+use DateInterval;
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
+use function microtime;
+use function round;
+use function sleep;
 
 class StoppedMockClockTest extends TestCase
 {
@@ -14,7 +20,7 @@ class StoppedMockClockTest extends TestCase
     {
         $clock = StoppedMockClock::atNow();
         $this->assertEqualsWithDelta(
-            new \DateTimeImmutable,
+            new DateTimeImmutable,
             $clock->getDateTime(),
             1,
             'Starts at the right time'
@@ -26,26 +32,24 @@ class StoppedMockClockTest extends TestCase
         return [
             [
                 '2019-03-04 10:02:03',
-                new \DateTimeImmutable('2019-03-04 10:02:03'),
+                new DateTimeImmutable('2019-03-04 10:02:03'),
                 1551693723.0
             ],
             [
-                new \DateTimeImmutable('2019-03-04 10:02:03'),
-                new \DateTimeImmutable('2019-03-04 10:02:03'),
+                new DateTimeImmutable('2019-03-04 10:02:03'),
+                new DateTimeImmutable('2019-03-04 10:02:03'),
                 1551693723.0
             ],
             [
-                new \DateTimeImmutable('2019-03-04 10:02:03.248123'),
-                new \DateTimeImmutable('2019-03-04 10:02:03.248123'),
+                new DateTimeImmutable('2019-03-04 10:02:03.248123'),
+                new DateTimeImmutable('2019-03-04 10:02:03.248123'),
                 1551693723.248123
             ],
         ];
     }
 
 
-    /**
-     * @dataProvider provider_at_fixed
-     */
+    #[DataProvider('provider_at_fixed')]
     public function test_it_is_initialisable_at_fixed_time_from_string_or_object($at_what, $expect_time, $expect_micro)
     {
         $clock = StoppedMockClock::at($at_what);
@@ -63,7 +67,7 @@ class StoppedMockClockTest extends TestCase
     public function test_it_is_initialisable_at_a_date_interval_in_the_past()
     {
         $clock = StoppedMockClock::atTimeAgo('P3D');
-        $ago = (new \DateTimeImmutable)->sub(new \DateInterval('P3D'));
+        $ago = (new DateTimeImmutable)->sub(new DateInterval('P3D'));
         $this->assertEqualsWithDelta($ago, $clock->getDateTime(), 1, 'Time is at correct interval');
     }
 
@@ -72,7 +76,7 @@ class StoppedMockClockTest extends TestCase
         $clock = StoppedMockClock::atNow();
         $start_microtime = $clock->getMicrotime();
         $start_time = $clock->getDateTime();
-        \sleep(2);
+        sleep(2);
         $this->assertEquals($start_time, $clock->getDateTime(), 'Stays at the same time');
         $this->assertSame($start_microtime, $clock->getMicrotime(), 'Stays at the same microtime');
     }
@@ -82,34 +86,34 @@ class StoppedMockClockTest extends TestCase
         $clock = StoppedMockClock::at('2019-01-05 10:03:02');
         $this->assertSame(1546682582.0, $clock->getMicrotime(), 'Correct starting microtime');
 
-        $clock->tick(new \DateInterval('P1D'));
-        $this->assertEquals(new \DateTimeImmutable('2019-01-06 10:03:02'), $clock->getDateTime());
+        $clock->tick(new DateInterval('P1D'));
+        $this->assertEquals(new DateTimeImmutable('2019-01-06 10:03:02'), $clock->getDateTime());
         $this->assertSame(1546768982.0, $clock->getMicrotime());
     }
 
     public function test_it_advances_time_after_each_tick_microseconds()
     {
         $clock = StoppedMockClock::atMicrotime(1546682582.150);
-        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02.150'), $clock->getDateTime());
+        $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:02.150'), $clock->getDateTime());
 
         $clock->tickMicroseconds(150000);
-        $this->assertSame(1546682582.300, \round($clock->getMicrotime(), 3));
-        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:02.300'), $clock->getDateTime(), 'DateTime not changed by sub-second tick');
+        $this->assertSame(1546682582.300, round($clock->getMicrotime(), 3));
+        $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:02.300'), $clock->getDateTime(), 'DateTime not changed by sub-second tick');
 
 
         $clock->tickMicroseconds(750000);
-        $this->assertSame(1546682583.050, \round($clock->getMicrotime(), 3));
-        $this->assertEquals(new \DateTimeImmutable('2019-01-05 10:03:03.050'), $clock->getDateTime(), 'DateTime changed after second boundary');
+        $this->assertSame(1546682583.050, round($clock->getMicrotime(), 3));
+        $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:03.050'), $clock->getDateTime(), 'DateTime changed after second boundary');
     }
 
     public function test_its_usleep_is_immediate_but_advances_time()
     {
         $clock = StoppedMockClock::atMicrotime(1546682582.05);
-        $start = \microtime(TRUE);
+        $start = microtime(TRUE);
         $clock->usleep(900000);
-        $real_ms = 1000 * (\microtime(TRUE) - $start);
+        $real_ms = 1000 * (microtime(TRUE) - $start);
         $this->assertLessThan(50, $real_ms, 'Should not actually sleep');
-        $this->assertSame(1546682582.95, \round($clock->getMicrotime(), 3), 'Should update time');
+        $this->assertSame(1546682582.95, round($clock->getMicrotime(), 3), 'Should update time');
     }
 
     public static function provider_assert_slept_fails()
@@ -146,9 +150,7 @@ class StoppedMockClockTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_assert_slept_fails
-     */
+    #[DataProvider('provider_assert_slept_fails')]
     public function test_assert_slept_fails_if_not_slept_for_expected_intervals($callback, $expected, $msg)
     {
         $clock = StoppedMockClock::atNow();

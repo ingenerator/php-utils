@@ -4,10 +4,13 @@
 namespace test\unit\Ingenerator\PHPUtils\Assets;
 
 
+use InvalidArgumentException;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Ingenerator\PHPUtils\Assets\StaticAssetUrlProvider;
+use RuntimeException;
 
 class StaticAssetUrlProviderTest extends TestCase
 {
@@ -31,21 +34,19 @@ class StaticAssetUrlProviderTest extends TestCase
     public function test_it_throws_in_invalid_mode()
     {
         $this->options['mode'] = 'some-junk';
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->newSubject();
     }
 
     public function test_in_local_mode_get_url_throws_if_file_does_not_exist()
     {
         $subject = $this->newSubject();
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $subject->getUrl('assets/some-file.css');
     }
 
-    /**
-     * @testWith ["assets/my-file.css"]
-     *           ["/assets/my-file.css"]
-     */
+    #[TestWith(['assets/my-file.css'])]
+    #[TestWith(['/assets/my-file.css'])]
     public function test_in_local_mode_get_url_returns_absolute_url_with_mtime_suffix($rel_path)
     {
         vfsStream::create(
@@ -67,17 +68,15 @@ class StaticAssetUrlProviderTest extends TestCase
     {
         $this->options['asset_base_url_file'] = $this->vfs->url().'/no-such-file.php';
         $this->options['mode']                = StaticAssetUrlProvider::MODE_REMOTE;
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('no-such-file.php');
         $this->newSubject();
     }
 
-    /**
-     * @testWith [""]
-     *           ["some content that is not php"]
-     *           ["<?php $a = 1;"]
-     *           ["<?php return '';"]
-     */
+    #[TestWith([''])]
+    #[TestWith(['some content that is not php'])]
+    #[TestWith(['<?php $a = 1;'])]
+    #[TestWith(["<?php return '';"])]
     public function test_in_remote_mode_get_url_throws_if_asset_base_url_file_does_not_return_string($file_content)
     {
         vfsStream::create(
@@ -87,15 +86,13 @@ class StaticAssetUrlProviderTest extends TestCase
 
         $this->options['asset_base_url_file'] = $this->vfs->getChild('asset-base-url.php')->url();
         $this->options['mode']                = StaticAssetUrlProvider::MODE_REMOTE;
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid content in asset base url');
         $this->newSubject();
     }
 
-    /**
-     * @testWith ["assets/my-file.css"]
-     *           ["/assets/my-file.css"]
-     */
+    #[TestWith(['assets/my-file.css'])]
+    #[TestWith(['/assets/my-file.css'])]
     public function test_it_remote_mode_get_url_returns_url_prefixed_with_base_url($rel_path)
     {
         vfsStream::create(

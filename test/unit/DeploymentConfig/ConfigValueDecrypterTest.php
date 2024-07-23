@@ -7,7 +7,11 @@ namespace unit\Ingenerator\PHPUtils\DeploymentConfig;
 use Ingenerator\PHPUtils\DeploymentConfig\ConfigValueDecrypter;
 use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use function base64_encode;
+use function uniqid;
 
 class ConfigValueDecrypterTest extends TestCase
 {
@@ -18,13 +22,11 @@ class ConfigValueDecrypterTest extends TestCase
         $this->assertInstanceOf(ConfigValueDecrypter::class, $this->newSubject());
     }
 
-    /**
-     * @testWith [0]
-     *           [1]
-     *           [1.29]
-     *           ["anything"]
-     *           [{"any": "thing", "other": {"things": "here"}}]
-     */
+    #[TestWith([0])]
+    #[TestWith([1])]
+    #[TestWith([1.29])]
+    #[TestWith(['anything'])]
+    #[TestWith([['any' => 'thing', 'other' => ['things' => 'here']]])]
     public function test_it_returns_unchanged_value_if_not_encrypted($value)
     {
         $this->assertSame($value, $this->newSubject()->decrypt($value));
@@ -70,9 +72,7 @@ class ConfigValueDecrypterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_decrypt
-     */
+    #[DataProvider('provider_decrypt')]
     public function test_it_returns_value_decrypted_with_specified_or_default_key($value, $expect, $keypairs)
     {
         $this->vfs = vfsStream::create($keypairs);
@@ -124,9 +124,7 @@ class ConfigValueDecrypterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_corrupt_key
-     */
+    #[DataProvider('provider_corrupt_key')]
     public function test_it_throws_if_required_decryption_key_is_mangled($key)
     {
         $this->vfs = vfsStream::create(['slightly.secret-config.key' => $key]);
@@ -142,10 +140,10 @@ class ConfigValueDecrypterTest extends TestCase
     {
         $kp                  = sodium_crypto_box_keypair();
         $this->vfs           = vfsStream::create(['slightly.secret-config.key' => base64_encode($kp)]);
-        $valid_encrypted_val = \base64_encode(sodium_crypto_box_seal('whoops', sodium_crypto_box_publickey($kp)));
+        $valid_encrypted_val = base64_encode(sodium_crypto_box_seal('whoops', sodium_crypto_box_publickey($kp)));
         // The actual encrypted value is fine, but the problem is that the keypair it specifies isn't present with the
         // correct name.
-        $other_keypair_name = \uniqid('very');
+        $other_keypair_name = uniqid('very');
         $subject            = $this->newSubject();
         $this->expectException(InvalidConfigException::class);
         $this->expectExceptionMessage('Unknown config decryption key');
@@ -172,9 +170,7 @@ class ConfigValueDecrypterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_failed_decrypt
-     */
+    #[DataProvider('provider_failed_decrypt')]
     public function test_it_throws_if_decryption_fails($value)
     {
         $this->vfs = vfsStream::create(

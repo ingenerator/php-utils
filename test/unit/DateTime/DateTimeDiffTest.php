@@ -9,6 +9,7 @@ namespace test\unit\Ingenerator\PHPUtils\unit\DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ingenerator\PHPUtils\DateTime\DateTimeDiff;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class DateTimeDiffTest extends TestCase
@@ -59,9 +60,7 @@ class DateTimeDiffTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider date_time_diff
-     */
+    #[DataProvider('date_time_diff')]
     public function test_it_calculates_difference_in_milliseconds(
         DateTimeInterface $date1,
         DateTimeInterface $date2,

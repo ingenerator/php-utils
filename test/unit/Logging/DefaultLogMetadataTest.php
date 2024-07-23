@@ -7,6 +7,8 @@ namespace test\unit\Ingenerator\PHPUtils\Logging;
 use Ingenerator\PHPUtils\Logging\DefaultLogMetadata;
 use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class DefaultLogMetadataTest extends TestCase
@@ -25,37 +27,25 @@ class DefaultLogMetadataTest extends TestCase
         $this->assertSame(['context' => ['did' => 'abc4567890123456789012']], $result());
     }
 
-    /**
-     * ---------------------------------
-     * httpContext
-     * ---------------------------------
-     */
-
-    /**
-     * @testWith [{"REMOTE_ADDR": "192.182.382.39"}, "192.182.382.39"]
-     *           [{}, "{na}"]
-     */
+    #[TestWith([['REMOTE_ADDR' => '192.182.382.39'], '192.182.382.39'])]
+    #[TestWith([[], '{na}'])]
     public function test_its_http_context_provides_client_ip_from_server_vars($server, $expect)
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['remoteIp']);
     }
 
-    /**
-     * @testWith [{"REQUEST_URI": "/foobar/foo"}, "/foobar/foo"]
-     *           [{"REQUEST_URI": "/foobar/foo?arg=what"}, "/foobar/foo?arg=what"]
-     *           [{}, null]
-     */
+    #[TestWith([['REQUEST_URI' => '/foobar/foo'], '/foobar/foo'])]
+    #[TestWith([['REQUEST_URI' => '/foobar/foo?arg=what'], '/foobar/foo?arg=what'])]
+    #[TestWith([[], null])]
     public function test_its_http_context_provides_request_url_from_server_vars($server, $expect)
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['requestUrl']);
     }
 
-    /**
-     * @testWith [{"REQUEST_METHOD": "POST"}, "POST"]
-     *           [{}, null]
-     */
+    #[TestWith([['REQUEST_METHOD' => 'POST'], 'POST'])]
+    #[TestWith([[], null])]
     public function test_its_http_context_provides_request_method_from_server_vars($server, $expect)
     {
         $result = DefaultLogMetadata::httpContext($server);
@@ -77,7 +67,7 @@ class DefaultLogMetadataTest extends TestCase
             $result1['context']['req'],
             'Should match expected format'
         );
-        $result3 = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace();
+        $result3 = DefaultLogMetadata::requestTrace();
         $this->assertNotSame(
             $result1['context']['req'],
             $result3['context']['req'],
@@ -88,7 +78,7 @@ class DefaultLogMetadataTest extends TestCase
     public function test_its_request_tracing_data_adds_trace_id_with_request_id_if_no_headers_available(
     )
     {
-        $result = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::requestTrace();
+        $result = DefaultLogMetadata::requestTrace();
         $this->assertSame(
             $result['context']['req'],
             $result['logging.googleapis.com/trace'],
@@ -127,9 +117,7 @@ class DefaultLogMetadataTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_trace_header
-     */
+    #[DataProvider('provider_trace_header')]
     public function test_its_request_tracing_data_adds_trace_id_with_from_header_and_optionally_project_if_available(
         $server,
         $project,
@@ -151,17 +139,15 @@ class DefaultLogMetadataTest extends TestCase
 
     public function test_its_service_context_provides_service_name()
     {
-        $result = \Ingenerator\PHPUtils\Logging\DefaultLogMetadata::serviceContext('my-svc');
+        $result = DefaultLogMetadata::serviceContext('my-svc');
         $this->assertSame('my-svc', $result['serviceContext']['service']);
     }
 
-    /**
-     * @testWith ["<?php I am the borg", "#ERROR#"]
-     *           ["<?php throw new BadMethodCallException('Whoops');", "#ERROR#"]
-     *           ["<?php 'abcdefe';", "#ERROR#"]
-     *           ["<?php return 'abcdef123';", "abcdef123"]
-     *           [false, "#ERROR#"]
-     */
+    #[TestWith(['<?php I am the borg', '#ERROR#'])]
+    #[TestWith(["<?php throw new BadMethodCallException('Whoops');", '#ERROR#'])]
+    #[TestWith(["<?php 'abcdefe';", '#ERROR#'])]
+    #[TestWith(["<?php return 'abcdef123';", 'abcdef123'])]
+    #[TestWith([false, '#ERROR#'])]
     public function test_its_service_context_loads_version_from_file_ignoring_any_errors($file_content, $expect)
     {
         $vfs = vfsStream::setup();

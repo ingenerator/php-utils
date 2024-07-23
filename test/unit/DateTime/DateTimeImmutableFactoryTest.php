@@ -7,21 +7,25 @@
 namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
 
+use DateTime;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use function date_default_timezone_get;
+use function date_default_timezone_set;
 
 class DateTimeImmutableFactoryTest extends TestCase
 {
 
-    /**
-     * @testWith ["2017-07-09", "2017-07-09"]
-     *           ["09/07/2017", "2017-07-09"]
-     *           ["5/9/2017", "2017-09-05"]
-     *           ["9/5/15", "2015-05-09"]
-     */
+    #[TestWith(['2017-07-09', '2017-07-09'])]
+    #[TestWith(['09/07/2017', '2017-07-09'])]
+    #[TestWith(['5/9/2017', '2017-09-05'])]
+    #[TestWith(['9/5/15', '2015-05-09'])]
     public function test_it_factories_correct_object_from_valid_user_date_input($input, $expect)
     {
         $actual = DateTimeImmutableFactory::fromUserDateInput($input);
@@ -30,10 +34,8 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($expect.' 00:00:00', $actual->format('Y-m-d H:i:s'));
     }
 
-    /**
-     * @testWith [""]
-     *           [null]
-     */
+    #[TestWith([''])]
+    #[TestWith([null])]
     public function test_it_factories_null_from_empty_user_date_input($input)
     {
         $this->assertNull(
@@ -41,12 +43,10 @@ class DateTimeImmutableFactoryTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["junk"]
-     *           ["2017-13-02"]
-     *           ["30/02/2015"]
-     *           ["02/30/2015"]
-     */
+    #[TestWith(['junk'])]
+    #[TestWith(['2017-13-02'])]
+    #[TestWith(['30/02/2015'])]
+    #[TestWith(['02/30/2015'])]
     public function test_it_factories_invalid_object_from_invalid_user_date_input($input)
     {
         $actual = DateTimeImmutableFactory::fromUserDateInput($input);
@@ -54,11 +54,9 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($input, $actual->format('anything'));
     }
 
-    /**
-     * @testWith ["2017-07-09 10:00:00", "2017-07-09 10:00:00"]
-     *           ["2017-07-09 10:00", "2017-07-09 10:00:00"]
-     *           ["2017-11-30 23:50", "2017-11-30 23:50:00"]
-     */
+    #[TestWith(['2017-07-09 10:00:00', '2017-07-09 10:00:00'])]
+    #[TestWith(['2017-07-09 10:00', '2017-07-09 10:00:00'])]
+    #[TestWith(['2017-11-30 23:50', '2017-11-30 23:50:00'])]
     public function test_it_factories_correct_object_from_valid_user_date_time_input(
         $input,
         $expect
@@ -69,20 +67,16 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($expect, $actual->format('Y-m-d H:i:s'));
     }
 
-    /**
-     * @testWith [""]
-     *           [null]
-     */
+    #[TestWith([''])]
+    #[TestWith([null])]
     public function test_it_factories_null_from_empty_user_date_time_input($input)
     {
         $this->assertNull(DateTimeImmutableFactory::fromUserDateTimeInput($input));
     }
 
-    /**
-     * @testWith ["junk"]
-     *           ["2017-11-10 32:02:30"]
-     *           ["10/11/2017 02:02:02"]
-     */
+    #[TestWith(['junk'])]
+    #[TestWith(['2017-11-10 32:02:30'])]
+    #[TestWith(['10/11/2017 02:02:02'])]
     public function test_it_factories_invalid_object_from_invalid_user_date_time_input($input)
     {
         $actual = DateTimeImmutableFactory::fromUserDateInput($input);
@@ -90,9 +84,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($input, $actual->format('anything'));
     }
 
-    /**
-     * @testWith ["2017-07-09", "2017-07-09 00:00:00"]
-     */
+    #[TestWith(['2017-07-09', '2017-07-09 00:00:00'])]
     public function test_it_factories_correct_object_from_valid_ymd_input($input, $expect)
     {
         $actual = DateTimeImmutableFactory::fromYmdInput($input);
@@ -102,21 +94,17 @@ class DateTimeImmutableFactoryTest extends TestCase
 
     }
 
-    /**
-     * @testWith [""]
-     *           [null]
-     */
+    #[TestWith([''])]
+    #[TestWith([null])]
     public function test_it_factories_null_from_empty_ymd_input($input)
     {
         $this->assertNull(DateTimeImmutableFactory::fromYmdInput($input));
     }
 
-    /**
-     * @testWith ["junk"]
-     *           ["2017-11-10 12:02:30"]
-     *           ["2017-14-10"]
-     *           ["10/11/2017"]
-     */
+    #[TestWith(['junk'])]
+    #[TestWith(['2017-11-10 12:02:30'])]
+    #[TestWith(['2017-14-10'])]
+    #[TestWith(['10/11/2017'])]
     public function test_it_factories_invalid_object_from_invalid_ymd_input($input)
     {
         $actual = DateTimeImmutableFactory::fromYmdInput($input);
@@ -124,74 +112,66 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertEquals($input, $actual->format('anything'));
     }
 
-    /**
-     * @testWith ["2017-07-09 10:01:02", "2017-07-09T10:01:02.000000+01:00"]
-     */
+    #[TestWith(['2017-07-09 10:01:02', '2017-07-09T10:01:02.000000+01:00'])]
     public function test_it_factories_correct_object_from_valid_ymdhis_in_default_tz($input, $expect)
     {
-        $old_default = \date_default_timezone_get();
+        $old_default = date_default_timezone_get();
         try {
-            \date_default_timezone_set('Europe/London');
+            date_default_timezone_set('Europe/London');
             $actual = DateTimeImmutableFactory::fromYmdHis($input);
             $this->assertInstanceOf(DateTimeImmutable::class, $actual);
             $this->assertSame('Europe/London', $actual->getTimezone()->getName());
             $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
         } finally {
-            \date_default_timezone_set($old_default);
+            date_default_timezone_set($old_default);
         }
     }
 
-    /**
-     * @testWith [""]
-     *           ["yesterday"]
-     *           ["2017-11-10"]
-     *           ["2017-11-10 26:10:10"]
-     *           ["2017-14-10"]
-     *           ["10/11/2017"]
-     */
+    #[TestWith([''])]
+    #[TestWith(['yesterday'])]
+    #[TestWith(['2017-11-10'])]
+    #[TestWith(['2017-11-10 26:10:10'])]
+    #[TestWith(['2017-14-10'])]
+    #[TestWith(['10/11/2017'])]
     public function test_it_throws_from_invalid_ymdhis_input($input)
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         DateTimeImmutableFactory::fromYmdHis($input);
     }
 
     public function test_it_factories_from_unix_timestamp_in_default_tz()
     {
         try {
-            $old_default = \date_default_timezone_get();
-            \date_default_timezone_set('Europe/London');
+            $old_default = date_default_timezone_get();
+            date_default_timezone_set('Europe/London');
             $actual = DateTimeImmutableFactory::atUnixSeconds(1600947830);
             $this->assertSame('Europe/London', $actual->getTimezone()->getName());
-            $this->assertSame('2020-09-24T12:43:50+01:00', $actual->format(\DateTime::ATOM));
+            $this->assertSame('2020-09-24T12:43:50+01:00', $actual->format(DateTime::ATOM));
         } finally {
-            \date_default_timezone_set($old_default);
+            date_default_timezone_set($old_default);
         }
     }
 
-    /**
-     * @testWith [1598008554.643, "2020-08-21T12:15:54.643000+01:00"]
-     *           ["1598008554.64321424", "2020-08-21T12:15:54.643214+01:00"]
-     *           ["1274437650", "2010-05-21T11:27:30.000000+01:00"]
-     *           [1274437650, "2010-05-21T11:27:30.000000+01:00"]
-     *           [1274437650.0, "2010-05-21T11:27:30.000000+01:00"]
-     */
+    #[TestWith([1598008554.643, '2020-08-21T12:15:54.643000+01:00'])]
+    #[TestWith(['1598008554.64321424', '2020-08-21T12:15:54.643214+01:00'])]
+    #[TestWith([1274437650, '2010-05-21T11:27:30.000000+01:00'])]
+    #[TestWith([1274437650, '2010-05-21T11:27:30.000000+01:00'])]
+    #[TestWith([1274437650.0, '2010-05-21T11:27:30.000000+01:00'])]
     public function test_it_factories_from_microtime_in_default_tz($val, $expect)
     {
         try {
-            $old_default = \date_default_timezone_get();
-            \date_default_timezone_set('Europe/London');
+            $old_default = date_default_timezone_get();
+            date_default_timezone_set('Europe/London');
             $actual = DateTimeImmutableFactory::atMicrotime($val);
             $this->assertSame('Europe/London', $actual->getTimezone()->getName());
             $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
         } finally {
-            \date_default_timezone_set($old_default);
+            date_default_timezone_set($old_default);
         }
     }
 
-    /**
-     * @testWith ["2020-03-04 10:11:12", "Y-m-d H:i:s", "2020-03-04T10:11:12.000000+00:00"]
-     *           ["2020-08-21 12:15:54.643214+01:00", "Y-m-d H:i:s.uP", "2020-08-21T12:15:54.643214+01:00"]
-     */
+    #[TestWith(['2020-03-04 10:11:12', 'Y-m-d H:i:s', '2020-03-04T10:11:12.000000+00:00'])]
+    #[TestWith(['2020-08-21 12:15:54.643214+01:00', 'Y-m-d H:i:s.uP', '2020-08-21T12:15:54.643214+01:00'])]
     public function test_it_factories_from_strict_date_format(string $val, string $format, string $expect): void
     {
         $actual = DateTimeImmutableFactory::fromStrictFormat($val, $format);
@@ -199,13 +179,11 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertSame($expect, $actual->format('Y-m-d\TH:i:s.uP'));
     }
 
-    /**
-     * @testWith ["01-02-2020 10:20:30", "Y-m-d H:i:s"]
-     *           ["2021-02-23 15:16:17", "Y-m-d\\TH:i:s.uP"]
-     */
+    #[TestWith(['01-02-2020 10:20:30', 'Y-m-d H:i:s'])]
+    #[TestWith(['2021-02-23 15:16:17', 'Y-m-d\TH:i:s.uP'])]
     public function test_it_throws_from_strict_date_format(string $val, string $format): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("`$val` is not a valid date/time in the format `$format`");
         DateTimeImmutableFactory::fromStrictFormat($val, $format);
     }
@@ -229,9 +207,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_from_iso_ms
-     */
+    #[DataProvider('provider_from_iso_ms')]
     public function test_it_factories_from_iso_format(string $input, string $expect)
     {
         $actual = DateTimeImmutableFactory::fromIso($input);
@@ -249,13 +225,11 @@ class DateTimeImmutableFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_throws_from_invalid_iso
-     */
+    #[DataProvider('provider_throws_from_invalid_iso')]
     public function test_it_throws_from_invalid_iso_format($input)
     {
         $this->expectExceptionMessage("`$input` cannot be parsed as a valid ISO date-time");
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         DateTimeImmutableFactory::fromIso($input);
     }
 

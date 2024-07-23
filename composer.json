@@ -24,7 +24,7 @@
   },
   "require-dev": {
     "mikey179/vfsstream": "^1.6.11",
-    "phpunit/phpunit": "^10.0",
+    "phpunit/phpunit": "^11.0",
     "ergebnis/phpunit-slow-test-detector": "^2.15"
   },
   "support": {

@@ -4,7 +4,13 @@
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use Ingenerator\PHPUtils\Logging\ExternalCallSiteFinder;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use function debug_backtrace;
+use function file_put_contents;
+use function sys_get_temp_dir;
+use function tempnam;
+use function unlink;
 
 class ExternalCallSiteFinderTest extends TestCase
 {
@@ -16,7 +22,7 @@ class ExternalCallSiteFinderTest extends TestCase
 
     public function test_it_reports_unknown_location_if_stack_not_deep_enough()
     {
-        $trace = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
         $this->assertSame(
             ['_unexpected_trace_' => $trace],
             $this->newSubject()->findExternalCall($trace, [static::class])
@@ -195,20 +201,18 @@ PHP
         ];
     }
 
-    /**
-     * @dataProvider provider_source_location_call_sites
-     */
+    #[DataProvider('provider_source_location_call_sites')]
     public function test_it_can_handle_all_possible_call_sites($code)
     {
-        $temp = \tempnam(\sys_get_temp_dir(), 'logger_test');
-        \file_put_contents($temp, "<?php\n".$code);
+        $temp = tempnam(sys_get_temp_dir(), 'logger_test');
+        file_put_contents($temp, "<?php\n".$code);
         try {
             // Include the code block in anonymous scope so the call is not related to this method
             $func = function (TestCallSiteAsserter $asserter) use ($temp) { return require $temp; };
             $func->bindTo(NULL, NULL);
             $result = $func(new TestCallSiteAsserter($this->newSubject()));
         } finally {
-            \unlink($temp);
+            unlink($temp);
         }
 
         $this->assertSame($result['expected'], $result['actual']);
@@ -226,7 +230,7 @@ class TestCallsiteCaller extends TestCallSiteCallerParent
 {
     public function singleExternal(ExternalCallSiteFinder $finder)
     {
-        return $finder->findExternalCall(\debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
+        return $finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
     }
 
     public function throughInternalMethod(ExternalCallSiteFinder $finder)
@@ -237,7 +241,7 @@ class TestCallsiteCaller extends TestCallSiteCallerParent
     public function fromManager(ExternalCallSiteFinder $finder)
     {
         return $finder->findExternalCall(
-            \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
+            debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
             [
                 static::class,
                 TestCallSiteProxy::class,
@@ -281,7 +285,7 @@ class TestCallSiteAsserter
 
     public function test(array $expected)
     {
-        $actual = $this->finder->findExternalCall(\debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
+        $actual = $this->finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
 
         ksort($expected);
         ksort($actual);

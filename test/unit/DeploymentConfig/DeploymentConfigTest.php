@@ -3,10 +3,14 @@
 namespace unit\Ingenerator\PHPUtils\DeploymentConfig;
 
 use Closure;
+use Ingenerator\PHPUtils\DeploymentConfig\ConfigValueDecrypter;
 use Ingenerator\PHPUtils\DeploymentConfig\DeploymentConfig;
+use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use Ingenerator\PHPUtils\DeploymentConfig\MissingConfigException;
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class DeploymentConfigTest extends TestCase
@@ -99,9 +103,7 @@ class DeploymentConfigTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_is_current_env
-     */
+    #[DataProvider('provider_is_current_env')]
     public function test_its_is_environment_returns_whether_current_environment_one_of_those_listed(
         $env,
         $args,
@@ -112,9 +114,7 @@ class DeploymentConfigTest extends TestCase
         $this->assertSame($expect, $result);
     }
 
-    /**
-     * @dataProvider provider_is_current_env
-     */
+    #[DataProvider('provider_is_current_env')]
     public function test_its_not_environment_returns_whether_current_environment_none_of_those_listed(
         $env,
         $args,
@@ -126,14 +126,12 @@ class DeploymentConfigTest extends TestCase
         $this->assertSame($expect_not, $result);
     }
 
-    /**
-     * @testWith ["dev", "i-am-dev"]
-     *           ["prod", "i-am-prod-ish"]
-     *           ["qa", "i-am-prod-ish"]
-     *           ["ci", null]
-     *           ["imagined", "who-knows-what-i-am"]
-     *           ["standalone", "i-am-standalone"]
-     */
+    #[TestWith(['dev', 'i-am-dev'])]
+    #[TestWith(['prod', 'i-am-prod-ish'])]
+    #[TestWith(['qa', 'i-am-prod-ish'])]
+    #[TestWith(['ci', null])]
+    #[TestWith(['imagined', 'who-knows-what-i-am'])]
+    #[TestWith(['standalone', 'i-am-standalone'])]
     public function test_its_map_returns_value_or_default_for_the_current_env($env, $expect)
     {
         $subject = $this->newSubjectWithEnv($env);
@@ -149,11 +147,9 @@ class DeploymentConfigTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["dev"]
-     *           ["standalone"]
-     *           ["ci"]
-     */
+    #[TestWith(['dev'])]
+    #[TestWith(['standalone'])]
+    #[TestWith(['ci'])]
     public function test_its_map_returns_any_for_env_that_is_not_defined($env)
     {
         $subject = $this->newSubjectWithEnv($env);
@@ -243,18 +239,16 @@ class DeploymentConfigTest extends TestCase
         $this->assertSame(NULL, $subject->readJSON('secrets/any/old/secret'));
     }
 
-    /**
-     * @testWith ["true", true]
-     *           ["null", null]
-     *           ["false", false]
-     *           ["0", 0]
-     *           ["\"string\"", "string"]
-     *           ["1234", 1234]
-     *           ["1234.5", 1234.5]
-     */
+    #[TestWith([true, true])]
+    #[TestWith([null, null])]
+    #[TestWith([false, false])]
+    #[TestWith([0, 0])]
+    #[TestWith(['string', 'string'])]
+    #[TestWith([1234, 1234])]
+    #[TestWith([1234.5, 1234.5])]
     public function test_its_read_json_returns_json_decoded_file_content_if_present_outside_standalone($json, $expect)
     {
-        $path    = $this->givenConfigDirWithFile('config/some_scalar', $json);
+        $path    = $this->givenConfigDirWithFile('config/some_scalar', json_encode($json));
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -280,7 +274,7 @@ class DeploymentConfigTest extends TestCase
             DeploymentConfig::DEV,
             $path
         );
-        $this->expectException(\Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException::class);
+        $this->expectException(InvalidConfigException::class);
         $subject->readJSON('secrets/database/persistent');
     }
 
@@ -295,22 +289,12 @@ class DeploymentConfigTest extends TestCase
         $this->assertSame(['full' => 'fileencrypted'], $subject->readJSON('secrets/integrations/via/lots'));
     }
 
-    /**
-     * @param string $env
-     *
-     * @return DeploymentConfig
-     */
-    protected function newSubjectWithEnv($env)
+    private function newSubjectWithEnv(string $env): DeploymentConfig
     {
         return $this->newSubject(['INGENERATOR_ENV' => $env]);
     }
 
-    /**
-     * @param array $env_vars
-     *
-     * @return DeploymentConfig
-     */
-    protected function newSubject(array $env_vars)
+    private function newSubject(array $env_vars): DeploymentConfig
     {
         $creator = Closure::bind(
             function () use ($env_vars) {
@@ -326,10 +310,7 @@ class DeploymentConfigTest extends TestCase
         return $subject;
     }
 
-    /**
-     * @return DeploymentConfig
-     */
-    protected function newSubjectWithNoArgs()
+    private function newSubjectWithNoArgs(): DeploymentConfig
     {
         $creator = Closure::bind(
             function () { return new DeploymentConfig; },
@@ -340,7 +321,7 @@ class DeploymentConfigTest extends TestCase
         return $creator();
     }
 
-    protected function givenConfigDirWithFile($path, $content)
+    private function givenConfigDirWithFile(string $path, $content): string
     {
         $vfs     = vfsStream::setup('var');
         $cfg_dir = vfsStream::newDirectory('config')
@@ -360,7 +341,7 @@ class DeploymentConfigTest extends TestCase
         return $cfg_dir->url();
     }
 
-    protected function givenEmptyConfigDir()
+    private function givenEmptyConfigDir(): string
     {
         $vfs     = vfsStream::setup('var');
         $cfg_dir = vfsStream::newDirectory('config')
@@ -369,7 +350,7 @@ class DeploymentConfigTest extends TestCase
         return $cfg_dir->url();
     }
 
-    protected function newSubjectWithEnvAndConfigDir($env, $path)
+    private function newSubjectWithEnvAndConfigDir($env, $path): DeploymentConfig
     {
         $subject = $this->newSubjectWithEnv($env);
         ObjectPropertyPopulator::assign($subject, 'config_dir', $path);
@@ -386,7 +367,7 @@ class DeploymentConfigTest extends TestCase
 }
 
 
-class PaddedConfigDecryptStub extends \Ingenerator\PHPUtils\DeploymentConfig\ConfigValueDecrypter
+class PaddedConfigDecryptStub extends ConfigValueDecrypter
 {
     public function __construct() { }
 
