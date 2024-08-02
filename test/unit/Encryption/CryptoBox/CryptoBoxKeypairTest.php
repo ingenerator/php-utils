@@ -8,6 +8,8 @@ use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxString;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\DecryptionFailedException;
 use Ingenerator\TrustIDIngress\ToExtract\SensitiveParameter;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use function str_replace;
 
@@ -31,14 +33,12 @@ class CryptoBoxKeypairTest extends TestCase
         $second_keypair->decrypt($encrypted);
     }
 
-    /**
-     * @testWith ["multi words"]
-     *           [""]
-     *           ["Whoopdedo!"]
-     */
+    #[TestWith(['multi words'])]
+    #[TestWith([''])]
+    #[TestWith(['Whoopdedo!'])]
     public function test_it_cannot_be_created_with_keypair_id_in_invalid_format($key_id)
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         CryptoBoxKeypair::generate($key_id);
     }
 
@@ -60,7 +60,7 @@ class CryptoBoxKeypairTest extends TestCase
         );
     }
 
-    public function provider_invalid_keypair_string()
+    public static function provider_invalid_keypair_string()
     {
         return [
             'empty' => [''],
@@ -71,9 +71,7 @@ class CryptoBoxKeypairTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_invalid_keypair_string
-     */
+    #[DataProvider('provider_invalid_keypair_string')]
     public function test_it_throws_invalid_argument_if_attempting_to_create_from_invalid_string($keypair_string)
     {
         $this->expectException(InvalidArgumentException::class);
@@ -95,7 +93,7 @@ class CryptoBoxKeypairTest extends TestCase
         CryptoBoxKeypair::fromString($keypair_string)->decrypt($enc);
     }
 
-    public function provider_bad_decryption()
+    public static function provider_bad_decryption()
     {
         return [
             'valid as a key, but not for this message' => [
@@ -106,9 +104,7 @@ class CryptoBoxKeypairTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_bad_decryption
-     */
+    #[DataProvider('provider_bad_decryption')]
     public function test_it_throws_decryption_failed_with_incorrect_key($bad_keypair)
     {
         $encrypted = CryptoBoxKeypair::generate('a')

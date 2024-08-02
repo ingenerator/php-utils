@@ -6,6 +6,7 @@ namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxString;
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use function random_bytes;
 
@@ -15,7 +16,7 @@ class CryptoBoxStringTest extends TestCase
      * Heavily tested through the tests for CryptoBoxKeypair and CryptoBoxPublicKey
      */
 
-    public function provider_invalid_string_format()
+    public static function provider_invalid_string_format()
     {
         return [
             'empty' => [''],
@@ -25,9 +26,7 @@ class CryptoBoxStringTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_invalid_string_format
-     */
+    #[DataProvider('provider_invalid_string_format')]
     public function test_it_throws_invalid_argument_if_attempting_to_create_from_invalid_string($keypair_string)
     {
         $this->expectException(InvalidArgumentException::class);

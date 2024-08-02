@@ -7,87 +7,85 @@
 namespace test\unit\Ingenerator\PHPUtils\Validation;
 
 
+use ArrayObject;
+use DateTime;
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
 use Ingenerator\PHPUtils\Validation\StrictDate;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class StrictDateTest extends TestCase
 {
 
-    /**
-     * @testWith ["", false]
-     *           [null, false]
-     *           ["junk", false]
-     *           ["01/10/01", false]
-     *           ["2016-01-01", false]
-     *           ["2016-01-01 10:00", false]
-     *           ["2016-02-30 10:00:00", false]
-     *           ["2016-01-01 50:12:00", false]
-     *           ["2016-01-01T10:00:00", false]
-     *           ["2016-01-01 10:00:00", true]
-     */
+    #[TestWith(['', false])]
+    #[TestWith([null, false])]
+    #[TestWith(['junk', false])]
+    #[TestWith(['01/10/01', false])]
+    #[TestWith(['2016-01-01', false])]
+    #[TestWith(['2016-01-01 10:00', false])]
+    #[TestWith(['2016-02-30 10:00:00', false])]
+    #[TestWith(['2016-01-01 50:12:00', false])]
+    #[TestWith(['2016-01-01T10:00:00', false])]
+    #[TestWith(['2016-01-01 10:00:00', true])]
     public function test_it_validates_iso_datetime($value, $expect)
     {
         $this->assertSame($expect, StrictDate::iso_datetime($value));
     }
 
-    /**
-     * @testWith ["", false]
-     *           [null, false]
-     *           ["junk", false]
-     *           ["01/10/01", false]
-     *           ["2016-01-45", false]
-     *           ["2016-02-30", false]
-     *           ["2016-01-01", true]
-     *           ["2016-02-30 10:00:00", false]
-     */
+    #[TestWith(['', false])]
+    #[TestWith([null, false])]
+    #[TestWith(['junk', false])]
+    #[TestWith(['01/10/01', false])]
+    #[TestWith(['2016-01-45', false])]
+    #[TestWith(['2016-02-30', false])]
+    #[TestWith(['2016-01-01', true])]
+    #[TestWith(['2016-02-30 10:00:00', false])]
     public function test_it_validates_iso_date($value, $expect)
     {
         $this->assertSame($expect, StrictDate::iso_date($value));
     }
 
-    public function provider_datetime_immutable()
+    public static function provider_datetime_immutable()
     {
         return [
             [NULL, TRUE],
-            [new \DateTimeImmutable, TRUE],
+            [new DateTimeImmutable, TRUE],
             [FALSE, FALSE],
-            [new \DateTime, FALSE],
+            [new DateTime, FALSE],
             ["2017-08-01", FALSE],
             [new InvalidUserDateTime('1/30/2018'), FALSE],
         ];
     }
 
-    /**
-     * @dataProvider  provider_datetime_immutable
-     */
+    #[DataProvider('provider_datetime_immutable')]
     public function test_it_validates_datetime_immutable_instance($value, $expect)
     {
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
-    /**
-     * @dataProvider  provider_datetime_immutable
-     */
+    #[DataProvider('provider_datetime_immutable')]
     public function test_it_validates_date_immutable_instance($value, $expect)
     {
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
-    public function provider_date_before_after_invalid_inputs()
+    public static function provider_date_before_after_invalid_inputs()
     {
         return [
             [['from' => NULL, 'to' => NULL], 'from', 'to', TRUE],
-            [['from' => new \DateTimeImmutable, 'to' => NULL], 'from', 'to', TRUE],
-            [['from' => NULL, 'to' => new \DateTimeImmutable], 'from', 'to', TRUE],
+            [['from' => new DateTimeImmutable, 'to' => NULL], 'from', 'to', TRUE],
+            [['from' => NULL, 'to' => new DateTimeImmutable], 'from', 'to', TRUE],
             [
-                ['from' => new \DateTimeImmutable, 'to' => new InvalidUserDateTime('any')],
+                ['from' => new DateTimeImmutable, 'to' => new InvalidUserDateTime('any')],
                 'from',
                 'to',
                 TRUE
             ],
             [
-                ['from' => new InvalidUserDateTime('any'), 'to' => new \DateTimeImmutable],
+                ['from' => new InvalidUserDateTime('any'), 'to' => new DateTimeImmutable],
                 'from',
                 'to',
                 TRUE
@@ -95,13 +93,11 @@ class StrictDateTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_date_before_after_invalid_inputs
-     */
+    #[DataProvider('provider_date_before_after_invalid_inputs')]
     public function test_date_compare_funcs_validate_invalid_input($data, $from_field, $to_field)
     {
         // This is so that an invalid date just says "invalid date" rather than also "must be after"
-        $data = new \ArrayObject($data);
+        $data = new ArrayObject($data);
         $this->assertTrue(StrictDate::date_after($data, $from_field, $to_field), 'date_after');
         $this->assertTrue(
             StrictDate::date_on_or_after($data, $from_field, $to_field),
@@ -109,7 +105,7 @@ class StrictDateTest extends TestCase
         );
     }
 
-    public function provider_date_after_date()
+    public static function provider_date_after_date()
     {
         return [
             'long before'   => ['2022-10-02 13:04:03', '2015-11-02 10:03:02', FALSE],
@@ -121,18 +117,16 @@ class StrictDateTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_date_after_date
-     */
+    #[DataProvider('provider_date_after_date')]
     public function test_it_validates_date_after_date($from, $to, $expect)
     {
         $this->assertSame(
             $expect,
             StrictDate::date_after(
-                new \ArrayObject(
+                new ArrayObject(
                     [
-                        'from' => new \DateTimeImmutable($from),
-                        'to'   => new \DateTimeImmutable($to),
+                        'from' => new DateTimeImmutable($from),
+                        'to'   => new DateTimeImmutable($to),
                     ]
                 ),
                 'from',
@@ -141,23 +135,21 @@ class StrictDateTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["2017-01-05 00:00:00", "2017-01-04 23:59:59", false]
-     *           ["2017-01-04 10:00:00", "2017-01-04 23:59:59", true]
-     *           ["2017-01-04 00:00:00", "2017-01-04 00:00:00", true]
-     *           ["2017-01-04 10:00:00", "2017-01-04 08:00:00", true]
-     *           ["2017-05-06 10:00:00", "2018-12-30 00:00:00", true]
-     *
-     */
+    
+    #[TestWith(['2017-01-05 00:00:00', '2017-01-04 23:59:59', false])]
+    #[TestWith(['2017-01-04 10:00:00', '2017-01-04 23:59:59', true])]
+    #[TestWith(['2017-01-04 00:00:00', '2017-01-04 00:00:00', true])]
+    #[TestWith(['2017-01-04 10:00:00', '2017-01-04 08:00:00', true])]
+    #[TestWith(['2017-05-06 10:00:00', '2018-12-30 00:00:00', true])]
     public function test_it_validates_date_on_or_after_date($from, $to, $expect)
     {
         $this->assertSame(
             $expect,
             StrictDate::date_on_or_after(
-                new \ArrayObject(
+                new ArrayObject(
                     [
-                        'from' => new \DateTimeImmutable($from),
-                        'to'   => new \DateTimeImmutable($to)
+                        'from' => new DateTimeImmutable($from),
+                        'to'   => new DateTimeImmutable($to)
                     ]
                 ),
                 'from',
@@ -168,7 +160,7 @@ class StrictDateTest extends TestCase
 
     public function test_it_throws_for_unknown_rule_name()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         StrictDate::rule('random nonsense');
     }
 

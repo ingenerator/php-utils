@@ -15,6 +15,7 @@ use Ingenerator\PHPUtils\Monitoring\AssertMetrics;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\PHPUtils\Monitoring\OperationTimer;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class OperationTimerTest extends TestCase
@@ -27,14 +28,10 @@ class OperationTimerTest extends TestCase
         $this->assertInstanceOf(OperationTimer::class, $this->newSubject());
     }
 
-    /**
-     * @testWith [false]
-     *           [true]
-     *           ["I'm a string"]
-     *
-     * @param mixed $callback
-     */
-    public function test_timeOperation_calls_callback($callback)
+    #[TestWith([false])]
+    #[TestWith([true])]
+    #[TestWith(["I'm a string"])]
+    public function test_timeOperation_calls_callback(mixed $callback)
     {
         $subject = $this->newSubject();
         $this->assertSame(
@@ -64,12 +61,10 @@ class OperationTimerTest extends TestCase
         $this->assertMetricMatches('queries.failed', 'mysql.slave', $metric);
     }
 
-    /**
-     * @testWith ["", ""]
-     *           [null, null]
-     *           ["foo", null]
-     *           [null, "bar"]
-     **/
+    #[TestWith(['', ''])]
+    #[TestWith([null, null])]
+    #[TestWith(['foo', null])]
+    #[TestWith([null, 'bar'])]
     public function test_timeOperation_throws_if_no_metric_name_or_source($name, $src)
     {
         $subject = $this->newSubject();

@@ -11,6 +11,7 @@ namespace test\unit\Ingenerator\PHPUtils\unit\Monitoring;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 
@@ -31,13 +32,11 @@ class ArrayMetricsAgentTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    /**
-     * @testWith [[], "no metrics"]
-     *              [[{"name": "foo", "source": "wrong"}], "wrong source"]
-     *              [[{"name": "wrong", "source": "bar"}], "wrong name"]
-     *              [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "bar"}], "duplicate metric"]
-     *              [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "other"}], "extra metric"]
-     **/
+    #[TestWith([[], 'no metrics'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'wrong']], 'wrong source'])]
+    #[TestWith([[['name' => 'wrong', 'source' => 'bar']], 'wrong name'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'bar'], ['name' => 'foo', 'source' => 'bar']], 'duplicate metric'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'bar'], ['name' => 'foo', 'source' => 'other']], 'extra metric'])]
     public function test_assertCapturedOneTimer_fails_if_no_match(array $metrics)
     {
         $subject = $this->newSubject();

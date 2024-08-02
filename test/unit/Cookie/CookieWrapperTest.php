@@ -4,8 +4,10 @@
 namespace test\unit\Ingenerator\PHPUtils\Cookie;
 
 
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\CookieWrapper;
 use Ingenerator\PHPUtils\Cookie\HeadersSentException;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class CookieWrapperTest extends TestCase
@@ -15,11 +17,9 @@ class CookieWrapperTest extends TestCase
 
     protected $ssl_available = TRUE;
 
-    /**
-     * @testWith ["my", true, "cookie"]
-     *           ["has", true, "values"]
-     *           ["anything", false, null]
-     */
+    #[TestWith(['my', true, 'cookie'])]
+    #[TestWith(['has', true, 'values'])]
+    #[TestWith(['anything', false, null])]
     public function test_it_has_cookies_from_superglobal($name, $expect_has, $expect_val)
     {
         $_COOKIE = ['my' => 'cookie', 'has' => 'values'];
@@ -128,7 +128,7 @@ class CookieWrapperTest extends TestCase
         $subject->set(
             'any',
             'thing',
-            ['expires' => new \DateTimeImmutable('2028-03-02 10:02:02 +01:00')]
+            ['expires' => new DateTimeImmutable('2028-03-02 10:02:02 +01:00')]
         );
         $this->assertSame(
             1835600522,
@@ -136,11 +136,9 @@ class CookieWrapperTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [{"secure": true}, false]
-     *           [{"secure": false}, false]
-     *           [{}, false]
-     */
+    #[TestWith([['secure' => true], false])]
+    #[TestWith([['secure' => false], false])]
+    #[TestWith([[], false])]
     public function test_it_downgrades_secure_cookies_when_no_ssl_available($opts, $expect)
     {
         $this->ssl_available = FALSE;
@@ -150,12 +148,10 @@ class CookieWrapperTest extends TestCase
         $this->assertSame($expect, $subject->setcookie_calls[0]['options']['secure']);
     }
 
-    /**
-     * @testWith [true, {}, null]
-     *           [true, {"samesite": "Lax"}, "Lax"]
-     *           [true, {"samesite": "None"}, "None"]
-     *           [false, {"samesite": "None"}, null]
-     */
+    #[TestWith([true, [], null])]
+    #[TestWith([true, ['samesite' => 'Lax'], 'Lax'])]
+    #[TestWith([true, ['samesite' => 'None'], 'None'])]
+    #[TestWith([false, ['samesite' => 'None'], null])]
     public function test_it_adds_samesite_attribute_only_if_ssl_available($has_ssl, $opts, $expect)
     {
         $this->ssl_available = $has_ssl;

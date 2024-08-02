@@ -1,5 +1,11 @@
 ### Unreleased
 
+### v2.1.0 (2024-08-02)
+
+* Support PHP 8.3
+* Upgrade tests to support PHPUnit 11
+* Drop support for PHP 8.1
+
 ### v2.0.0 (2023-10-27)
 
 * Support psr/log ^1.1 || ^2.0 || ^3.0

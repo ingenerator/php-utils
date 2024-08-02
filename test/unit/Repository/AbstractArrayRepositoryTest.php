@@ -9,7 +9,12 @@ namespace test\unit\Ingenerator\PHPUtils\Repository;
 
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
 use Ingenerator\PHPUtils\Repository\AbstractArrayRepository;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use UnexpectedValueException;
+use function array_map;
 
 class AbstractArrayRepositoryTest extends TestCase
 {
@@ -53,10 +58,8 @@ class AbstractArrayRepositoryTest extends TestCase
         $this->assertSame([$e1, $e2], $subject->getEntities());
     }
 
-    /**
-     * @testWith [[], []]
-     *           [[{"prop1": "foo"}, {"prop1":"bar"}, {"prop1":"foo"}], {"foo": 2, "bar": 1}]
-     */
+    #[TestWith([[], []])]
+    #[TestWith([[['prop1' => 'foo'], ['prop1' => 'bar'], ['prop1' => 'foo']], ['foo' => 2, 'bar' => 1]])]
     public function test_it_provides_base_layer_for_counting_entities_by_group($entities, $expect)
     {
         $subject = AnyArrayRepository::withList($entities);
@@ -69,7 +72,7 @@ class AbstractArrayRepositoryTest extends TestCase
     public function test_its_load_with_throws_if_no_entity()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'boo']);
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $subject->loadWith(function (AnyEntity $e) { return $e->getProp1() === 'baz'; });
     }
 
@@ -83,7 +86,7 @@ class AbstractArrayRepositoryTest extends TestCase
     public function test_its_load_with_throws_if_entity_not_unique()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
-        $this->expectException(\UnexpectedValueException::class);
+        $this->expectException(UnexpectedValueException::class);
         $subject->loadWith(function (AnyEntity $e) { return TRUE; });
     }
 
@@ -105,20 +108,18 @@ class AbstractArrayRepositoryTest extends TestCase
     public function test_its_find_with_throws_if_entity_not_unique()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
-        $this->expectException(\UnexpectedValueException::class);
+        $this->expectException(UnexpectedValueException::class);
         $subject->findWith(function (AnyEntity $e) { return TRUE; });
     }
 
-    /**
-     * @testWith [[], []]
-     *           [[{"prop1": "ok", "prop2": 0}, {"prop1": "nah-ah", "prop2": 1}, {"prop1": "ok", "prop2": 2}], [0,2]]
-     */
+    #[TestWith([[], []])]
+    #[TestWith([[['prop1' => 'ok', 'prop2' => 0], ['prop1' => 'nah-ah', 'prop2' => 1], ['prop1' => 'ok', 'prop2' => 2]], [0, 2]])]
     public function test_its_list_with_returns_all_matched_entities($entities, $expect)
     {
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
-            \array_map(
+            array_map(
                 function (AnyEntity $e) { return $e->getProp2(); },
                 $subject->listWith(function (AnyEntity $e) { return $e->getProp1() === 'ok'; })
             )
@@ -156,7 +157,7 @@ class AbstractArrayRepositoryTest extends TestCase
     {
         try {
             $callable();
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             // Ignore it this is correct
             return;
         }

@@ -3,6 +3,8 @@
 namespace test\unit\Ingenerator\PHPUtils\Random;
 
 use Ingenerator\PHPUtils\Random\ConsistentStringScrambler;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use function mt_rand;
 
@@ -25,12 +27,12 @@ class ConsistentStringScramblerTest extends TestCase
         $this->assertNull($this->newSubject()->shuffleWords('', 'anything'));
     }
 
-    /**
-     * @testWith ["Foo"]
-     *           ["  Foo"]
-     *           ["Foo "]
-     *           ["\nFoo\n"]
-     */
+    #[TestWith(['Foo'])]
+    #[TestWith(['  Foo'])]
+    #[TestWith(['Foo '])]
+    #[TestWith(['
+Foo
+'])]
     public function test_it_returns_same_output_for_single_word_string_even_with_extra_whitespace(
         $input
     ): void {
@@ -66,11 +68,11 @@ class ConsistentStringScramblerTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["I,  robot am\t alive", "am I, robot alive"]
-     *           ["Thus!\nspake Zarathustra  ", "spake Zarathustra Thus!"]
-     *           [" 51 Niddry St\n", "Niddry St 51"]
-     */
+    #[TestWith(['I,  robot am	 alive', 'am I, robot alive'])]
+    #[TestWith(['Thus!
+spake Zarathustra  ', 'spake Zarathustra Thus!'])]
+    #[TestWith([' 51 Niddry St
+', 'Niddry St 51'])]
     public function test_it_strips_repeated_and_enclosing_whitespace_in_incoming_string($input, $expect): void
     {
         $this->assertSame($expect, $this->newSubject()->shuffleWords($input, 'any-hash'));
@@ -115,7 +117,7 @@ class ConsistentStringScramblerTest extends TestCase
     public function test_it_throws_with_empty_hash_input(): void
     {
         $subject = $this->newSubject();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $subject->shuffleWords('anything', '');
     }
 

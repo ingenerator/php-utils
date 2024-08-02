@@ -4,11 +4,12 @@ namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
 use DateInterval;
 use Ingenerator\PHPUtils\DateTime\DateIntervalFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class DateIntervalFactoryTest extends TestCase
 {
-    public function provider_shorthand_single_part()
+    public static function provider_shorthand_single_part()
     {
         return [
             'seconds' => [fn() => DateIntervalFactory::seconds(15), new DateInterval('PT15S')],
@@ -20,9 +21,7 @@ class DateIntervalFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_shorthand_single_part
-     */
+    #[DataProvider('provider_shorthand_single_part')]
     public function test_from_shorthand_single_part(callable $creator, DateInterval $expect)
     {
         $this->assertEquals($expect, $creator());

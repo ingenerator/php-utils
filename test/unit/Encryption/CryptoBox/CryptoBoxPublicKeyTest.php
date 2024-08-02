@@ -5,6 +5,8 @@ namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
 
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxKeypair;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxPublicKey;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class CryptoBoxPublicKeyTest extends TestCase
@@ -29,7 +31,7 @@ class CryptoBoxPublicKeyTest extends TestCase
         );
     }
 
-    public function provider_invalid_keypair_string()
+    public static function provider_invalid_keypair_string()
     {
         return [
             'empty' => [''],
@@ -40,12 +42,10 @@ class CryptoBoxPublicKeyTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_invalid_keypair_string
-     */
+    #[DataProvider('provider_invalid_keypair_string')]
     public function test_it_throws_on_attempt_to_create_from_invalid_string($invalid)
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         CryptoBoxPublicKey::fromString($invalid);
     }
 

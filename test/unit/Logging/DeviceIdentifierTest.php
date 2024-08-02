@@ -4,22 +4,22 @@
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
 use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
 use Ingenerator\PHPUtils\Object\ScopeChangingCaller;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class DeviceIdentifierTest extends TestCase
 {
     /**
-     * @var \Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub
+     * @var ArrayCookieWrapperStub
      */
     protected $cookies;
 
-    /**
-     * @testWith [{"did": "OfLAtnofliaNqvkAjhhsFA"}]
-     *           [{"didf": "OfLAtnofliaNqvkAjhhsFA"}]
-     */
+    #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA']])]
+    #[TestWith([['didf' => 'OfLAtnofliaNqvkAjhhsFA']])]
     public function test_its_init_does_not_set_new_cookie_if_either_cookie_present($cookie)
     {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
@@ -51,11 +51,9 @@ class DeviceIdentifierTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [{}]
-     *           [{"did": "i am an abusive person!!! $$@@~~##''$$$"}]
-     *           [{"did": "", "didf": ""}]
-     */
+    #[TestWith([[]])]
+    #[TestWith([['did' => "i am an abusive person!!! \$\$@@~~##''\$\$\$"]])]
+    #[TestWith([['did' => '', 'didf' => '']])]
     public function test_its_init_sets_new_cookies_if_not_present_or_not_valid($cookie)
     {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
@@ -73,7 +71,7 @@ class DeviceIdentifierTest extends TestCase
     {
         $this->cookies = new ArrayCookieWrapperStub([]);
         $this->newSubject()->init();
-        $expect      = new \DateTimeImmutable('+5 years');
+        $expect      = new DateTimeImmutable('+5 years');
         $cookies_set = $this->cookies->inspectSetCookies();
         $this->assertEqualsWithDelta($expect, $cookies_set['did'][0]['opts']['expires'], 1);
         $this->assertEqualsWithDelta($expect, $cookies_set['didf'][0]['opts']['expires'], 1);
@@ -97,10 +95,8 @@ class DeviceIdentifierTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [true, "/;SameSite=none"]
-     *           [false, "/"]
-     */
+    #[TestWith([true, '/;SameSite=none'])]
+    #[TestWith([false, '/'])]
     public function test_it_sets_one_cookie_as_samesite_none_and_fallback_without()
     {
         $this->cookies = new ArrayCookieWrapperStub([]);
@@ -118,15 +114,13 @@ class DeviceIdentifierTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [{}, "-unset-"]
-     *           [{"did": ""}, "-unset-"]
-     *           [{"didf": ""}, "-unset-"]
-     *           [{"did": "OfLAtnofliaNqvkAjhhsFA"}, "OfLAtnofliaNqvkAjhhsFA"]
-     *           [{"didf": "OfLAtnofliaNqvkAjhhsFA"}, "OfLAtnofliaNqvkAjhhsFA"]
-     *           [{"did": "OfLAtnofliaNqvkAjhhsFA", "didf": "OfLAtnofliaNqvkAjhhsFA"}, "OfLAtnofliaNqvkAjhhsFA"]
-     *           [{"did": "i am an abusive person!!! $$@@~~##''$$$"}, "-invalid-"]
-     */
+    #[TestWith([[], '-unset-'])]
+    #[TestWith([['did' => ''], '-unset-'])]
+    #[TestWith([['didf' => ''], '-unset-'])]
+    #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA'], 'OfLAtnofliaNqvkAjhhsFA'])]
+    #[TestWith([['didf' => 'OfLAtnofliaNqvkAjhhsFA'], 'OfLAtnofliaNqvkAjhhsFA'])]
+    #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA', 'didf' => 'OfLAtnofliaNqvkAjhhsFA'], 'OfLAtnofliaNqvkAjhhsFA'])]
+    #[TestWith([['did' => "i am an abusive person!!! \$\$@@~~##''\$\$\$"], '-invalid-'])]
     public function test_its_getter_returns_valid_cookie_value_or_unset_if_initialised_never_called(
         $cookie,
         $expect

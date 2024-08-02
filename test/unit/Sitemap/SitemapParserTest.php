@@ -3,11 +3,13 @@
 namespace test\unit\Ingenerator\PHPUtils\Sitemap;
 
 use Ingenerator\PHPUtils\Sitemap\SitemapParser;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class SitemapParserTest extends TestCase
 {
-    public function provider_invalid(): array
+    public static function provider_invalid(): array
     {
         return [
             [
@@ -38,19 +40,17 @@ class SitemapParserTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_invalid
-     */
+    #[DataProvider('provider_invalid')]
     public function test_it_throws_on_attempt_to_parse_invalid_xml_or_if_not_schema_valid($input, $expect_msg): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expect_msg);
         SitemapParser::parse($input);
     }
 
     public function test_it_throws_with_duplicate_url_entries(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Duplicate sitemap entry for http://www.example.com/foobar');
         SitemapParser::parse(
             <<<'XML'
@@ -72,7 +72,7 @@ class SitemapParserTest extends TestCase
         );
     }
 
-    public function provider_parse(): array
+    public static function provider_parse(): array
     {
         return [
             [
@@ -148,9 +148,7 @@ class SitemapParserTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_parse
-     */
+    #[DataProvider('provider_parse')]
     public function test_it_parses_valid_sitemap_to_map_of_url_to_properties($xml, $expect): void
     {
         $this->assertSame($expect, SitemapParser::parse($xml));

@@ -4,16 +4,16 @@
 namespace test\unit\Ingenerator\PHPUtils\Cookie;
 
 
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class ArrayCookieWrapperStubTest extends TestCase
 {
-    /**
-     * @testWith ["my", true, "cookie"]
-     *           ["has", true, "values"]
-     *           ["anything", false, null]
-     */
+    #[TestWith(['my', true, 'cookie'])]
+    #[TestWith(['has', true, 'values'])]
+    #[TestWith(['anything', false, null])]
     public function test_it_has_cookies_from_constructor_ignoring_superglobal(
         $name,
         $expect_has,
@@ -40,7 +40,7 @@ class ArrayCookieWrapperStubTest extends TestCase
 
     public function test_it_can_simulate_set_cookie_and_capture_args()
     {
-        $exp     = new \DateTimeImmutable('tomorrow');
+        $exp     = new DateTimeImmutable('tomorrow');
         $subject = $this->newSubject();
         $subject->set('any', 'thing', ['expires' => $exp]);
         $this->assertSame(

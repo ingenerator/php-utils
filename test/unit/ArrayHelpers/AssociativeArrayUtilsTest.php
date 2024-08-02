@@ -8,15 +8,16 @@ namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
 
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
+use PHPUnit\Framework\TestCase;
 
-class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
+class AssociativeArrayUtilsTest extends TestCase
 {
 
-    /**
-     * @testWith [["one", "two", "three"], false]
-     *           [{"1": "mixed indices", "5": "also mixed"}, true]
-     *           [{"one": "o clock", "two": "o clock", "three": "o clock"}, true]
-     */
+    #[TestWith([['one', 'two', 'three'], false])]
+    #[TestWith([[1 => 'mixed indices', 5 => 'also mixed'], true])]
+    #[TestWith([['one' => 'o clock', 'two' => 'o clock', 'three' => 'o clock'], true])]
     public function test_is_associative(array $array, $expected)
     {
         $this->assertSame(
@@ -25,7 +26,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function provider_paths_to_nested()
+    public static function provider_paths_to_nested(): array
     {
         return [
             [
@@ -51,15 +52,13 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_paths_to_nested
-     */
+    #[DataProvider('provider_paths_to_nested')]
     public function test_it_converts_pathed_hash_to_nested_arrays($input, $expect)
     {
         $this->assertSame($expect, AssociativeArrayUtils::pathsToNested($input));
     }
 
-    public function provider_pop_keys()
+    public static function provider_pop_keys(): array
     {
         return [
             [
@@ -90,9 +89,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_pop_keys
-     */
+    #[DataProvider('provider_pop_keys')]
     public function test_it_can_pop_keys_from_a_source_array($source, $pop_keys, $expect)
     {
         $result = AssociativeArrayUtils::popKeys($source, $pop_keys);
@@ -104,7 +101,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
      *
      * @return array
      */
-    public function provider_set_path()
+    public static function provider_set_path(): array
     {
         return [
             // Tests returns normal values
@@ -125,9 +122,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_set_path
-     */
+    #[DataProvider('provider_set_path')]
     public function test_set_path($expected, $array, ...$args)
     {
         AssociativeArrayUtils::setPath($array, ...$args);
@@ -136,7 +131,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
     }
 
 
-    public function provider_merge()
+    public static function provider_merge(): array
     {
         return [
             // Test how it merges arrays and sub arrays with assoc keys
@@ -266,9 +261,7 @@ class AssociativeArrayUtilsTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_merge
-     */
+    #[DataProvider('provider_merge')]
     public function test_deep_merge($expected, ...$args)
     {
         $this->assertSame(

@@ -9,6 +9,7 @@ namespace test\unit\Ingenerator\PHPUtils\unit\Monitoring;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\PHPUtils\Monitoring\StatsiteMetricsAgent;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class SpyingStatsiteMetricsAgent extends StatsiteMetricsAgent
@@ -33,11 +34,9 @@ class StatsiteMetricsAgentTest extends TestCase
         $this->assertInstanceOf(StatsiteMetricsAgent::class, $this->newSubject());
     }
 
-    /**
-     * @testWith ["simple", "simple"]
-     *           ["fully.qualified.hostname", "fully"]
-     *           ["fully-qualified-hostname", "fully-qualified-hostname"]
-     */
+    #[TestWith(['simple', 'simple'])]
+    #[TestWith(['fully.qualified.hostname', 'fully'])]
+    #[TestWith(['fully-qualified-hostname', 'fully-qualified-hostname'])]
     public function test_it_sanitises_source_hostname(string $hostname, string $expect_hostname)
     {
         $subject = $this->newSubject();

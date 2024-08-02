@@ -2,34 +2,36 @@
 
 namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
+use DateInterval;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateIntervalUtils;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class DateIntervalUtilsTest extends TestCase
 {
 
-    /**
-     * @testWith ["P5M", "5 months"]
-     *           ["P1Y", "1 year"]
-     *           ["P10Y", "10 years"]
-     *           ["P3W", "21 days", "NOTE: Weeks is always compiled-out to days in the object, cannot get back to it."]
-     *           ["P3W2D", "23 days", "NOTE: Weeks is always compiled-out to days in the object, cannot get back to it."]
-     *           ["P1Y3M", "1 year and 3 months"]
-     *           ["P2Y3M2D", "2 years, 3 months and 2 days"]
-     *           ["PT4H", "4 hours"]
-     *           ["P3DT4H", "3 days and 4 hours"]
-     *           ["PT5M4S", "5 minutes and 4 seconds"]
-     */
+    #[TestWith(['P5M', '5 months'])]
+    #[TestWith(['P1Y', '1 year'])]
+    #[TestWith(['P10Y', '10 years'])]
+    #[TestWith(['P3W', '21 days', 'NOTE: Weeks is always compiled-out to days in the object, cannot get back to it.'])]
+    #[TestWith(['P3W2D', '23 days', 'NOTE: Weeks is always compiled-out to days in the object, cannot get back to it.'])]
+    #[TestWith(['P1Y3M', '1 year and 3 months'])]
+    #[TestWith(['P2Y3M2D', '2 years, 3 months and 2 days'])]
+    #[TestWith(['PT4H', '4 hours'])]
+    #[TestWith(['P3DT4H', '3 days and 4 hours'])]
+    #[TestWith(['PT5M4S', '5 minutes and 4 seconds'])]
     public function test_it_can_parse_to_human_string(string $interval_string, string $expect): void
     {
         $this->assertSame(
             $expect,
-            DateIntervalUtils::toHuman(new \DateInterval($interval_string))
+            DateIntervalUtils::toHuman(new DateInterval($interval_string))
         );
     }
 
-    public function provider_unsupported_human_intervals()
+    public static function provider_unsupported_human_intervals()
     {
         $diff = fn(string $dt1, string $dt2) => (new DateTimeImmutable($dt1))->diff(new DateTimeImmutable($dt2));
 
@@ -39,12 +41,10 @@ class DateIntervalUtilsTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_unsupported_human_intervals
-     */
-    public function test_to_human_throws_with_unsupported_intervals(\DateInterval $interval)
+    #[DataProvider('provider_unsupported_human_intervals')]
+    public function test_to_human_throws_with_unsupported_intervals(DateInterval $interval)
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         DateIntervalUtils::toHuman($interval);
     }
 

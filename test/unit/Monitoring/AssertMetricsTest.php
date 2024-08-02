@@ -12,6 +12,7 @@ use DateTimeImmutable;
 use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;
 use Ingenerator\PHPUtils\Monitoring\AssertMetrics;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
 
@@ -52,13 +53,11 @@ class AssertMetricsTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    /**
-     * @testWith [[], "no metrics"]
-     *           [[{"name": "foo", "source": "wrong"}], "wrong source"]
-     *           [[{"name": "wrong", "source": "bar"}], "wrong name"]
-     *           [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "bar"}], "duplicate metric"]
-     *           [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "other"}], "extra metric"]
-     **/
+    #[TestWith([[], 'no metrics'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'wrong']], 'wrong source'])]
+    #[TestWith([[['name' => 'wrong', 'source' => 'bar']], 'wrong name'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'bar'], ['name' => 'foo', 'source' => 'bar']], 'duplicate metric'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'bar'], ['name' => 'foo', 'source' => 'other']], 'extra metric'])]
     public function test_assertCapturedOneTimer_fails_if_no_match(array $metrics)
     {
         $agent = new ArrayMetricsAgent();
@@ -77,15 +76,13 @@ class AssertMetricsTest extends TestCase
         }
     }
 
-    /**
-     * @testWith ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0, [0], true]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0, [0.001], false]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123457", 0, [0.001], true]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123455", 0.001, [0.001], false]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0.001, [0.001], true]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123458", 0.001, [0.001], true]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123459", 0.001, [0.001], false]
-     */
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123456', 0, [0], true])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123456', 0, [0.001], false])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123457', 0, [0.001], true])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123455', 0.001, [0.001], false])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123456', 0.001, [0.001], true])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123458', 0.001, [0.001], true])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123459', 0.001, [0.001], false])]
     public function test_assertTimerValues(
         string $start,
         string $end,
@@ -102,13 +99,11 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [[], "no metrics"]
-     *           [[{"name": "foo", "source": "wrong"}], "wrong source"]
-     *           [[{"name": "wrong", "source": "bar"}], "wrong name"]
-     *           [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "bar"}], "duplicate metric"]
-     *           [[{"name": "foo", "source": "bar"}, {"name": "foo", "source": "other"}], "extra metric"]
-     **/
+    #[TestWith([[], 'no metrics'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'wrong']], 'wrong source'])]
+    #[TestWith([[['name' => 'wrong', 'source' => 'bar']], 'wrong name'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'bar'], ['name' => 'foo', 'source' => 'bar']], 'duplicate metric'])]
+    #[TestWith([[['name' => 'foo', 'source' => 'bar'], ['name' => 'foo', 'source' => 'other']], 'extra metric'])]
     public function test_assertCapturedOneExactTimer_fails_if_no_match(array $metrics)
     {
         $agent = new ArrayMetricsAgent();
@@ -128,12 +123,10 @@ class AssertMetricsTest extends TestCase
         }
     }
 
-    /**
-     * @testWith ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0, true]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123456", 0.001, false]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123457", 0.001, true]
-     *           ["2020-02-02 02:02:02.123456", "2020-02-02 02:02:02.123455", 0.001, false]
-     */
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123456', 0, true])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123456', 0.001, false])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123457', 0.001, true])]
+    #[TestWith(['2020-02-02 02:02:02.123456', '2020-02-02 02:02:02.123455', 0.001, false])]
     public function test_assertCapturedOneExactTimer_asserts_correct_time(
         string $start,
         string $end,
@@ -151,11 +144,9 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["something", "test", true]
-     *           ["something_else", "test", false]
-     *           ["something", "another_system", false]
-     */
+    #[TestWith(['something', 'test', true])]
+    #[TestWith(['something_else', 'test', false])]
+    #[TestWith(['something', 'another_system', false])]
     public function test_assert_counter_increments_asserts_correct_metric(string $name, string $source, bool $success)
     {
         $agent = new ArrayMetricsAgent();
@@ -181,12 +172,10 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["something", "test", 15.5, true]
-     *           ["something", "test", 18, false]
-     *           ["something_else", "test", 15.5, false]
-     *           ["something", "another_system", 15.5, false]
-     */
+    #[TestWith(['something', 'test', 15.5, true])]
+    #[TestWith(['something', 'test', 18, false])]
+    #[TestWith(['something_else', 'test', 15.5, false])]
+    #[TestWith(['something', 'another_system', 15.5, false])]
     public function test_assert_sample_asserts_correct_metric(string $name, string $source, float $value, bool $success)
     {
         $agent = new ArrayMetricsAgent();
@@ -201,11 +190,9 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [[1.2, 1.2], 1.2, false]
-     *           [[1.2, 2.3], 2.3, false]
-     *           [[1.2], 1.2, true]
-     */
+    #[TestWith([[1.2, 1.2], 1.2, false])]
+    #[TestWith([[1.2, 2.3], 2.3, false])]
+    #[TestWith([[1.2], 1.2, true])]
     public function test_assert_sample_fails_if_same_metric_recorded_more_than_once(
         array $values,
         float $assert_value,
@@ -223,12 +210,10 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["something", "test", 15.5, true]
-     *           ["something", "test", 18, false]
-     *           ["something_else", "test", 15.5, false]
-     *           ["something", "another_system", 15.5, false]
-     */
+    #[TestWith(['something', 'test', 15.5, true])]
+    #[TestWith(['something', 'test', 18, false])]
+    #[TestWith(['something_else', 'test', 15.5, false])]
+    #[TestWith(['something', 'another_system', 15.5, false])]
     public function test_assert_gauge_asserts_correct_metric(string $name, string $source, float $value, bool $success)
     {
         $agent = new ArrayMetricsAgent();
@@ -239,11 +224,9 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [[1.2, 1.2], 1.2, false]
-     *           [[1.2, 2.3], 2.3, false]
-     *           [[1.2], 1.2, true]
-     */
+    #[TestWith([[1.2, 1.2], 1.2, false])]
+    #[TestWith([[1.2, 2.3], 2.3, false])]
+    #[TestWith([[1.2], 1.2, true])]
     public function test_assert_gauge_fails_if_same_metric_recorded_more_than_once(
         array $values,
         float $assert_value,
@@ -261,12 +244,10 @@ class AssertMetricsTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [{"name":"other", "source": "other"}, true]
-     *           [{"name":"same", "source": "same"}, false]
-     *           [{"name":"same", "source": "other"}, true]
-     *           [{"name":"other", "source": "same"}, true]
-     */
+    #[TestWith([['name' => 'other', 'source' => 'other'], true])]
+    #[TestWith([['name' => 'same', 'source' => 'same'], false])]
+    #[TestWith([['name' => 'same', 'source' => 'other'], true])]
+    #[TestWith([['name' => 'other', 'source' => 'same'], true])]
     public function test_assert_gauge_fails_if_any_other_metric_with_same_name_and_source(array $m, bool $success)
     {
         $agent  = new ArrayMetricsAgent();
