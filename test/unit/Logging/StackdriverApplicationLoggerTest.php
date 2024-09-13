@@ -91,6 +91,32 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame($messages, $actual, 'Expect correct log messages');
     }
 
+    public function test_it_handles_invalid_utf8_when_logging()
+    {
+        $subject = $this->newSubject();
+        $line = __LINE__ + 1;
+        $subject->info("This got truncated somewhere\xD0 then appended to", ['and' => "this was junk\xa3\xa9"]);
+        $entries = $this->assertLoggedJSONLines();
+        $this->assertSame(
+            [
+                [
+                    'severity' => 'INFO',
+                    'message' => "This got truncated somewhere� then appended to",
+                    '@ingenType' => 'app',
+                    'logging.googleapis.com/sourceLocation' => [
+                        'file' => __FILE__,
+                        'line' => $line,
+                        'function' => __CLASS__.'->'.__FUNCTION__,
+                    ],
+                    'custom_context' => [
+                        'and' => 'this was junk��',
+                    ],
+                ],
+            ],
+            $entries
+        );
+    }
+
     public function test_it_appends_logs_to_existing_content_if_file_specified()
     {
         $previous = vfsStream::newFile('existing-log.log')
