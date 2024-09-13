@@ -91,6 +91,32 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame($messages, $actual, 'Expect correct log messages');
     }
 
+    public function test_it_handles_invalid_utf8_when_logging()
+    {
+        $subject = $this->newSubject();
+        $line = __LINE__ + 1;
+        $subject->info("This got truncated somewhere\xD0 then appended to", ['and' => "this was junk\xa3\xa9"]);
+        $entries = $this->assertLoggedJSONLines();
+        $this->assertSame(
+            [
+                [
+                    'severity' => 'INFO',
+                    'message' => "This got truncated somewhere� then appended to",
+                    '@ingenType' => 'app',
+                    'logging.googleapis.com/sourceLocation' => [
+                        'file' => __FILE__,
+                        'line' => $line,
+                        'function' => __CLASS__.'->'.__FUNCTION__,
+                    ],
+                    'custom_context' => [
+                        'and' => 'this was junk��',
+                    ],
+                ],
+            ],
+            $entries
+        );
+    }
+
     public function test_it_appends_logs_to_existing_content_if_file_specified()
     {
         $previous = vfsStream::newFile('existing-log.log')
@@ -568,8 +594,12 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
 
-    #[TestWith([[], null])]
+    #[TestWith([[], ''])]
     #[TestWith([['HTTP_USER_AGENT' => 'chrome 10'], 'chrome 10'])]
+    #[TestWith([
+        ['HTTP_USER_AGENT' => "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff"],
+        'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
+    ])]
     public function test_its_request_logger_logs_user_agent_from_global_array($server, $expect)
     {
         http_response_code(402);

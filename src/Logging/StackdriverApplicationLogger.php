@@ -8,6 +8,7 @@ use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\PHPUtils\Monitoring\MetricsAgent;
 use Ingenerator\PHPUtils\Object\InitialisableSingletonTrait;
+use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use RuntimeException;
@@ -383,7 +384,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         try {
             $success = file_put_contents(
                 $this->log_destination,
-                json_encode($log_entry)."\n",
+                json_encode($log_entry, JSON_INVALID_UTF8_SUBSTITUTE)."\n",
                 FILE_APPEND
             );
 
@@ -428,7 +429,10 @@ class StackdriverApplicationLogger extends AbstractLogger
                     // requestMethod, requestUrl, remoteIp are expected to come from metadata provider as they are
                     // shared with application log entry context
                     'status'    => $http_code,
-                    'userAgent' => $this->truncate($server['HTTP_USER_AGENT'] ?? NULL, 500),
+                    'userAgent' => $this->truncate(
+                        StringSanitiser::ensurePrintableUtf8($server['HTTP_USER_AGENT'] ?? ''),
+                        500
+                    ),
                     'latency'   => $this->calculateRequestLatency($request_start_time),
                 ],
             ]
