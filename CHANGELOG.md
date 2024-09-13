@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v2.1.1 (2024-09-13)
+
 * Support specifying unescaped-slashes in `JSON::encode()`
 * Don't escape `/` in JSON-encoded log payloads from StackdriverApplicationLogger
 * Ensure StackdriverApplicationLogger can always log even with invalid UTF8 characters anywhere in payload
