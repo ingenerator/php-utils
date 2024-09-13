@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Fix session & logging bugs when incoming user-agent contains invalid UTF8 or escape characters
+
 ### v2.1.0 (2024-08-02)
 
 * Support PHP 8.3

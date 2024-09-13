@@ -9,6 +9,7 @@ namespace Ingenerator\PHPUtils\Session;
 
 
 use Ingenerator\PHPUtils\DateTime\DateString;
+use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
 use PDO;
 use SessionHandlerInterface;
 
@@ -168,7 +169,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
                 'hash'       => $this->calculateHash(),
                 'data'       => '',
                 'now'        => \date('Y-m-d H:i:s'),
-                'user_agent' => mb_substr($this->client_user_agent, 0, 255),
+                'user_agent' => StringSanitiser::ensurePrintableUtf8($this->client_user_agent, 255),
                 'ip'         => $this->client_ip,
             ]
         );
@@ -307,6 +308,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      */
     protected function calculateHash(): string
     {
+        // Note, intentionally using the *raw* user-agent (as reported by the client) rather than the sanitised one.
         $hash = $this->client_user_agent.$this->hash_salt;
 
         return \sha1($hash);

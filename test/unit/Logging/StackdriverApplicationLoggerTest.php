@@ -568,8 +568,12 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
 
-    #[TestWith([[], null])]
+    #[TestWith([[], ''])]
     #[TestWith([['HTTP_USER_AGENT' => 'chrome 10'], 'chrome 10'])]
+    #[TestWith([
+        ['HTTP_USER_AGENT' => "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff"],
+        'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
+    ])]
     public function test_its_request_logger_logs_user_agent_from_global_array($server, $expect)
     {
         http_response_code(402);
