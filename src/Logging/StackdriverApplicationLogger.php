@@ -384,7 +384,10 @@ class StackdriverApplicationLogger extends AbstractLogger
         try {
             $success = file_put_contents(
                 $this->log_destination,
-                json_encode($log_entry, JSON_INVALID_UTF8_SUBSTITUTE)."\n",
+                json_encode(
+                    $log_entry,
+                    JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_SLASHES
+                )."\n",
                 FILE_APPEND
             );
 

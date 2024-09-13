@@ -3,7 +3,7 @@
 namespace Ingenerator\PHPUtils\StringEncoding;
 
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
-use function json_last_error_msg;
+use JsonException;
 
 class JSON
 {
@@ -16,13 +16,11 @@ class JSON
             throw new InvalidJSONException('Invalid JSON: Cannot decode a null value');
         }
 
-        $result = json_decode($json, TRUE);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidJSONException('Invalid JSON: '.json_last_error_msg());
+        try {
+            return json_decode($json, associative: true, flags: JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new InvalidJSONException('Invalid JSON: '.$e->getMessage());
         }
-
-        return $result;
     }
 
     public static function decodeArray(string $json): array
@@ -34,13 +32,31 @@ class JSON
         return $value ?: [];
     }
 
-    public static function encode($value, bool $pretty = TRUE): string
-    {
-        $json = json_encode($value, $pretty ? JSON_PRETTY_PRINT : 0);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Ingenerator\PHPUtils\StringEncoding\InvalidJSONException('Could not encode as JSON : ' . json_last_error_msg());
+    /**
+     * @param mixed $value
+     * @param bool $pretty
+     * @param bool $escaped_slashes defaults true to match the PHP default
+     *
+     * @return string
+     */
+    public static function encode(
+        $value,
+        bool $pretty = true,
+        bool $escaped_slashes = true,
+    ): string {
+        $flags = (
+            ($pretty ? JSON_PRETTY_PRINT : 0)
+            |
+            ($escaped_slashes ? 0 : JSON_UNESCAPED_SLASHES)
+            |
+            JSON_THROW_ON_ERROR
+        );
+
+        try {
+            return json_encode($value, $flags);
+        } catch (JsonException $e) {
+            throw new InvalidJSONException('Could not encode as JSON: '.$e->getMessage());
         }
-        return $json;
     }
 
     /**
