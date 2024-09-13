@@ -34,9 +34,26 @@ class JSON
         return $value ?: [];
     }
 
-    public static function encode($value, bool $pretty = TRUE): string
-    {
-        $json = json_encode($value, $pretty ? JSON_PRETTY_PRINT : 0);
+    /**
+     * @param mixed $value
+     * @param bool $pretty
+     * @param bool $escaped_slashes defaults true to match the PHP default
+     *
+     * @return string
+     * @throws \Ingenerator\PHPUtils\StringEncoding\InvalidJSONException
+     */
+    public static function encode(
+        $value,
+        bool $pretty = true,
+        bool $escaped_slashes = true,
+    ): string {
+        $flags = (
+            ($pretty ? JSON_PRETTY_PRINT : 0)
+            |
+            ($escaped_slashes ? 0 : JSON_UNESCAPED_SLASHES)
+        );
+
+        $json = json_encode($value, $flags);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Ingenerator\PHPUtils\StringEncoding\InvalidJSONException('Could not encode as JSON : ' . json_last_error_msg());
         }
