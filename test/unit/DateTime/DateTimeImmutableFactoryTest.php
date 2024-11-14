@@ -251,4 +251,23 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertGreaterThanOrEqual($before, $result, 'Should be after start of test (ignoring micros)');
     }
 
+    public function test_it_can_factory_with_zero_time()
+    {
+        $result = DateTimeImmutableFactory::zeroTime(
+            DateTimeImmutableFactory::fromIso('2023-01-03T10:02:03.123456+01:00')
+        );
+        $this->assertSame('2023-01-03T00:00:00.000000+01:00', DateString::isoMS($result));
+    }
+
+    public function test_zero_time_uses_current_time_by_default()
+    {
+        $before = new DateTimeImmutable('00:00:00.000000');
+        $result = DateTimeImmutableFactory::zeroTime();
+        $after = new DateTimeImmutable('00:00:00.000000');
+
+        $this->assertSame('00:00:00.000000', $result->format('H:i:s.u'), 'Time is midnight');
+        $this->assertLessThanOrEqual($after, $result, 'Should be after start of test');
+        $this->assertGreaterThanOrEqual($before, $result, 'Should be before end of test (ignoring time)');
+    }
+
 }

@@ -199,4 +199,12 @@ class DateTimeImmutableFactory
         );
     }
 
+    /**
+     * Remove the entire time component from a DateTimeImmutable (e.g. reset it to midnight)
+     */
+    public static function zeroTime(DateTimeImmutable $date_time = new DateTimeImmutable()): DateTimeImmutable
+    {
+        return $date_time->setTime(0, 0);
+    }
+
 }

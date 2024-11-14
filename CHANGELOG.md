@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Add `->ago()` and `->future()` helper methods to RealtimeClock
+
 ### v2.1.1 (2024-09-13)
 
 * Support specifying unescaped-slashes in `JSON::encode()`

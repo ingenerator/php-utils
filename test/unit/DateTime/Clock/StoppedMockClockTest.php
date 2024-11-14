@@ -6,6 +6,8 @@ namespace test\unit\Ingenerator\PHPUtils\unit\DateTime\Clock;
 use DateInterval;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
+use Ingenerator\PHPUtils\DateTime\DateIntervalFactory;
+use Ingenerator\PHPUtils\DateTime\DateString;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
@@ -182,5 +184,27 @@ class StoppedMockClockTest extends TestCase
         $clock->usleep(500);
         $this->expectException(ExpectationFailedException::class);
         $clock->assertNeverSlept();
+    }
+
+    public function test_ago_and_future_work_as_expected()
+    {
+        $clock = StoppedMockClock::at('2024-11-14 13:56:20.203123');
+        $this->assertSame(
+            [
+                'ago_with_time' => '2023-11-14T13:56:20.203123+00:00',
+                'ago_date_only' => '2023-11-14T00:00:00.000000+00:00',
+                'future_with_time' => '2025-01-14T13:56:20.203123+00:00',
+                'future_date_only' => '2025-01-14T00:00:00.000000+00:00',
+            ],
+            array_map(
+                DateString::isoMS(...),
+                [
+                    'ago_with_time' => $clock->ago(DateIntervalFactory::years(1)),
+                    'ago_date_only' => $clock->ago(DateIntervalFactory::years(1), date_only: TRUE),
+                    'future_with_time' => $clock->future(DateIntervalFactory::months(2)),
+                    'future_date_only' => $clock->future(DateIntervalFactory::months(2), date_only: TRUE),
+                ]
+            )
+        );
     }
 }
