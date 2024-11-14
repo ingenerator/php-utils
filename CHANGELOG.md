@@ -1,5 +1,7 @@
 ### Unreleased
 
+### v2.2.0 (2024-11-14)
+
 * Add `->ago()` and `->future()` helper methods to RealtimeClock
 
 ### v2.1.1 (2024-09-13)
