@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v2.3.0 (2025-03-10)
+
+* Support option to write CSV column headers unquoted
+
 ### v2.2.0 (2024-11-14)
 
 * Add `->ago()` and `->future()` helper methods to RealtimeClock
