@@ -11,8 +11,10 @@ use ErrorException;
 use Ingenerator\PHPUtils\CSV\CSVWriter;
 use Ingenerator\PHPUtils\CSV\MismatchedSchemaException;
 use LogicException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use function fclose;
 use function fgetcsv;
 use function file_get_contents;
@@ -134,6 +136,64 @@ class CSVWriterTest extends TestCase
         fclose($file);
     }
 
+    public static function providerQuotedHeaders(): array
+    {
+        $row = ['our data' => 'is at times', 'really big' => 'often'];
+
+        return [
+            'default (with quotes)' => [
+                $row,
+                [],
+                <<<CSV
+                "our data","really big"
+                "is at times",often
+
+                CSV,
+            ],
+            'with quotes' => [
+                $row,
+                ['quote_headers' => true],
+                <<<CSV
+                "our data","really big"
+                "is at times",often
+
+                CSV,
+            ],
+            'without quotes' => [
+                $row,
+                ['quote_headers' => false],
+                <<<CSV
+                our data,really big
+                "is at times",often
+
+                CSV,
+            ],
+        ];
+    }
+
+    #[DataProvider('providerQuotedHeaders')]
+    public function test_it_optionally_writes_column_headers_without_quotes(array $row, array $options, string $expect): void
+    {
+        $file = fopen('php://memory', 'w');
+        $subj = $this->newSubject();
+        $subj->open($file, $options);
+        $subj->write($row);
+        rewind($file);
+        $this->assertSame($expect, stream_get_contents($file));
+        fclose($file);
+    }
+
+    public function test_it_throws_if_column_headers_contain_comma_when_unquoted(): void
+    {
+        $file = fopen('php://memory', 'w');
+        $subj = $this->newSubject();
+        $subj->open($file, ['quote_headers' => false]);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Column header `really, really big` cannot contain comma if headers are not quoted');
+        $subj->write(['our data' => 'is, at times', 'really, really big' => 'often']);
+        fclose($file);
+    }
+
     #[TestWith([true])]
     #[TestWith([false])]
     public function test_it_optionally_writes_byte_order_mark_at_start_of_file($write_bom)
@@ -189,8 +249,7 @@ class CSVWriterTest extends TestCase
         $this->assertSame($expect, $actual, 'CSV content should match');
     }
 
-
-    protected function newSubject()
+    private function newSubject(): CSVWriter
     {
         return new CSVWriter();
     }

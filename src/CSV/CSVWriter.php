@@ -8,6 +8,7 @@ namespace Ingenerator\PHPUtils\CSV;
 
 
 use Ingenerator\PHPUtils\CSV\MismatchedSchemaException;
+use RuntimeException;
 
 class CSVWriter
 {
@@ -32,7 +33,8 @@ class CSVWriter
      * @var array
      */
     protected $options = [
-        'write_utf8_bom' => FALSE
+        'write_utf8_bom' => FALSE,
+        'quote_headers' => TRUE,
     ];
 
     /**
@@ -72,7 +74,7 @@ class CSVWriter
                 \fputs($this->resource, static::UTF8_BOM);
             }
             $this->expect_schema = $row_schema;
-            \fputcsv($this->resource, $this->expect_schema);
+            $this->writeHeaders($this->expect_schema);
         } elseif ($this->expect_schema !== $row_schema) {
             throw MismatchedSchemaException::forSchema($this->expect_schema, $row_schema);
         }
@@ -96,5 +98,21 @@ class CSVWriter
         }
 
         $this->resource = NULL;
+    }
+
+    private function writeHeaders(array $keys): void
+    {
+        if ($this->options['quote_headers']) {
+            \fputcsv($this->resource, $keys);
+        } else {
+            array_walk(
+                $keys,
+                fn(string $str) => ! str_contains($str, ',')
+                    ?: throw new RuntimeException(
+                        "Column header `$str` cannot contain comma if headers are not quoted"
+                    )
+            );
+            fwrite($this->resource, implode(',', $keys).PHP_EOL);
+        }
     }
 }
