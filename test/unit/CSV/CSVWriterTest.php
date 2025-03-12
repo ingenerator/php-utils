@@ -194,6 +194,48 @@ class CSVWriterTest extends TestCase
         fclose($file);
     }
 
+    public static function providerLineEndings(): array
+    {
+        return [
+            'default' => [
+                [],
+                "\"our big\",is\ndata,here\n",
+            ],
+            'default, with unquoted headers' => [
+                ['quote_headers' => false],
+                "our big,is\ndata,here\n",
+            ],
+            'unix' => [
+                ['eol' => "\n"],
+                "\"our big\",is\ndata,here\n",
+            ],
+            'mac' => [
+                ['eol' => "\r"],
+                "\"our big\",is\rdata,here\r",
+            ],
+            'windows' => [
+                ['eol' => "\r\n"],
+                "\"our big\",is\r\ndata,here\r\n",
+            ],
+            'windows, with unquoted headers' => [
+                ['eol' => "\r\n", 'quote_headers' => false],
+                "our big,is\r\ndata,here\r\n",
+            ],
+        ];
+    }
+
+    #[DataProvider('providerLineEndings')]
+    public function test_its_line_endings_can_be_configured(array $options, string $expect): void
+    {
+        $file = fopen('php://memory', 'w');
+        $subj = $this->newSubject();
+        $subj->open($file, $options);
+        $subj->write(['our big' => 'data', 'is' => 'here']);
+        rewind($file);
+        $this->assertSame($expect, stream_get_contents($file));
+        fclose($file);
+    }
+
     #[TestWith([true])]
     #[TestWith([false])]
     public function test_it_optionally_writes_byte_order_mark_at_start_of_file($write_bom)

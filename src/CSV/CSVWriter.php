@@ -35,6 +35,7 @@ class CSVWriter
     protected $options = [
         'write_utf8_bom' => FALSE,
         'quote_headers' => TRUE,
+        'eol' => "\n",
     ];
 
     /**
@@ -79,7 +80,7 @@ class CSVWriter
             throw MismatchedSchemaException::forSchema($this->expect_schema, $row_schema);
         }
 
-        \fputcsv($this->resource, $row);
+        \fputcsv($this->resource, $row, eol: $this->options['eol']);
     }
 
     protected function isResourceOpen()
@@ -103,7 +104,7 @@ class CSVWriter
     private function writeHeaders(array $keys): void
     {
         if ($this->options['quote_headers']) {
-            \fputcsv($this->resource, $keys);
+            \fputcsv($this->resource, $keys, eol: $this->options['eol']);
         } else {
             array_walk(
                 $keys,
@@ -112,7 +113,7 @@ class CSVWriter
                         "Column header `$str` cannot contain comma if headers are not quoted"
                     )
             );
-            fwrite($this->resource, implode(',', $keys).PHP_EOL);
+            fwrite($this->resource, implode(',', $keys).$this->options['eol']);
         }
     }
 }
