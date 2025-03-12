@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v2.3.1 (2025-03-12)
+
+* Support option to customize EOL character in CSVWriter
+
 ### v2.3.0 (2025-03-10)
 
 * Support option to write CSV column headers unquoted
