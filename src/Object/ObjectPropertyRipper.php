@@ -49,10 +49,9 @@ class ObjectPropertyRipper
         // We also shouldn't cache, as individual objects may have variable field names (e.g. with public vars)
         // that are not present on other instances of the same class
 
-        $props = (\Closure::bind(
+        $props = (self::bindScopedClosure(
             fn() => \get_object_vars($object),
-            NULL,
-            $object
+            $object,
         ))();
 
         // Safety check - the method above is efficient but can't return private props from parent classes
@@ -92,21 +91,35 @@ class ObjectPropertyRipper
      */
     protected static function getRipper($class)
     {
-        if ( ! isset(static::$rippers[$class])) {
-            static::$rippers[$class] = \Closure::bind(
-                function ($object, $properties) {
-                    $values = [];
-                    foreach ($properties as $property) {
-                        $values[$property] = $object->$property;
-                    }
+        static::$rippers[$class] ??= self::bindScopedClosure(
+            function ($object, $properties) {
+                $values = [];
+                foreach ($properties as $property) {
+                    $values[$property] = $object->$property;
+                }
 
-                    return $values;
-                },
-                NULL,
-                $class
-            );
-        }
+                return $values;
+            },
+            $class,
+        );
 
         return static::$rippers[$class];
+    }
+
+    /**
+     * @param object|class-string<object> $scope
+     */
+    private static function bindScopedClosure(callable $callback, object|string $scope): \Closure
+    {
+        $scope_class = \is_object($scope) ? $scope::class : $scope;
+        if ($scope_class === \stdClass::class) {
+            // Cannot bind to the scope of an internal class (e.g. stdClass), and there is no need to do so since
+            // all stdClass properties are public.
+            // Note that this is the *not* the case for a user-defined class that extends stdClass, hence checking
+            // for the exact class name rather than `instanceof`.
+            $scope = null;
+        }
+
+        return \Closure::bind($callback, newThis: null, newScope: $scope);
     }
 }
