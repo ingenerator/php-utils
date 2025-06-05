@@ -1,5 +1,9 @@
 ### Unreleased
 
+### v2.4.0 (2025-06-05)
+
+* Fix `ObjectPropertyRipper` to handle `stdClass` objects
+
 ### v2.3.1 (2025-03-12)
 
 * Support option to customize EOL character in CSVWriter
