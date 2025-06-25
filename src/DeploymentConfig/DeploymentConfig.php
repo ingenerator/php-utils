@@ -58,7 +58,7 @@ class DeploymentConfig
      *
      * @param array|NULL $env_vars - if missing will default to reading from $_SERVER
      */
-    protected function __construct(array $env_vars = NULL)
+    protected function __construct(?array $env_vars = NULL)
     {
         if ($env_vars === NULL) {
             $env_vars = $_SERVER;

@@ -38,7 +38,7 @@ if (PHP_MAJOR_VERSION < 8) {
 
         public function __construct(array $result) { $this->result = $result; }
 
-        public function fetchAll(int $fetch_style = NULL, mixed ...$fetch_argument): array
+        public function fetchAll(?int $fetch_style = NULL, mixed ...$fetch_argument): array
         {
             if (PHP_VERSION_ID < 80100) {
                 // Before 8.1, ints and floats were returned as strings
