@@ -248,7 +248,7 @@ class CSVWriterTest extends TestCase
         if ($write_bom) {
             $this->assertSame(CSVWriter::UTF8_BOM, fread($file, strlen(CSVWriter::UTF8_BOM)));
         }
-        $this->assertSame(['first'], fgetcsv($file));
+        $this->assertSame(['first'], fgetcsv($file, escape: '\\'));
     }
 
     #[TestWith([['is' => 'jumbled', 'our' => 'up']])]
@@ -284,7 +284,7 @@ class CSVWriterTest extends TestCase
     {
         rewind($file);
         $actual = [];
-        while ($row = fgetcsv($file)) {
+        while ($row = fgetcsv($file, escape: '\\')) {
             $actual[] = $row;
         }
 

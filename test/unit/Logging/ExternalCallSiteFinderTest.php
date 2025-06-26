@@ -129,8 +129,20 @@ PHP
             [
                 <<<'PHP'
                 // Anonymous func
+                use test\unit\Ingenerator\PHPUtils\Logging\ExternalCallSiteFinderTest;
                 return (function ($asserter) {
-                    return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => '{closure}']);
+                    if (PHP_VERSION_ID < 80400) {
+                        $expected_func_name = '{closure}';
+                    } else {
+                        $expected_func_name = sprintf("%s->{closure:%s:%d}",
+                            ExternalCallSiteFinderTest::class,
+                            __FILE__,
+                            // it's the line with the 'function' keyword
+                            (__LINE__-8)
+                        );
+                    }
+                    return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => $expected_func_name]);
+                    
                 })($asserter);
 PHP
                 ,

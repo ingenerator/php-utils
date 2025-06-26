@@ -17,7 +17,7 @@ class OperationTimer
 
     protected RealtimeClock $realtime_clock;
 
-    public function __construct(MetricsAgent $metrics_agent, RealtimeClock $realtime_clock = NULL)
+    public function __construct(MetricsAgent $metrics_agent, ?RealtimeClock $realtime_clock = NULL)
     {
         $this->metrics_agent  = $metrics_agent;
         $this->realtime_clock = $realtime_clock ?? new RealtimeClock();

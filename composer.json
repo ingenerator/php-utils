@@ -16,15 +16,15 @@
   ],
   "require": {
     "ext-json": "*",
-    "ext-mbstring": "~8.2.0 || ~8.3.0",
-    "ext-pdo": "~8.2.0 || ~8.3.0",
-    "ext-sodium": "~8.2.0 || ~8.3.0",
-    "php": "~8.2.0 || ~8.3.0",
+    "ext-mbstring": "~8.2.0 || ~8.3.0 || ~8.4.0",
+    "ext-pdo": "~8.2.0 || ~8.3.0 || ~8.4.0",
+    "ext-sodium": "~8.2.0 || ~8.3.0 || ~8.4.0",
+    "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
     "psr/log": "^1.1 || ^2.0 || ^3.0"
   },
   "require-dev": {
-    "mikey179/vfsstream": "^1.6.11",
-    "phpunit/phpunit": "^11.0",
+    "mikey179/vfsstream": "^1.6.12",
+    "phpunit/phpunit": "^11.5",
     "ergebnis/phpunit-slow-test-detector": "^2.15"
   },
   "support": {

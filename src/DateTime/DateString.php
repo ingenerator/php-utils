@@ -22,7 +22,7 @@ class DateString
      *
      * @return string
      */
-    public static function format(\DateTimeImmutable $date = NULL, $format, $empty_value = '')
+    public static function format(?\DateTimeImmutable $date, $format, $empty_value = '')
     {
         if ( ! $date) {
             return $empty_value;
@@ -52,7 +52,7 @@ class DateString
      *
      * @return string
      */
-    public static function ymd(\DateTimeImmutable $date = NULL, $empty_value = '')
+    public static function ymd(?\DateTimeImmutable $date, $empty_value = '')
     {
         return static::format($date, 'Y-m-d', $empty_value);
     }
@@ -65,7 +65,7 @@ class DateString
      *
      * @return string
      */
-    public static function ymdhis(\DateTimeImmutable $date = NULL, $empty_value = '')
+    public static function ymdhis(?\DateTimeImmutable $date, $empty_value = '')
     {
         return static::format($date, 'Y-m-d H:i:s', $empty_value);
     }
