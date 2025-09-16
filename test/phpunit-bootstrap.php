@@ -6,6 +6,11 @@
 // https://github.com/sebastianbergmann/phpunit/issues/2449
 \set_error_handler(
     function ($severity, $message, $file, $line) {
-        throw new ErrorException($message, 0, $severity, $file, $line);
-    }
+        if (error_reporting() & $severity) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        }
+
+        // This error has been silenced locally, ignore it
+        return true;
+    },
 );
