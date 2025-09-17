@@ -12,6 +12,7 @@ use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
 use PDO;
 use SessionHandlerInterface;
+use UnexpectedValueException;
 
 class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface, \SessionIdInterface
 {
@@ -186,6 +187,12 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
      */
     public function validateId($session_id): bool
     {
+        if ( ! (is_string($session_id) && preg_match($this->getValidSessionIdRegex(), $session_id))) {
+            // It cannot be a valid SID if it doesn't match the format that we generate
+            // It's likely a credential stuffing bot - ignore it
+            return false;
+        }
+
         $now = new \DateTimeImmutable();
         $this->getLock($session_id);
 
@@ -228,6 +235,28 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
 
             return FALSE;
         }
+    }
+
+    private function getValidSessionIdRegex(): string
+    {
+        // sid_length and sid_bits_per_character can be configured with INI settings, but this is deprecated from 8.4
+        // https://wiki.php.net/rfc/deprecations_php_8_4#sessionsid_length_and_sessionsid_bits_per_character
+        // In future they will always be 32 byte hexadecimal strings.
+        // In the meantime we need to accommodate the potential that the running app has different defaults.
+        return sprintf(
+            match (ini_get('session.sid_bits_per_character')) {
+                '5' => '/^[0-9a-v]{%d}$/',
+                '6' => '/^[0-9a-zA-Z,-]{%d}$/',
+                // The default, which will also become the standard once the INI setting is removed (at which point
+                // ini_get will return false)
+                false,
+                '4' => '/^[0-9a-f]{%d}$/',
+                default => throw new UnexpectedValueException(
+                    'Unexpected ini setting for session.sid_bits_per_character',
+                ),
+            },
+            ini_get('session.sid_length') ?: 32,
+        );
     }
 
     /**
