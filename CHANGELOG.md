@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Support PHP 8.5 & 8.6
+
 ### v2.5.1 (2025-09-17)
 
 * Fix MysqlSession to immediately return false (without database check) if session ID does not match the pattern of IDs
