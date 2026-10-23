@@ -7,6 +7,9 @@
 namespace Ingenerator\PHPUtils\DateTime;
 
 
+use DateInterval;
+use DateTimeZone;
+
 /**
  * Holds a user-entered invalid date string that could not be parsed, to allow overall entity
  * validation to catch it and legacy forms to re-display it.
@@ -45,7 +48,7 @@ class InvalidUserDateTime extends \DateTimeImmutable
         throw new \BadMethodCallException('Invalid call to '.__METHOD__);
     }
 
-    public static function __set_state(array $array): \DateTimeImmutable
+    public static function __set_state(array $array): static
     {
         throw new \BadMethodCallException('Invalid call to '.__METHOD__);
     }
@@ -60,7 +63,7 @@ class InvalidUserDateTime extends \DateTimeImmutable
         return $this->input_string;
     }
 
-    public function add($interval): \DateTimeImmutable
+    public function add(DateInterval $interval): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
@@ -78,49 +81,49 @@ class InvalidUserDateTime extends \DateTimeImmutable
      * @return static
      * Returns the {@link http://www.php.net/manual/en/class.datetimeimmutable.php DateTimeImmutable} object for method chaining or <b>FALSE</b> on failure.
      */
-    public function modify($modify): \DateTimeImmutable
+    public function modify(string $modify): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
         );
     }
 
-    public function setDate($year, $month, $day): \DateTimeImmutable
+    public function setDate(int $year, int $month, int $day): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
         );
     }
 
-    public function setISODate($year, $week, $day = 1): \DateTimeImmutable
+    public function setISODate(int $year, int $week, int $day = 1): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
         );
     }
 
-    public function setTime($hour, $minute, $second = 0, $microseconds = 0): \DateTimeImmutable
+    public function setTime(int $hour, int $minute, int $second = 0, $microseconds = 0): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
         );
     }
 
-    public function setTimestamp($unixtimestamp): \DateTimeImmutable
+    public function setTimestamp(int $unixtimestamp): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
         );
     }
 
-    public function setTimezone($timezone): \DateTimeImmutable
+    public function setTimezone(DateTimeZone $timezone): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'
         );
     }
 
-    public function sub($interval): \DateTimeImmutable
+    public function sub(DateInterval $interval): static
     {
         throw new \RuntimeException(
             'Cannot '.__METHOD__.' on invalid user date/time `'.$this->input_string.'`'

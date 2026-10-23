@@ -14,7 +14,7 @@ class LoggingFailureException extends \RuntimeException
 
     public function __construct(?string $log_destination, Throwable $failure)
     {
-        return parent::__construct(
+        parent::__construct(
             sprintf(
                 'Could not write to log at `%s` - [%s] %s',
                 $log_destination,
