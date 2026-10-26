@@ -121,7 +121,7 @@ final class StoppedMockClockTest extends TestCase
     }
 
     /**
-     * @return Iterator<int, (array<(array<int> | string)> | Closure(): array<void> | Closure(StoppedMockClock $clock): array<void>)>
+     * @return Iterator<int, array{Closure(StoppedMockClock $clock):void, list<int>, string}>
      */
     public static function provider_assert_slept_fails(): Iterator
     {

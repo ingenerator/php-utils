@@ -161,7 +161,7 @@ abstract class AbstractArrayRepository
     {
         $seen_objects ??= new WeakMap();
         if (isset($seen_objects[$entity])) {
-            return '**RECURSION**';
+            return ['**RECURSION**'];
         }
         $seen_objects[$entity] = true;
 

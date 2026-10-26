@@ -93,7 +93,7 @@ final class RealtimeClockTest extends TestCase
     }
 
     /**
-     * @return Iterator<string, (array<(bool | string)> | Closure(RealtimeClock $clock): array<DateTimeImmutable>)>
+     * @return Iterator<string, array{Closure(RealtimeClock $clock):DateTimeImmutable, string, bool}>
      */
     public static function provider_relative_times(): Iterator
     {

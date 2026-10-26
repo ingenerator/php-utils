@@ -26,7 +26,7 @@ class CSVWriter
     public const UTF8_BOM = "\xEF\xBB\xBF";
 
     /**
-     * @var resource
+     * @var resource|null
      */
     protected $resource;
 

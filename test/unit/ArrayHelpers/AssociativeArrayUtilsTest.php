@@ -134,7 +134,7 @@ final class AssociativeArrayUtilsTest extends TestCase
     }
 
     /**
-     * @return Iterator<int, non-empty-list<array<string, mixed>>>
+     * @return Iterator<int, non-empty-list<array<mixed>>>
      */
     public static function provider_merge(): Iterator
     {
