@@ -78,18 +78,19 @@ final class StoppedMockClock extends RealtimeClock
         $this->current_microtime += ($microseconds / 1000000);
     }
 
-    public function usleep($microseconds): void
+    public function usleep(int $microseconds): void
     {
         $this->tickMicroseconds($microseconds);
         $this->sleeps[] = $microseconds;
     }
 
-    public function assertSlept(array $expected, $msg = ''): void
+    /** @param list<int> $expected */
+    public function assertSlept(array $expected, string $msg = ''): void
     {
         Assert::assertSame($expected, $this->sleeps, $msg);
     }
 
-    public function assertNeverSlept($msg = ''): void
+    public function assertNeverSlept(string $msg = ''): void
     {
         Assert::assertSame([], $this->sleeps, $msg);
     }

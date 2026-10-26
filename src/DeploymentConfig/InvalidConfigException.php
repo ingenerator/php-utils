@@ -25,7 +25,7 @@ final class InvalidConfigException extends RuntimeException
         return new self('Corrupt config keypair file '.$keypair_file.' ('.$reason.')');
     }
 
-    public static function duplicateEnvironmentMap($env): InvalidConfigException
+    public static function duplicateEnvironmentMap(string $env): InvalidConfigException
     {
         return new self('Duplicate environment mapping for '.$env);
     }

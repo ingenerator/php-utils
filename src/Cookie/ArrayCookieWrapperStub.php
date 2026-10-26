@@ -18,16 +18,18 @@ class ArrayCookieWrapperStub extends CookieWrapper
         $this->set_cookie_calls[$name][] = ['value' => $value, 'opts' => $options];
     }
 
-    protected function set_cookie($name, $value, $options): void
+    /** @param array<string, mixed> $options */
+    protected function set_cookie(string $name, ?string $value, array $options): void
     {
         // No-op
     }
 
-    protected function headers_sent(&$file, &$line): bool
+    protected function headers_sent(?string &$file = null, ?int &$line = null): bool
     {
         return false;
     }
 
+    /** @return array<string, list<array{value: ?string, opts: array<string, mixed>}>> */
     public function inspectSetCookies(): array
     {
         return $this->set_cookie_calls;

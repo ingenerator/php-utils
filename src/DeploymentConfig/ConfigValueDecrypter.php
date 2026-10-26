@@ -15,7 +15,7 @@ class ConfigValueDecrypter
     {
     }
 
-    public function decrypt($value)
+    public function decrypt(mixed $value): mixed
     {
         if (is_string($value) && preg_match('/^#SECRET-?(?P<keypair>.*)#(?P<ciphertext>.+)$/', $value, $matches)) {
             return $this->tryDecrypt($matches['ciphertext'], $this->getKeypair($matches['keypair'] ?: 'default'));

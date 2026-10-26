@@ -91,7 +91,7 @@ final class DeploymentConfig
     /**
      * Use this when the value of a config / secret is type-sensitive (integer / boolean / supports null value).
      */
-    public function readJSON(string $string)
+    public function readJSON(string $string): mixed
     {
         $value = $this->read($string);
         if ($value === null) {
@@ -105,7 +105,8 @@ final class DeploymentConfig
         }
     }
 
-    public function map(array ...$declarations)
+    /** @param array<mixed> ...$declarations */
+    public function map(array ...$declarations): mixed
     {
         $map = $this->map_parser->parse($declarations);
         if (array_key_exists($this->environment, $map)) {

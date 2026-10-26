@@ -96,12 +96,13 @@ class CookieWrapper
         unset($this->cookies[$name]);
     }
 
-    protected function set_cookie($name, $value, $options)
+    /** @param array<string, mixed> $options */
+    protected function set_cookie(string $name, ?string $value, array $options): void
     {
         setcookie($name, $value, $options);
     }
 
-    protected function headers_sent(&$file, &$line): bool
+    protected function headers_sent(?string &$file = null, ?int &$line = null): bool
     {
         return headers_sent($file, $line);
     }

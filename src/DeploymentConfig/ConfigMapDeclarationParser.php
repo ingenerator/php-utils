@@ -38,7 +38,10 @@ class ConfigMapDeclarationParser
         return $result;
     }
 
-    protected function validateDeclaration($declaration): array
+    /**
+     * @return array{list<string>, mixed}
+     */
+    protected function validateDeclaration(mixed $declaration): array
     {
         if (!is_array($declaration)) {
             throw InvalidConfigException::invalidMapDeclaration('not an array');

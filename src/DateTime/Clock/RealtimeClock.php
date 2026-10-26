@@ -31,7 +31,7 @@ class RealtimeClock
         return microtime(true);
     }
 
-    public function usleep($microseconds): void
+    public function usleep(int $microseconds): void
     {
         usleep($microseconds);
     }

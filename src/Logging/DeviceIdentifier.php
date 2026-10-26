@@ -116,7 +116,7 @@ class DeviceIdentifier
         }
     }
 
-    protected function assignNewIdAndSetCookies()
+    protected function assignNewIdAndSetCookies(): void
     {
         $this->id = Base64Url::encode(random_bytes(16));
         $expire = (new DateTimeImmutable())->add(new DateInterval(static::COOKIE_LIFETIME));

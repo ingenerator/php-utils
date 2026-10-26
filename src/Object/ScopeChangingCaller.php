@@ -30,7 +30,7 @@ class ScopeChangingCaller
      * @param callable(TArgs):TReturn $func
      * @param TArgs $args,...
      */
-    public static function call(string $class, callable $func, ...$args): mixed
+    public static function call(string $class, callable $func, mixed ...$args): mixed
     {
         $func = Closure::bind($func, null, $class);
 
