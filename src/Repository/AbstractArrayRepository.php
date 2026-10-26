@@ -17,6 +17,7 @@ use Ingenerator\PHPUtils\StringEncoding\JSON;
 use InvalidArgumentException;
 use PHPUnit\Framework\Assert;
 use UnexpectedValueException;
+use WeakMap;
 
 use function array_pop;
 use function call_user_func;
@@ -31,11 +32,16 @@ use function sprintf;
 /**
  * Base class for an array-based memory repository for use in unit tests. Provides helpers to allow
  * easy and quick creation of array-backed implementations of a project-specific repository interface.
+ *
+ * @template T of object
  */
 abstract class AbstractArrayRepository
 {
     protected string $save_log = '';
 
+    /**
+     * @param array<int, T> $entities
+     */
     protected function __construct(protected array $entities)
     {
     }
@@ -43,7 +49,7 @@ abstract class AbstractArrayRepository
     /**
      * Create a repo with the provided entities. Pass entities, or arrays of properties to stub.
      *
-     * @param array|object $entity,...
+     * @param array|T $entity ,...
      *
      * @return static
      */
@@ -55,7 +61,7 @@ abstract class AbstractArrayRepository
     /**
      * Same as ::with, but takes an array rather than a list of method parameters.
      *
-     * @param array[] $entity_data
+     * @param list<array|T> $entity_data
      *
      * @return static
      */
@@ -73,12 +79,17 @@ abstract class AbstractArrayRepository
         return new static($entities);
     }
 
+    /**
+     * @return class-string<T>
+     */
     abstract protected static function getEntityBaseClass(): string;
 
     /**
-     * @return object
+     * @param array<string, mixed> $data
+     *
+     * @return T
      */
-    protected static function stubEntity(array $data)
+    protected static function stubEntity(array $data): object
     {
         $class = static::getEntityBaseClass();
         $e = new $class();
@@ -87,10 +98,7 @@ abstract class AbstractArrayRepository
         return $e;
     }
 
-    /**
-     * @return static
-     */
-    public static function withNothing()
+    public static function withNothing(): static
     {
         return new static([]);
     }
@@ -100,7 +108,7 @@ abstract class AbstractArrayRepository
      *
      * (Does what it says on the tin)
      */
-    protected function assertNothingSaved()
+    protected function assertNothingSaved(): void
     {
         Assert::assertEquals(
             '',
@@ -112,9 +120,9 @@ abstract class AbstractArrayRepository
     /**
      * This, and only this, entity should have been saved.
      *
-     * @param object $entity
+     * @param T $entity
      */
-    protected function assertSavedOnly($entity)
+    protected function assertSavedOnly(object $entity): void
     {
         Assert::assertEquals(
             $this->save_log,
@@ -126,9 +134,9 @@ abstract class AbstractArrayRepository
     /**
      * Build a save-log record to allow the class to identify what's been saved for assertions.
      *
-     * @param object $entity
+     * @param T $entity
      */
-    protected function formatSaveLog($entity): string
+    protected function formatSaveLog(object $entity): string
     {
         return sprintf(
             "%s (object %s) with data:\n%s\n",
@@ -142,17 +150,14 @@ abstract class AbstractArrayRepository
      * Creates a simple array representation of a set of entities that can be formatted as JSON.
      *
      * Used to capture a snapshot of entity state at the time it's saved to allow later comparison
-     *
-     * @param object $entity
-     * @param array<int, mixed> $seen_objects
      */
-    protected function entityToArray($entity, array &$seen_objects = []): array
+    protected function entityToArray(object $entity, ?WeakMap $seen_objects = null): array
     {
-        $entity_hash = spl_object_id($entity);
-        if (isset($seen_objects[$entity_hash])) {
+        $seen_objects ??= new WeakMap();
+        if (isset($seen_objects[$entity])) {
             return '**RECURSION**';
         }
-        $seen_objects[$entity_hash] = true;
+        $seen_objects[$entity] = true;
 
         $all_props = Closure::bind(
             fn ($e): array => get_object_vars($e),
@@ -192,11 +197,11 @@ abstract class AbstractArrayRepository
      *       );
      *     }
      *
-     * @param callable $callable
+     * @param callable(T):string $callable
      *
-     * @return int[]
+     * @return array<string, int>
      */
-    protected function countWith($callable): array
+    protected function countWith(callable $callable): array
     {
         $counts = [];
         foreach ($this->entities as $entity) {
@@ -214,11 +219,11 @@ abstract class AbstractArrayRepository
      *       return $this->loadWith(function (MyEntity $e) use ($id) { return $e->getId() === $id; });
      *     }
      *
-     * @param callable $callable
+     * @param callable(T):bool $callable
      *
-     * @return object
+     * @return T
      */
-    protected function loadWith($callable)
+    protected function loadWith(callable $callable): object
     {
         if (!$entity = $this->findWith($callable)) {
             throw new InvalidArgumentException('No entity matching criteria');
@@ -230,9 +235,11 @@ abstract class AbstractArrayRepository
     /**
      * Find a single entity matching the callback, or null (throws if non-unique).
      *
-     * @return object
+     * @param callable(T):bool $callable
+     *
+     * @return T|null
      */
-    protected function findWith($callable)
+    protected function findWith(callable $callable): ?object
     {
         $entities = $this->listWith($callable);
         if (count($entities) > 1) {
@@ -247,9 +254,9 @@ abstract class AbstractArrayRepository
     /**
      * Find all entities that the callable matches (like array_filter).
      *
-     * @param callable $callable
+     * @param callable(T):bool $callable
      *
-     * @return object[]
+     * @return array<T>
      */
     protected function listWith($callable): array
     {
@@ -269,9 +276,9 @@ abstract class AbstractArrayRepository
      * The state of all entity properties will be captured at time of save to allow verifying that
      * it hasn't been subsequently modified.
      *
-     * @param object $entity
+     * @param T $entity
      */
-    protected function saveEntity($entity)
+    protected function saveEntity($entity): void
     {
         $this->save_log .= $this->formatSaveLog($entity);
         if (!in_array($entity, $this->entities, true)) {

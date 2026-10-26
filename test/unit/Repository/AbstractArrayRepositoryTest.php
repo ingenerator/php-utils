@@ -217,6 +217,9 @@ final class AbstractArrayRepositoryTest extends TestCase
     }
 }
 
+/**
+ * @extends AbstractArrayRepository<AnyEntity>
+ */
 class AnyArrayRepository extends AbstractArrayRepository
 {
     protected static function getEntityBaseClass(): string
@@ -234,47 +237,26 @@ class AnyArrayRepository extends AbstractArrayRepository
         parent::assertNothingSaved();
     }
 
-    /**
-     * @param object $entity
-     */
     public function assertSavedOnly($entity): void
     {
         parent::assertSavedOnly($entity);
     }
 
-    /**
-     * @param callable $callable
-     *
-     * @return int[]
-     */
     public function countWith($callable): array
     {
         return parent::countWith($callable);
     }
 
-    /**
-     * @param callable $callable
-     *
-     * @return object
-     */
-    public function loadWith($callable)
+    public function loadWith($callable): object
     {
         return parent::loadWith($callable);
     }
 
-    /**
-     * @return object
-     */
-    public function findWith($callable)
+    public function findWith($callable): ?object
     {
         return parent::findWith($callable);
     }
 
-    /**
-     * @param callable $callable
-     *
-     * @return object[]
-     */
     public function listWith($callable): array
     {
         return parent::listWith($callable);
