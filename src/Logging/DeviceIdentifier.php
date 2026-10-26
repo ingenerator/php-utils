@@ -53,6 +53,7 @@ class DeviceIdentifier
         } else {
             static::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
         }
+        assert(static::$instance instanceof DeviceIdentifier, 'Should have been assigned by above or by ::forceGlobalTestValue');
         static::$instance->init();
     }
 
