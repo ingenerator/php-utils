@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -16,7 +18,7 @@ use PHPUnit\Framework\TestCase;
  *
  * @licence   BSD-3-Clause
  */
-class ConstantDirectoryTest extends TestCase
+final class ConstantDirectoryTest extends TestCase
 {
     public const TEST_ONE = 'any';
     public const TEST_TWO = 'two';

@@ -13,57 +13,56 @@ namespace test\unit\Ingenerator\PHPUtils\unit\DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ingenerator\PHPUtils\DateTime\DateTimeDiff;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class DateTimeDiffTest extends TestCase
+final class DateTimeDiffTest extends TestCase
 {
     /**
-     * @return array<int, array<int, DateTimeImmutable|int>>
+     * @return Iterator<int, array<int, (DateTimeImmutable | int)>>
      */
-    public static function date_time_diff(): array
+    public static function date_time_diff(): Iterator
     {
-        return [
-            [
-                new DateTimeImmutable('2017-06-24 10:11:12.456'),
-                new DateTimeImmutable('2017-06-24 10:11:12.456'),
-                0,
-            ],
-            [
-                new DateTimeImmutable('2018-10-01 02:03:04'),
-                new DateTimeImmutable('2018-10-03 15:20:07'),
-                220_623_000_000,
-            ],
-            [
-                new DateTimeImmutable('2018-10-01 02:03:07'),
-                new DateTimeImmutable('2018-10-01 02:03:04'),
-                -3000_000,
-            ],
-            [
-                new DateTimeImmutable('2019-03-02 11:56:10.1230'),
-                new DateTimeImmutable('2019-03-02 11:56:10.1280'),
-                5_000,
-            ],
-            [
-                new DateTimeImmutable('2019-03-02 11:56:07.109999'),
-                new DateTimeImmutable('2019-03-02 11:56:10.110000'),
-                3_000_001,
-            ],
-            [
-                new DateTimeImmutable('2019-03-02 11:56:07.600001'),
-                new DateTimeImmutable('2019-03-02 11:56:10.100003'),
-                2_500_002,
-            ],
-            [
-                new DateTimeImmutable('2020-05-31 19:20:45.123456'),
-                new DateTimeImmutable('2020-05-31 19:20:45.123720'),
-                264,
-            ],
-            [
-                new DateTimeImmutable('2021-02-04 11:43:44.123456'),
-                new DateTimeImmutable('2021-02-04 11:43:44.123457'),
-                1,
-            ],
+        yield [
+            new DateTimeImmutable('2017-06-24 10:11:12.456'),
+            new DateTimeImmutable('2017-06-24 10:11:12.456'),
+            0,
+        ];
+        yield [
+            new DateTimeImmutable('2018-10-01 02:03:04'),
+            new DateTimeImmutable('2018-10-03 15:20:07'),
+            220_623_000_000,
+        ];
+        yield [
+            new DateTimeImmutable('2018-10-01 02:03:07'),
+            new DateTimeImmutable('2018-10-01 02:03:04'),
+            -3000_000,
+        ];
+        yield [
+            new DateTimeImmutable('2019-03-02 11:56:10.1230'),
+            new DateTimeImmutable('2019-03-02 11:56:10.1280'),
+            5_000,
+        ];
+        yield [
+            new DateTimeImmutable('2019-03-02 11:56:07.109999'),
+            new DateTimeImmutable('2019-03-02 11:56:10.110000'),
+            3_000_001,
+        ];
+        yield [
+            new DateTimeImmutable('2019-03-02 11:56:07.600001'),
+            new DateTimeImmutable('2019-03-02 11:56:10.100003'),
+            2_500_002,
+        ];
+        yield [
+            new DateTimeImmutable('2020-05-31 19:20:45.123456'),
+            new DateTimeImmutable('2020-05-31 19:20:45.123720'),
+            264,
+        ];
+        yield [
+            new DateTimeImmutable('2021-02-04 11:43:44.123456'),
+            new DateTimeImmutable('2021-02-04 11:43:44.123457'),
+            1,
         ];
     }
 
@@ -73,6 +72,6 @@ class DateTimeDiffTest extends TestCase
         DateTimeInterface $date2,
         int $expected_result,
     ): void {
-        $this->assertEquals($expected_result, DateTimeDiff::microsBetween($date1, $date2));
+        $this->assertSame($expected_result, DateTimeDiff::microsBetween($date1, $date2));
     }
 }

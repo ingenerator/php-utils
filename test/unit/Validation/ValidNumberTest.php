@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -13,7 +15,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class ValidNumberTest extends TestCase
+final class ValidNumberTest extends TestCase
 {
     #[TestWith(['', 13, false])]
     #[TestWith(['junk', 13, false])]

@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 use function iterator_to_array;
 
-class UniqueMapTest extends TestCase
+final class UniqueMapTest extends TestCase
 {
     public function testItReturnsEntriesByKey(): void
     {
@@ -25,7 +25,7 @@ class UniqueMapTest extends TestCase
         );
         $this->assertSame($bar, $subject['bar']);
         $this->assertSame('some-foo', $subject['foo']);
-        $this->assertSame(null, $subject['nully']);
+        $this->assertNull($subject['nully']);
     }
 
     public function testItThrowsOnAccessToUndefinedKey(): void
@@ -45,7 +45,7 @@ class UniqueMapTest extends TestCase
 
         $this->assertSame($new1, $subject['new1']);
         $this->assertSame('some-string', $subject['new2']);
-        $this->assertSame(null, $subject['new3']);
+        $this->assertNull($subject['new3']);
     }
 
     public function testItThrowsOnAttemptToOverwriteKey(): void
@@ -113,7 +113,7 @@ class UniqueMapTest extends TestCase
         $subject['new'] = 'new1';
         $subject['other'] = 'new2';
 
-        $this->assertSame(3, count($subject));
+        $this->assertCount(3, $subject);
     }
 
     public function testItSupportsConditionalReadLikeAnArray(): void

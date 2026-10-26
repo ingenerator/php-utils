@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Object;
 
 use Ingenerator\PHPUtils\Object\InitialisableSingletonTrait;
@@ -9,7 +11,7 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-class InitialisableSingletonTraitTest extends TestCase
+final class InitialisableSingletonTraitTest extends TestCase
 {
     public function testItThrowsIfNotInitialised(): void
     {
@@ -35,10 +37,10 @@ class InitialisableSingletonTraitTest extends TestCase
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $this->assertSame(false, $class::isInitialised(), 'Not initialised before init');
+        $this->assertFalse($class::isInitialised(), 'Not initialised before init');
 
         $class::initialise(fn (): object => new $class());
-        $this->assertSame(true, $class::isInitialised(), 'Initialised after init');
+        $this->assertTrue($class::isInitialised(), 'Initialised after init');
     }
 
     public function testItCanInitialiseAndReturnsSingletonFromThenOn(): void

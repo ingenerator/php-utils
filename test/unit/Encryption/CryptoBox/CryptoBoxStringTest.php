@@ -7,27 +7,26 @@ namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxString;
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function random_bytes;
 
-class CryptoBoxStringTest extends TestCase
+final class CryptoBoxStringTest extends TestCase
 {
     /*
      * Heavily tested through the tests for CryptoBoxKeypair and CryptoBoxPublicKey
      */
     /**
-     * @return array<string, string[]>
+     * @return Iterator<string, array<string>>
      */
-    public static function provider_invalid_string_format(): array
+    public static function provider_invalid_string_format(): Iterator
     {
-        return [
-            'empty' => [''],
-            'incorrect format' => ['just a long string'],
-            'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'],
-            'no keypair_id' => ['zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'],
-        ];
+        yield 'empty' => [''];
+        yield 'incorrect format' => ['just a long string'];
+        yield 'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'];
+        yield 'no keypair_id' => ['zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'];
     }
 
     #[DataProvider('provider_invalid_string_format')]

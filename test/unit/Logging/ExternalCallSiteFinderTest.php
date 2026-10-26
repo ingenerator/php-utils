@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use Ingenerator\PHPUtils\Logging\ExternalCallSiteFinder;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -12,7 +15,7 @@ use function sys_get_temp_dir;
 use function tempnam;
 use function unlink;
 
-class ExternalCallSiteFinderTest extends TestCase
+final class ExternalCallSiteFinderTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {
@@ -24,7 +27,7 @@ class ExternalCallSiteFinderTest extends TestCase
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
         $this->assertSame(
             ['_unexpected_trace_' => $trace],
-            $this->newSubject()->findExternalCall($trace, [static::class])
+            $this->newSubject()->findExternalCall($trace, [self::class])
         );
     }
 
@@ -93,30 +96,29 @@ class ExternalCallSiteFinderTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]>
+     * @return Iterator<int, array<string>>
      */
-    public static function provider_source_location_call_sites(): array
+    public static function provider_source_location_call_sites(): Iterator
     {
-        return [
-            [
-                <<<'PHP_WRAP'
+        yield [
+            <<<'PHP_WRAP'
                                 // Raw file include
                                 use test\unit\Ingenerator\PHPUtils\Logging\TestCallSiteAsserter;
                                 /* @var TestCallSiteAsserter $asserter */ 
                                 return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'require']);
                 PHP_WRAP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Raw function
                 function log_ab8123723123($asserter) {
                     return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'log_ab8123723123']);
                 }
                 return log_ab8123723123($asserter);
 PHP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Raw function in namespace
                 namespace whoops\i\did\it\again;
                 function log_ab8123723123($asserter) {
@@ -124,9 +126,9 @@ PHP,
                 }
                 return log_ab8123723123($asserter);
 PHP,
-            ],
-            [
-                <<<'PHP_WRAP'
+        ];
+        yield [
+            <<<'PHP_WRAP'
                                 // Anonymous func
                                 use test\unit\Ingenerator\PHPUtils\Logging\ExternalCallSiteFinderTest;
                                 return (function ($asserter) {
@@ -144,9 +146,9 @@ PHP,
                                     
                                 })($asserter);
                 PHP_WRAP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Static class call
                 class Lgt812372321312312321Static {
                   public static function log($asserter) {
@@ -155,9 +157,9 @@ PHP,
                 }
                 return Lgt812372321312312321Static::log($asserter);
 PHP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Instance method
                 class Lgt812372321312312321Inst {
                   public function log($asserter) {
@@ -166,9 +168,9 @@ PHP,
                 }
                 return (new Lgt812372321312312321Inst)->log($asserter);
 PHP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Anonymous class static
                 $class = new class {
                   public static function log($asserter) {
@@ -177,9 +179,9 @@ PHP,
                 };
                 return $class::log($asserter);
 PHP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Anonymous class instance
                 $class = new class {
                   public function log($asserter) {
@@ -188,9 +190,9 @@ PHP,
                 };
                 return $class->log($asserter);
 PHP,
-            ],
-            [
-                <<<'PHP'
+        ];
+        yield [
+            <<<'PHP'
                 // Class that calls a function
                 function ab9123723712391257213($asserter) {
                     return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'ab9123723712391257213']);
@@ -202,7 +204,6 @@ PHP,
                 };
                 return $class->log($asserter);
 PHP,
-            ],
         ];
     }
 

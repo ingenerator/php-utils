@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Cookie;
 
 use DateTimeImmutable;
@@ -7,7 +9,7 @@ use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class ArrayCookieWrapperStubTest extends TestCase
+final class ArrayCookieWrapperStubTest extends TestCase
 {
     #[TestWith(['my', true, 'cookie'])]
     #[TestWith(['has', true, 'values'])]

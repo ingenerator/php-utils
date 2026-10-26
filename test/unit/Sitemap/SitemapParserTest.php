@@ -6,33 +6,33 @@ namespace test\unit\Ingenerator\PHPUtils\Sitemap;
 
 use Ingenerator\PHPUtils\Sitemap\SitemapParser;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class SitemapParserTest extends TestCase
+final class SitemapParserTest extends TestCase
 {
     /**
-     * @return array<int, string[]>
+     * @return Iterator<int, array<string>>
      */
-    public static function provider_invalid(): array
+    public static function provider_invalid(): Iterator
     {
-        return [
-            [
-                '{"json":true}',
-                'Start tag expected',
-            ],
-            [
-                '<?xml version="1.0" encoding="UTF-8"?><foobar></foobar>',
-                'foobar',
-            ],
-            [
-                // NB that a sitemap must have at least one URL to be valid
-                '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>',
-                'Missing child element(s)',
-            ],
-            [
-                // NB that a sitemap must have at least one URL to be valid
-                <<<'XML'
+        yield [
+            '{"json":true}',
+            'Start tag expected',
+        ];
+        yield [
+            '<?xml version="1.0" encoding="UTF-8"?><foobar></foobar>',
+            'foobar',
+        ];
+        yield [
+            // NB that a sitemap must have at least one URL to be valid
+            '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>',
+            'Missing child element(s)',
+        ];
+        yield [
+            // NB that a sitemap must have at least one URL to be valid
+            <<<'XML'
                     <?xml version="1.0" encoding="UTF-8"?>
                     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                        <url>
@@ -40,8 +40,7 @@ class SitemapParserTest extends TestCase
                         </url>  
                     </urlset>
                     XML,
-                'randomness',
-            ],
+            'randomness',
         ];
     }
 
@@ -78,14 +77,13 @@ class SitemapParserTest extends TestCase
     }
 
     /**
-     * @return array<int, mixed[]>
+     * @return Iterator<int, array<mixed>>
      */
-    public static function provider_parse(): array
+    public static function provider_parse(): Iterator
     {
-        return [
-            [
-                // Simple, one with all props
-                <<<'XML'
+        yield [
+            // Simple, one with all props
+            <<<'XML'
                     <?xml version="1.0" encoding="UTF-8"?>
                     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                        <url>
@@ -96,17 +94,17 @@ class SitemapParserTest extends TestCase
                        </url>  
                     </urlset>
                     XML,
-                [
-                    'http://www.example.com/' => [
-                        'lastmod' => '2005-01-01',
-                        'changefreq' => 'monthly',
-                        'priority' => '0.8',
-                    ],
+            [
+                'http://www.example.com/' => [
+                    'lastmod' => '2005-01-01',
+                    'changefreq' => 'monthly',
+                    'priority' => '0.8',
                 ],
             ],
-            [
-                // Simple, one with no extra props
-                <<<'XML'
+        ];
+        yield [
+            // Simple, one with no extra props
+            <<<'XML'
                     <?xml version="1.0" encoding="UTF-8"?>
                     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                        <url>
@@ -114,17 +112,17 @@ class SitemapParserTest extends TestCase
                        </url>  
                     </urlset>
                     XML,
-                [
-                    'http://www.example.com/' => [
-                        'lastmod' => null,
-                        'changefreq' => null,
-                        'priority' => null,
-                    ],
+            [
+                'http://www.example.com/' => [
+                    'lastmod' => null,
+                    'changefreq' => null,
+                    'priority' => null,
                 ],
             ],
-            [
-                // Multiples
-                <<<'XML'
+        ];
+        yield [
+            // Multiples
+            <<<'XML'
                     <?xml version="1.0" encoding="UTF-8"?>
                     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                         <url>
@@ -140,17 +138,16 @@ class SitemapParserTest extends TestCase
                        </url>  
                     </urlset>
                     XML,
-                [
-                    'http://www.example.com/foobar' => [
-                        'lastmod' => '2005-01-01',
-                        'changefreq' => null,
-                        'priority' => '0.8',
-                    ],
-                    'http://www.example.com/biffbox' => [
-                        'lastmod' => '2010-05-02',
-                        'changefreq' => 'monthly',
-                        'priority' => '0.5',
-                    ],
+            [
+                'http://www.example.com/foobar' => [
+                    'lastmod' => '2005-01-01',
+                    'changefreq' => null,
+                    'priority' => '0.8',
+                ],
+                'http://www.example.com/biffbox' => [
+                    'lastmod' => '2010-05-02',
+                    'changefreq' => 'monthly',
+                    'priority' => '0.5',
                 ],
             ],
         ];

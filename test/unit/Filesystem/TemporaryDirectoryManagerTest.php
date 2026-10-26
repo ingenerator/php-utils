@@ -20,7 +20,7 @@ use function rmdir;
 use function sys_get_temp_dir;
 use function uniqid;
 
-class TemporaryDirectoryManagerTest extends TestCase
+final class TemporaryDirectoryManagerTest extends TestCase
 {
     /**
      * Uses real files rather than vfsStream because of the recursive delete behaviour.
@@ -37,7 +37,7 @@ class TemporaryDirectoryManagerTest extends TestCase
         $subject = $this->newSubject();
         $path = $subject->mkTemp('my-dir');
         $path2 = $subject->mkTemp('my-dir');
-        $this->assertNotEquals($path, $path2, 'Paths are unique');
+        $this->assertNotSame($path, $path2, 'Paths are unique');
         $this->assertMatchesRegularExpression(
             '#^'.preg_quote($this->base_dir).'/my-dir[a-z0-9\.]+$#',
             $path,

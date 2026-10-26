@@ -13,21 +13,20 @@ namespace test\unit\Ingenerator\PHPUtils\DateTime;
 use DateTimeImmutable;
 use DateTimeZone;
 use Ingenerator\PHPUtils\DateTime\DateString;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class DateStringTest extends TestCase
+final class DateStringTest extends TestCase
 {
     /**
-     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     * @return Iterator<int, array<(DateTimeImmutable | string | null)>>
      */
-    public static function provider_generic_format(): array
+    public static function provider_generic_format(): Iterator
     {
-        return [
-            [null, 'Y-m-d', 'nothing', 'nothing'],
-            [new DateTimeImmutable('2017-05-04 20:03:02'), 'Y-m-d', '', '2017-05-04'],
-            [new DateTimeImmutable('2017-05-04 20:03:02'), 'D d M H:i', '', 'Thu 04 May 20:03'],
-        ];
+        yield [null, 'Y-m-d', 'nothing', 'nothing'];
+        yield [new DateTimeImmutable('2017-05-04 20:03:02'), 'Y-m-d', '', '2017-05-04'];
+        yield [new DateTimeImmutable('2017-05-04 20:03:02'), 'D d M H:i', '', 'Thu 04 May 20:03'];
     }
 
     #[DataProvider('provider_generic_format')]
@@ -37,14 +36,12 @@ class DateStringTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     * @return Iterator<int, array<(DateTimeImmutable | string | null)>>
      */
-    public static function provider_ymdhis(): array
+    public static function provider_ymdhis(): Iterator
     {
-        return [
-            [null, 'nothing', 'nothing'],
-            [new DateTimeImmutable('2017-02-03 10:02:02'), '', '2017-02-03 10:02:02'],
-        ];
+        yield [null, 'nothing', 'nothing'];
+        yield [new DateTimeImmutable('2017-02-03 10:02:02'), '', '2017-02-03 10:02:02'];
     }
 
     #[DataProvider('provider_ymdhis')]
@@ -54,14 +51,12 @@ class DateStringTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     * @return Iterator<int, array<(DateTimeImmutable | string | null)>>
      */
-    public static function provider_ymd(): array
+    public static function provider_ymd(): Iterator
     {
-        return [
-            [null, 'nothing', 'nothing'],
-            [new DateTimeImmutable('2017-02-03 10:02:02'), '', '2017-02-03'],
-        ];
+        yield [null, 'nothing', 'nothing'];
+        yield [new DateTimeImmutable('2017-02-03 10:02:02'), '', '2017-02-03'];
     }
 
     #[DataProvider('provider_ymd')]
@@ -71,16 +66,13 @@ class DateStringTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     * @return Iterator<int, array<(DateTimeImmutable | string | null)>>
      */
-    public static function provider_isoms(): array
+    public static function provider_isoms(): Iterator
     {
         $lndn = new DateTimeZone('Europe/London');
-
-        return [
-            [null, 'nothing', 'nothing'],
-            [new DateTimeImmutable('2020-08-21 12:15:54.643214', $lndn), '', '2020-08-21T12:15:54.643214+01:00'],
-        ];
+        yield [null, 'nothing', 'nothing'];
+        yield [new DateTimeImmutable('2020-08-21 12:15:54.643214', $lndn), '', '2020-08-21T12:15:54.643214+01:00'];
     }
 
     #[DataProvider('provider_isoms')]

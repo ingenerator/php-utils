@@ -10,7 +10,7 @@ use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
-class CryptoBoxKeypairSetTest extends TestCase
+final class CryptoBoxKeypairSetTest extends TestCase
 {
     public function testItCanReturnKnownKeypairById(): void
     {

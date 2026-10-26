@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Sitemap;
 
 use DateTimeImmutable;
@@ -9,7 +11,7 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use UnderflowException;
 
-class SitemapRendererTest extends TestCase
+final class SitemapRendererTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {

@@ -7,10 +7,11 @@ namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxKeypair;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxPublicKey;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class CryptoBoxPublicKeyTest extends TestCase
+final class CryptoBoxPublicKeyTest extends TestCase
 {
     /*
      * See also the tests for CryptoBoxKeypair which cover some behaviour of the public key object
@@ -32,17 +33,15 @@ class CryptoBoxPublicKeyTest extends TestCase
     }
 
     /**
-     * @return array<string, string[]>
+     * @return Iterator<string, array<string>>
      */
-    public static function provider_invalid_keypair_string(): array
+    public static function provider_invalid_keypair_string(): Iterator
     {
-        return [
-            'empty' => [''],
-            'incorrect format' => ['just a long string'],
-            'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'],
-            'no keypair_id' => ['-J5fsjd53SB2lLmTVcGC0k0w59d9E-qBOYVcuDzUpRU'],
-            'keypair is too short' => ['some-key.cnViYmlzaA'],
-        ];
+        yield 'empty' => [''];
+        yield 'incorrect format' => ['just a long string'];
+        yield 'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'];
+        yield 'no keypair_id' => ['-J5fsjd53SB2lLmTVcGC0k0w59d9E-qBOYVcuDzUpRU'];
+        yield 'keypair is too short' => ['some-key.cnViYmlzaA'];
     }
 
     #[DataProvider('provider_invalid_keypair_string')]

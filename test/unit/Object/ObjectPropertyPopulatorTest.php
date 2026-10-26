@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -14,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 use function get_object_vars;
 
-class ObjectPropertyPopulatorTest extends TestCase
+final class ObjectPropertyPopulatorTest extends TestCase
 {
     public function testItAssignsSingleProperty(): void
     {

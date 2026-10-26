@@ -1,63 +1,64 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
 use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class StringSanitiserTest extends TestCase
+final class StringSanitiserTest extends TestCase
 {
     /**
-     * @return array<string, string[]>
+     * @return Iterator<string, array<string>>
      */
-    public static function provider_printable_utf8(): array
+    public static function provider_printable_utf8(): Iterator
     {
-        return [
-            'valid ascii' => [
-                'I am valid text',
-            ],
-            'valid ascii with newlines and tabs' => [
-                "I am valid\nmultiline\ttext with whitespace",
-            ],
-            'valid ascii with windows newlines' => [
-                "I am valid\r\nmultiline fróm Windows",
-            ],
-            'valid UTF8' => [
-                'Hello from Denmark with æøå',
-            ],
-            'ascii with BEL control characters' => [
-                "Ring the \x07",
-                'Ring the �',
-            ],
-            'ascii with leading NUL control characters' => [
-                "\x00nully null",
-                '�nully null',
-            ],
-            'ascii with trailing NUL control characters' => [
-                "nully null\x00",
-                'nully null�',
-            ],
-            'ascii with internal NUL control characters' => [
-                "nully \x00 null",
-                'nully � null',
-            ],
-            'utf8 truncated at first escape' => [
-                "Some partial\xD0",
-                'Some partial�',
-            ],
-            'utf8 with invalid trailing bytes' => [
-                "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html\xa3\xa9",
-                'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html��',
-            ],
-            'utf8 with invalid included bytes' => [
-                "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff",
-                'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
-            ],
-            'utf8 with invalid leading bytes' => [
-                "\xa3\xa9Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff",
-                '��Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff',
-            ],
+        yield 'valid ascii' => [
+            'I am valid text',
+        ];
+        yield 'valid ascii with newlines and tabs' => [
+            "I am valid\nmultiline\ttext with whitespace",
+        ];
+        yield 'valid ascii with windows newlines' => [
+            "I am valid\r\nmultiline fróm Windows",
+        ];
+        yield 'valid UTF8' => [
+            'Hello from Denmark with æøå',
+        ];
+        yield 'ascii with BEL control characters' => [
+            "Ring the \x07",
+            'Ring the �',
+        ];
+        yield 'ascii with leading NUL control characters' => [
+            "\x00nully null",
+            '�nully null',
+        ];
+        yield 'ascii with trailing NUL control characters' => [
+            "nully null\x00",
+            'nully null�',
+        ];
+        yield 'ascii with internal NUL control characters' => [
+            "nully \x00 null",
+            'nully � null',
+        ];
+        yield 'utf8 truncated at first escape' => [
+            "Some partial\xD0",
+            'Some partial�',
+        ];
+        yield 'utf8 with invalid trailing bytes' => [
+            "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html\xa3\xa9",
+            'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html��',
+        ];
+        yield 'utf8 with invalid included bytes' => [
+            "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff",
+            'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
+        ];
+        yield 'utf8 with invalid leading bytes' => [
+            "\xa3\xa9Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff",
+            '��Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff',
         ];
     }
 
@@ -71,30 +72,28 @@ class StringSanitiserTest extends TestCase
     }
 
     /**
-     * @return array<string, string[]|string[][]>
+     * @return Iterator<string, array<(array<string> | string)>>
      */
-    public static function provider_printable_utf8_max_length(): array
+    public static function provider_printable_utf8_max_length(): Iterator
     {
-        return [
-            'with invalid input, still truncates after cleaning' => [
-                "Mozilla/5.0 \x08 and more \xa3\xa9 nonsense",
-                [
-                    23 => 'Mozilla/5.0 � and more ',
-                    24 => 'Mozilla/5.0 � and more �',
-                    25 => 'Mozilla/5.0 � and more ��',
-                    255 => 'Mozilla/5.0 � and more �� nonsense',
-                ],
+        yield 'with invalid input, still truncates after cleaning' => [
+            "Mozilla/5.0 \x08 and more \xa3\xa9 nonsense",
+            [
+                23 => 'Mozilla/5.0 � and more ',
+                24 => 'Mozilla/5.0 � and more �',
+                25 => 'Mozilla/5.0 � and more ��',
+                255 => 'Mozilla/5.0 � and more �� nonsense',
             ],
-            'with valid input, truncates as multibyte' => [
-                'Hello from Denmark with æøå and stuff',
-                [
-                    24 => 'Hello from Denmark with ',
-                    25 => 'Hello from Denmark with æ',
-                    26 => 'Hello from Denmark with æø',
-                    27 => 'Hello from Denmark with æøå',
-                    28 => 'Hello from Denmark with æøå ',
-                    255 => 'Hello from Denmark with æøå and stuff',
-                ],
+        ];
+        yield 'with valid input, truncates as multibyte' => [
+            'Hello from Denmark with æøå and stuff',
+            [
+                24 => 'Hello from Denmark with ',
+                25 => 'Hello from Denmark with æ',
+                26 => 'Hello from Denmark with æø',
+                27 => 'Hello from Denmark with æøå',
+                28 => 'Hello from Denmark with æøå ',
+                255 => 'Hello from Denmark with æøå and stuff',
             ],
         ];
     }

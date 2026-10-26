@@ -11,7 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class DbBackedMutexWrapperTest extends TestCase
+final class DbBackedMutexWrapperTest extends TestCase
 {
     /**
      * @var MockObject
@@ -45,7 +45,7 @@ class DbBackedMutexWrapperTest extends TestCase
         $subject->withLock(
             'mylock',
             5,
-            function (): void { throw new RuntimeException('Callback should never fire'); }
+            function (): never { throw new RuntimeException('Callback should never fire'); }
         );
     }
 
@@ -93,7 +93,7 @@ class DbBackedMutexWrapperTest extends TestCase
 
         $subject = $this->newSubject();
         try {
-            $subject->withLock('somelock', 2, function (): void { throw new RuntimeException('Stop'); });
+            $subject->withLock('somelock', 2, function (): never { throw new RuntimeException('Stop'); });
             $this->fail('Should have bubbled exception');
         } catch (RuntimeException$e) {
             $this->assertSame('Stop', $e->getMessage());

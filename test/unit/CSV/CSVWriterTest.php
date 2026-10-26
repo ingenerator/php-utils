@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -11,6 +13,7 @@ namespace test\unit\Ingenerator\PHPUtils\CSV;
 use ErrorException;
 use Ingenerator\PHPUtils\CSV\CSVWriter;
 use Ingenerator\PHPUtils\CSV\MismatchedSchemaException;
+use Iterator;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
@@ -30,7 +33,7 @@ use function sys_get_temp_dir;
 use function tempnam;
 use function unlink;
 
-class CSVWriterTest extends TestCase
+final class CSVWriterTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {
@@ -138,40 +141,37 @@ class CSVWriterTest extends TestCase
     }
 
     /**
-     * @return array<string, string[]|string[]|true[][]|array<string, string|false>[]>
+     * @return Iterator<string, array<(array<(bool | string)> | string)>>
      */
-    public static function providerQuotedHeaders(): array
+    public static function providerQuotedHeaders(): Iterator
     {
         $row = ['our data' => 'is at times', 'really big' => 'often'];
-
-        return [
-            'default (with quotes)' => [
-                $row,
-                [],
-                <<<CSV
+        yield 'default (with quotes)' => [
+            $row,
+            [],
+            <<<CSV
                 "our data","really big"
                 "is at times",often
 
                 CSV,
-            ],
-            'with quotes' => [
-                $row,
-                ['quote_headers' => true],
-                <<<CSV
+        ];
+        yield 'with quotes' => [
+            $row,
+            ['quote_headers' => true],
+            <<<CSV
                 "our data","really big"
                 "is at times",often
 
                 CSV,
-            ],
-            'without quotes' => [
-                $row,
-                ['quote_headers' => false],
-                <<<CSV
+        ];
+        yield 'without quotes' => [
+            $row,
+            ['quote_headers' => false],
+            <<<CSV
                 our data,really big
                 "is at times",often
 
                 CSV,
-            ],
         ];
     }
 
@@ -199,35 +199,33 @@ class CSVWriterTest extends TestCase
     }
 
     /**
-     * @return array<string, mixed[]>
+     * @return Iterator<string, array<mixed>>
      */
-    public static function providerLineEndings(): array
+    public static function providerLineEndings(): Iterator
     {
-        return [
-            'default' => [
-                [],
-                "\"our big\",is\ndata,here\n",
-            ],
-            'default, with unquoted headers' => [
-                ['quote_headers' => false],
-                "our big,is\ndata,here\n",
-            ],
-            'unix' => [
-                ['eol' => "\n"],
-                "\"our big\",is\ndata,here\n",
-            ],
-            'mac' => [
-                ['eol' => "\r"],
-                "\"our big\",is\rdata,here\r",
-            ],
-            'windows' => [
-                ['eol' => "\r\n"],
-                "\"our big\",is\r\ndata,here\r\n",
-            ],
-            'windows, with unquoted headers' => [
-                ['eol' => "\r\n", 'quote_headers' => false],
-                "our big,is\r\ndata,here\r\n",
-            ],
+        yield 'default' => [
+            [],
+            "\"our big\",is\ndata,here\n",
+        ];
+        yield 'default, with unquoted headers' => [
+            ['quote_headers' => false],
+            "our big,is\ndata,here\n",
+        ];
+        yield 'unix' => [
+            ['eol' => "\n"],
+            "\"our big\",is\ndata,here\n",
+        ];
+        yield 'mac' => [
+            ['eol' => "\r"],
+            "\"our big\",is\rdata,here\r",
+        ];
+        yield 'windows' => [
+            ['eol' => "\r\n"],
+            "\"our big\",is\r\ndata,here\r\n",
+        ];
+        yield 'windows, with unquoted headers' => [
+            ['eol' => "\r\n", 'quote_headers' => false],
+            "our big,is\r\ndata,here\r\n",
         ];
     }
 

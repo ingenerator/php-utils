@@ -5,23 +5,22 @@ declare(strict_types=1);
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function random_bytes;
 
-class Base64UrlTest extends TestCase
+final class Base64UrlTest extends TestCase
 {
     /**
-     * @return array<int, array<int, string>>
+     * @return Iterator<int, array<int, string>>
      */
-    public static function provider_encode_decode(): array
+    public static function provider_encode_decode(): Iterator
     {
-        return [
-            ['1'],
-            ['foo'],
-            [random_bytes(55)],
-        ];
+        yield ['1'];
+        yield ['foo'];
+        yield [random_bytes(55)];
     }
 
     #[DataProvider('provider_encode_decode')]

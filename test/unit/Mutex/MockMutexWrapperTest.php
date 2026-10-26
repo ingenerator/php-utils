@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 
 use Ingenerator\PHPUtils\Mutex\MockMutexWrapper;
@@ -7,7 +9,7 @@ use Ingenerator\PHPUtils\Mutex\MutexTimedOutException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class MockMutexWrapperTest extends TestCase
+final class MockMutexWrapperTest extends TestCase
 {
     public function testItCallsCallableAndReturns(): void
     {
@@ -29,7 +31,7 @@ class MockMutexWrapperTest extends TestCase
         $subject->withLock(
             'anything',
             1,
-            function (): void { throw new RuntimeException('Callable should not have run'); }
+            function (): never { throw new RuntimeException('Callable should not have run'); }
         );
     }
 

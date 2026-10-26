@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Cookie;
 
 use DateTimeImmutable;
@@ -8,7 +10,7 @@ use Ingenerator\PHPUtils\Cookie\HeadersSentException;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class CookieWrapperTest extends TestCase
+final class CookieWrapperTest extends TestCase
 {
     protected $_old_cookie_var;
 

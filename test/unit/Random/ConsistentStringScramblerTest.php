@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Random;
 
 use Ingenerator\PHPUtils\Random\ConsistentStringScrambler;
@@ -9,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 use function mt_rand;
 
-class ConsistentStringScramblerTest extends TestCase
+final class ConsistentStringScramblerTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {

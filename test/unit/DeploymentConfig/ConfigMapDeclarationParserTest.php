@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace unit\Ingenerator\PHPUtils\DeploymentConfig;
 
 use Ingenerator\PHPUtils\DeploymentConfig\ConfigMapDeclarationParser;
@@ -8,7 +10,7 @@ use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class ConfigMapDeclarationParserTest extends TestCase
+final class ConfigMapDeclarationParserTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {

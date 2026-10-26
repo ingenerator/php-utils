@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -12,13 +14,14 @@ use Closure;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\PHPUtils\DateTime\DateIntervalFactory;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 use function microtime;
 use function usleep;
 
-class RealtimeClockTest extends TestCase
+final class RealtimeClockTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {
@@ -90,31 +93,29 @@ class RealtimeClockTest extends TestCase
     }
 
     /**
-     * @return array<string, Closure(RealtimeClock $clock):DateTimeImmutable[]|string[]|bool[]>
+     * @return Iterator<string, (array<(bool | string)> | Closure(RealtimeClock $clock): array<DateTimeImmutable>)>
      */
-    public static function provider_relative_times(): array
+    public static function provider_relative_times(): Iterator
     {
-        return [
-            'in the past, with time component' => [
-                fn (RealtimeClock $clock): DateTimeImmutable => $clock->ago(DateIntervalFactory::years(6)),
-                '-6 year',
-                false,
-            ],
-            'in the past, with date only' => [
-                fn (RealtimeClock $clock): DateTimeImmutable => $clock->ago(DateIntervalFactory::months(6), date_only: true),
-                '-6 months 00:00:00.000000',
-                true,
-            ],
-            'in the future, with time component' => [
-                fn (RealtimeClock $clock): DateTimeImmutable => $clock->future(DateIntervalFactory::years(2)),
-                '+2 year',
-                false,
-            ],
-            'in the future, with date only' => [
-                fn (RealtimeClock $clock): DateTimeImmutable => $clock->future(DateIntervalFactory::months(1), date_only: true),
-                '+1 months 00:00:00.000000',
-                true,
-            ],
+        yield 'in the past, with time component' => [
+            fn (RealtimeClock $clock): DateTimeImmutable => $clock->ago(DateIntervalFactory::years(6)),
+            '-6 year',
+            false,
+        ];
+        yield 'in the past, with date only' => [
+            fn (RealtimeClock $clock): DateTimeImmutable => $clock->ago(DateIntervalFactory::months(6), date_only: true),
+            '-6 months 00:00:00.000000',
+            true,
+        ];
+        yield 'in the future, with time component' => [
+            fn (RealtimeClock $clock): DateTimeImmutable => $clock->future(DateIntervalFactory::years(2)),
+            '+2 year',
+            false,
+        ];
+        yield 'in the future, with date only' => [
+            fn (RealtimeClock $clock): DateTimeImmutable => $clock->future(DateIntervalFactory::months(1), date_only: true),
+            '+1 months 00:00:00.000000',
+            true,
         ];
     }
 

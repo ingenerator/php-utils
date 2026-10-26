@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use BadMethodCallException;
@@ -36,7 +38,7 @@ use function str_replace;
 
 use const PHP_MAJOR_VERSION;
 
-class StackdriverApplicationLoggerTest extends TestCase
+final class StackdriverApplicationLoggerTest extends TestCase
 {
     protected $vfs;
 
@@ -259,7 +261,7 @@ class StackdriverApplicationLoggerTest extends TestCase
             ['sources' => ['first_ok']],
             fn (): DateTimeImmutable => new DateTimeImmutable(new stdClass()),
             ['sources' => ['third_ok']],
-            function (): void { throw new InvalidArgumentException('Broken'); },
+            function (): never { throw new InvalidArgumentException('Broken'); },
             ['sources' => ['fifth_ok']],
             new class implements LogMetadataProvider {
                 public function getMetadata(): array
@@ -569,7 +571,7 @@ class StackdriverApplicationLoggerTest extends TestCase
             array_intersect_key($entry['httpRequest'], $original_http_meta),
             'Should include metadata in top-level httpRequest struct'
         );
-        $this->assertFalse(isset($entry['context']['httpRequest']), 'Should not duplicate httpRequest meta in context');
+        $this->assertArrayNotHasKey('httpRequest', $entry['context'], 'Should not duplicate httpRequest meta in context');
     }
 
     #[TestWith(['message'])]

@@ -8,13 +8,14 @@ use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxKeypair;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxString;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\DecryptionFailedException;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 use function str_replace;
 
-class CryptoBoxKeypairTest extends TestCase
+final class CryptoBoxKeypairTest extends TestCase
 {
     public function testItCanBeGeneratedAsANewKeypairAndUsedToDecrypt(): void
     {
@@ -62,17 +63,15 @@ class CryptoBoxKeypairTest extends TestCase
     }
 
     /**
-     * @return array<string, string[]>
+     * @return Iterator<string, array<string>>
      */
-    public static function provider_invalid_keypair_string(): array
+    public static function provider_invalid_keypair_string(): Iterator
     {
-        return [
-            'empty' => [''],
-            'incorrect format' => ['just a long string'],
-            'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'],
-            'no keypair_id' => ['zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'],
-            'keypair is too short' => ['some-key.cnViYmlzaA'],
-        ];
+        yield 'empty' => [''];
+        yield 'incorrect format' => ['just a long string'];
+        yield 'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'];
+        yield 'no keypair_id' => ['zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'];
+        yield 'keypair is too short' => ['some-key.cnViYmlzaA'];
     }
 
     #[DataProvider('provider_invalid_keypair_string')]
@@ -98,16 +97,12 @@ class CryptoBoxKeypairTest extends TestCase
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return Iterator<string, array<int, string>>
      */
-    public static function provider_bad_decryption(): array
+    public static function provider_bad_decryption(): Iterator
     {
-        return [
-            'valid as a key, but not for this message' => [
-                CryptoBoxKeypair::generate('a')->exportToString(),
-            ],
-            // I don't think there actually are any cases where the keypair provided can be invalid, because we
-            // validate and throw at the point of construction.
+        yield 'valid as a key, but not for this message' => [
+            CryptoBoxKeypair::generate('a')->exportToString(),
         ];
     }
 

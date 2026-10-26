@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace unit\Ingenerator\PHPUtils\DeploymentConfig;
 
 use Closure;
@@ -8,12 +10,13 @@ use Ingenerator\PHPUtils\DeploymentConfig\DeploymentConfig;
 use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use Ingenerator\PHPUtils\DeploymentConfig\MissingConfigException;
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
+use Iterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class DeploymentConfigTest extends TestCase
+final class DeploymentConfigTest extends TestCase
 {
     protected ConfigValueDecrypter $decrypter;
 
@@ -55,51 +58,47 @@ class DeploymentConfigTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]|bool[]|string[][]>
+     * @return Iterator<int, array<(array<string> | bool | string)>>
      */
-    public static function provider_is_current_env(): array
+    public static function provider_is_current_env(): Iterator
     {
-        return [
-            // Simples, single case
-            [
-                DeploymentConfig::PRODUCTION,
-                [DeploymentConfig::CI],
-                false,
-            ],
-            [
-                DeploymentConfig::PRODUCTION,
-                [DeploymentConfig::PRODUCTION],
-                true,
-            ],
-
-            // Match any of the requested ones
-            [
-                DeploymentConfig::DEV,
-                [DeploymentConfig::CI, DeploymentConfig::DEV],
-                true,
-            ],
-            [
-                DeploymentConfig::DEV,
-                [
-                    DeploymentConfig::DEV,
-                    DeploymentConfig::CI,
-                ],
-                true,
-            ],
-            [
-                DeploymentConfig::DEV,
-                [DeploymentConfig::PRODUCTION, DeploymentConfig::CI],
-                false,
-            ],
-
-            // Randomness
-            [
-                'junk-env',
-                [DeploymentConfig::PRODUCTION, DeploymentConfig::DEV],
-                false,
-            ],
-            [DeploymentConfig::DEV, ['junk-env'], false],
+        // Simples, single case
+        yield [
+            DeploymentConfig::PRODUCTION,
+            [DeploymentConfig::CI],
+            false,
         ];
+        yield [
+            DeploymentConfig::PRODUCTION,
+            [DeploymentConfig::PRODUCTION],
+            true,
+        ];
+        // Match any of the requested ones
+        yield [
+            DeploymentConfig::DEV,
+            [DeploymentConfig::CI, DeploymentConfig::DEV],
+            true,
+        ];
+        yield [
+            DeploymentConfig::DEV,
+            [
+                DeploymentConfig::DEV,
+                DeploymentConfig::CI,
+            ],
+            true,
+        ];
+        yield [
+            DeploymentConfig::DEV,
+            [DeploymentConfig::PRODUCTION, DeploymentConfig::CI],
+            false,
+        ];
+        // Randomness
+        yield [
+            'junk-env',
+            [DeploymentConfig::PRODUCTION, DeploymentConfig::DEV],
+            false,
+        ];
+        yield [DeploymentConfig::DEV, ['junk-env'], false];
     }
 
     #[DataProvider('provider_is_current_env')]
@@ -170,8 +169,7 @@ class DeploymentConfigTest extends TestCase
     public function testItsMapReturnsNullForStandaloneIfNothingDefined(): void
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
-        $this->assertSame(
-            null,
+        $this->assertNull(
             $subject->map(
                 [DeploymentConfig::DEV, 'I am dev'],
                 [DeploymentConfig::PRODUCTION, 'I am production']
@@ -194,7 +192,7 @@ class DeploymentConfigTest extends TestCase
     public function testItsReadAlwaysReturnsNullInStandalone(): void
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
-        $this->assertSame(null, $subject->read('secrets/any/old/secret'));
+        $this->assertNull($subject->read('secrets/any/old/secret'));
     }
 
     public function testItsReadReturnsFileContentIfPresentOutsideStandalone(): void
@@ -235,7 +233,7 @@ class DeploymentConfigTest extends TestCase
     public function testItsReadJsonAlwaysReturnsNullInStandalone(): void
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
-        $this->assertSame(null, $subject->readJSON('secrets/any/old/secret'));
+        $this->assertNull($subject->readJSON('secrets/any/old/secret'));
     }
 
     #[TestWith([true, true])]

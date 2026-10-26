@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Database;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,7 +12,7 @@ use RuntimeException;
 
 use function class_alias;
 
-class Doctrine2TransactionWrapperTest extends TestCase
+final class Doctrine2TransactionWrapperTest extends TestCase
 {
     private EntityManagerInterface $entity_manager_mock;
 
@@ -42,7 +44,7 @@ class Doctrine2TransactionWrapperTest extends TestCase
     {
         $subject = $this->newSubject();
         $this->expectExceptionMessage('I broke');
-        $subject->run(function (): void { throw new RuntimeException('I broke'); });
+        $subject->run(function (): never { throw new RuntimeException('I broke'); });
     }
 
     protected function setUp(): void

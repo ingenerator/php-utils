@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -17,7 +19,7 @@ use UnexpectedValueException;
 
 use function array_map;
 
-class AbstractArrayRepositoryTest extends TestCase
+final class AbstractArrayRepositoryTest extends TestCase
 {
     public function testItIsInitialisableWithNoEntities(): void
     {

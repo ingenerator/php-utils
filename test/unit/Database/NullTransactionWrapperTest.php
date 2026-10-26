@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Database;
 
 use Ingenerator\PHPUtils\Database\NullTransactionWrapper;
@@ -7,7 +9,7 @@ use Ingenerator\PHPUtils\Database\TransactionWrapper;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class NullTransactionWrapperTest extends TestCase
+final class NullTransactionWrapperTest extends TestCase
 {
     public function testItIsInitialisable(): void
     {
@@ -31,7 +33,7 @@ class NullTransactionWrapperTest extends TestCase
     {
         $subject = $this->newSubject();
         $this->expectExceptionMessage('I broke');
-        $subject->run(function (): void { throw new RuntimeException('I broke'); });
+        $subject->run(function (): never { throw new RuntimeException('I broke'); });
     }
 
     private function newSubject(): NullTransactionWrapper

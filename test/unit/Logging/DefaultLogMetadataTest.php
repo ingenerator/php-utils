@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use Ingenerator\PHPUtils\Logging\DefaultLogMetadata;
 use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
+use Iterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class DefaultLogMetadataTest extends TestCase
+final class DefaultLogMetadataTest extends TestCase
 {
     /**
      * ---------------------------------
@@ -81,36 +84,34 @@ class DefaultLogMetadataTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]|array<string, string>[]|null[]>
+     * @return Iterator<int, array<(array<string, string> | string | null)>>
      */
-    public static function provider_trace_header(): array
+    public static function provider_trace_header(): Iterator
     {
-        return [
-            [
-                // Doesn't match expected format, pass through as-is (with or without project)
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
-                null,
-                'abcdef-invalid',
-            ],
-            [
-                // Doesn't match expected format, pass through as-is (with or without project)
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
-                'ig-smth',
-                'abcdef-invalid',
-            ],
-            [
-                // Expected format but no GCP project - pass through the first key
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
-                null,
-                'a82732dfd72b2872',
-                'projects/a82732dfd72b2872/traces/935674659030955431',
-            ],
-            [
-                // Expected format and GCP project - convert to GCP format
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
-                'ig-smth',
-                'projects/ig-smth/traces/a82732dfd72b2872',
-            ],
+        yield [
+            // Doesn't match expected format, pass through as-is (with or without project)
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
+            null,
+            'abcdef-invalid',
+        ];
+        yield [
+            // Doesn't match expected format, pass through as-is (with or without project)
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
+            'ig-smth',
+            'abcdef-invalid',
+        ];
+        yield [
+            // Expected format but no GCP project - pass through the first key
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
+            null,
+            'a82732dfd72b2872',
+            'projects/a82732dfd72b2872/traces/935674659030955431',
+        ];
+        yield [
+            // Expected format and GCP project - convert to GCP format
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
+            'ig-smth',
+            'projects/ig-smth/traces/a82732dfd72b2872',
         ];
     }
 

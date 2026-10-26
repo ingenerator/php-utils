@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -13,7 +15,7 @@ use Ingenerator\PHPUtils\Object\ObjectPropertyRipper;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-class ObjectPropertyRipperTest extends TestCase
+final class ObjectPropertyRipperTest extends TestCase
 {
     public function testItRipsProperties(): void
     {

@@ -1,27 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class JSONTest extends TestCase
+final class JSONTest extends TestCase
 {
     /**
-     * @return array<int, mixed[]>
+     * @return Iterator<int, array<mixed>>
      */
-    public static function provider_valid_json(): array
+    public static function provider_valid_json(): Iterator
     {
-        return [
-            ['1', 1],
-            ['true', true],
-            ['"4"', '4'],
-            ['null', null],
-            ['{"foo": "bar", "baz": {"bin":"boo"}}', ['foo' => 'bar', 'baz' => ['bin' => 'boo']]],
-        ];
+        yield ['1', 1];
+        yield ['true', true];
+        yield ['"4"', '4'];
+        yield ['null', null];
+        yield ['{"foo": "bar", "baz": {"bin":"boo"}}', ['foo' => 'bar', 'baz' => ['bin' => 'boo']]];
     }
 
     #[DataProvider('provider_valid_json')]
@@ -58,16 +59,14 @@ class JSONTest extends TestCase
     }
 
     /**
-     * @return array<int, int[]|bool[]|string[]|array<string, string>[]>
+     * @return Iterator<int, array<(array<string, string> | bool | int | string)>>
      */
-    public static function provider_valid_encode(): array
+    public static function provider_valid_encode(): Iterator
     {
-        return [
-            [1, false, '1'],
-            [['foo' => 'bar'], false, '{"foo":"bar"}'],
-            [['foo' => 'bar', 'baz' => 'ban'], false, '{"foo":"bar","baz":"ban"}'],
-            [['foo' => 'bar', 'baz' => 'ban'], true, "{\n    \"foo\": \"bar\",\n    \"baz\": \"ban\"\n}"],
-        ];
+        yield [1, false, '1'];
+        yield [['foo' => 'bar'], false, '{"foo":"bar"}'];
+        yield [['foo' => 'bar', 'baz' => 'ban'], false, '{"foo":"bar","baz":"ban"}'];
+        yield [['foo' => 'bar', 'baz' => 'ban'], true, "{\n    \"foo\": \"bar\",\n    \"baz\": \"ban\"\n}"];
     }
 
     #[DataProvider('provider_valid_encode')]

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Assets;
 
 use Ingenerator\PHPUtils\Assets\StaticAssetUrlProvider;
@@ -10,7 +12,7 @@ use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class StaticAssetUrlProviderTest extends TestCase
+final class StaticAssetUrlProviderTest extends TestCase
 {
     protected $options = [
         'mode' => StaticAssetUrlProvider::MODE_LOCAL,

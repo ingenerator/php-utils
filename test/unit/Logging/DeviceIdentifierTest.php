@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use DateTimeImmutable;
@@ -9,7 +11,7 @@ use Ingenerator\PHPUtils\Object\ScopeChangingCaller;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class DeviceIdentifierTest extends TestCase
+final class DeviceIdentifierTest extends TestCase
 {
     protected ArrayCookieWrapperStub $cookies;
 

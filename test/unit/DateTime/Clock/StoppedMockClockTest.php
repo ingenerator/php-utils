@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\unit\DateTime\Clock;
 
 use Closure;
@@ -8,6 +10,7 @@ use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\PHPUtils\DateTime\DateIntervalFactory;
 use Ingenerator\PHPUtils\DateTime\DateString;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +19,7 @@ use function microtime;
 use function round;
 use function sleep;
 
-class StoppedMockClockTest extends TestCase
+final class StoppedMockClockTest extends TestCase
 {
     public function testItIsInitialisableNow(): void
     {
@@ -30,26 +33,24 @@ class StoppedMockClockTest extends TestCase
     }
 
     /**
-     * @return array<int, array<int, DateTimeImmutable|string|float>>
+     * @return Iterator<int, array<int, (DateTimeImmutable | float | string)>>
      */
-    public static function provider_at_fixed(): array
+    public static function provider_at_fixed(): Iterator
     {
-        return [
-            [
-                '2019-03-04 10:02:03',
-                new DateTimeImmutable('2019-03-04 10:02:03'),
-                1551693723.0,
-            ],
-            [
-                new DateTimeImmutable('2019-03-04 10:02:03'),
-                new DateTimeImmutable('2019-03-04 10:02:03'),
-                1551693723.0,
-            ],
-            [
-                new DateTimeImmutable('2019-03-04 10:02:03.248123'),
-                new DateTimeImmutable('2019-03-04 10:02:03.248123'),
-                1551693723.248123,
-            ],
+        yield [
+            '2019-03-04 10:02:03',
+            new DateTimeImmutable('2019-03-04 10:02:03'),
+            1551693723.0,
+        ];
+        yield [
+            new DateTimeImmutable('2019-03-04 10:02:03'),
+            new DateTimeImmutable('2019-03-04 10:02:03'),
+            1551693723.0,
+        ];
+        yield [
+            new DateTimeImmutable('2019-03-04 10:02:03.248123'),
+            new DateTimeImmutable('2019-03-04 10:02:03.248123'),
+            1551693723.248123,
         ];
     }
 
@@ -64,7 +65,7 @@ class StoppedMockClockTest extends TestCase
     public function testItIsInitialisableAtFixedMicrotime(): void
     {
         $clock = StoppedMockClock::atMicrotime(1551693723.1239);
-        $this->assertSame(1551693723.1239, $clock->getMicrotime());
+        $this->assertEqualsWithDelta(1551693723.1239, $clock->getMicrotime(), PHP_FLOAT_EPSILON);
         $this->assertSame('2019-03-04 10:02:03.123900', $clock->getDateTime()->format('Y-m-d H:i:s.u'));
     }
 
@@ -88,11 +89,11 @@ class StoppedMockClockTest extends TestCase
     public function testItAdvancesTimeAfterEachTick(): void
     {
         $clock = StoppedMockClock::at('2019-01-05 10:03:02');
-        $this->assertSame(1546682582.0, $clock->getMicrotime(), 'Correct starting microtime');
+        $this->assertEqualsWithDelta(1546682582.0, $clock->getMicrotime(), PHP_FLOAT_EPSILON, 'Correct starting microtime');
 
         $clock->tick(new DateInterval('P1D'));
         $this->assertEquals(new DateTimeImmutable('2019-01-06 10:03:02'), $clock->getDateTime());
-        $this->assertSame(1546768982.0, $clock->getMicrotime());
+        $this->assertEqualsWithDelta(1546768982.0, $clock->getMicrotime(), PHP_FLOAT_EPSILON);
     }
 
     public function testItAdvancesTimeAfterEachTickMicroseconds(): void
@@ -101,11 +102,11 @@ class StoppedMockClockTest extends TestCase
         $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:02.150'), $clock->getDateTime());
 
         $clock->tickMicroseconds(150000);
-        $this->assertSame(1546682582.300, round($clock->getMicrotime(), 3));
+        $this->assertEqualsWithDelta(1546682582.300, round($clock->getMicrotime(), 3), PHP_FLOAT_EPSILON);
         $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:02.300'), $clock->getDateTime(), 'DateTime not changed by sub-second tick');
 
         $clock->tickMicroseconds(750000);
-        $this->assertSame(1546682583.050, round($clock->getMicrotime(), 3));
+        $this->assertEqualsWithDelta(1546682583.050, round($clock->getMicrotime(), 3), PHP_FLOAT_EPSILON);
         $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:03.050'), $clock->getDateTime(), 'DateTime changed after second boundary');
     }
 
@@ -116,43 +117,41 @@ class StoppedMockClockTest extends TestCase
         $clock->usleep(900000);
         $real_ms = 1000 * (microtime(true) - $start);
         $this->assertLessThan(50, $real_ms, 'Should not actually sleep');
-        $this->assertSame(1546682582.95, round($clock->getMicrotime(), 3), 'Should update time');
+        $this->assertEqualsWithDelta(1546682582.95, round($clock->getMicrotime(), 3), PHP_FLOAT_EPSILON, 'Should update time');
     }
 
     /**
-     * @return array<int, Closure():void[]|string[]|int[][]|Closure(StoppedMockClock $clock):void[]>
+     * @return Iterator<int, (array<(array<int> | string)> | Closure(): array<void> | Closure(StoppedMockClock $clock): array<void>)>
      */
-    public static function provider_assert_slept_fails(): array
+    public static function provider_assert_slept_fails(): Iterator
     {
-        return [
-            [
-                function (): void {
-                },
-                [15],
-                'Never slept at all',
-            ],
-            [
-                function (StoppedMockClock $clock): void {
-                    $clock->usleep(150);
-                },
-                [15],
-                'Wrong amount of sleep',
-            ],
-            [
-                function (StoppedMockClock $clock): void {
-                    $clock->usleep(150);
-                },
-                [150, 30],
-                'Incorrect number of sleeps',
-            ],
-            [
-                function (StoppedMockClock $clock): void {
-                    $clock->usleep(150);
-                    $clock->usleep(10);
-                },
-                [10, 150],
-                'Sleeps in wrong order',
-            ],
+        yield [
+            function (): void {
+            },
+            [15],
+            'Never slept at all',
+        ];
+        yield [
+            function (StoppedMockClock $clock): void {
+                $clock->usleep(150);
+            },
+            [15],
+            'Wrong amount of sleep',
+        ];
+        yield [
+            function (StoppedMockClock $clock): void {
+                $clock->usleep(150);
+            },
+            [150, 30],
+            'Incorrect number of sleeps',
+        ];
+        yield [
+            function (StoppedMockClock $clock): void {
+                $clock->usleep(150);
+                $clock->usleep(10);
+            },
+            [10, 150],
+            'Sleeps in wrong order',
         ];
     }
 

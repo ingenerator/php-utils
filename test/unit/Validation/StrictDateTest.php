@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -13,11 +15,12 @@ use DateTime;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\Validation\StrictDate;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class StrictDateTest extends TestCase
+final class StrictDateTest extends TestCase
 {
     #[TestWith(['', false])]
     #[TestWith([null, false])]
@@ -48,17 +51,15 @@ class StrictDateTest extends TestCase
     }
 
     /**
-     * @return array<int, DateTimeImmutable[]|bool[]|null[]|DateTime[]|string[]>
+     * @return Iterator<int, array<(bool | DateTime | DateTimeImmutable | string | null)>>
      */
-    public static function provider_datetime_immutable(): array
+    public static function provider_datetime_immutable(): Iterator
     {
-        return [
-            [null, true],
-            [new DateTimeImmutable(), true],
-            [false, false],
-            [new DateTime(), false],
-            ['2017-08-01', false],
-        ];
+        yield [null, true];
+        yield [new DateTimeImmutable(), true];
+        yield [false, false];
+        yield [new DateTime(), false];
+        yield ['2017-08-01', false];
     }
 
     #[DataProvider('provider_datetime_immutable')]
@@ -74,15 +75,13 @@ class StrictDateTest extends TestCase
     }
 
     /**
-     * @return array<int, array<int, array<string, DateTimeImmutable|null>|string|bool>>
+     * @return Iterator<int, array<int, (array<string, (DateTimeImmutable | null)> | bool | string)>>
      */
-    public static function provider_date_before_after_invalid_inputs(): array
+    public static function provider_date_before_after_invalid_inputs(): Iterator
     {
-        return [
-            [['from' => null, 'to' => null], 'from', 'to', true],
-            [['from' => new DateTimeImmutable(), 'to' => null], 'from', 'to', true],
-            [['from' => null, 'to' => new DateTimeImmutable()], 'from', 'to', true],
-        ];
+        yield [['from' => null, 'to' => null], 'from', 'to', true];
+        yield [['from' => new DateTimeImmutable(), 'to' => null], 'from', 'to', true];
+        yield [['from' => null, 'to' => new DateTimeImmutable()], 'from', 'to', true];
     }
 
     #[DataProvider('provider_date_before_after_invalid_inputs')]
@@ -98,18 +97,16 @@ class StrictDateTest extends TestCase
     }
 
     /**
-     * @return array<string, string[]|bool[]>
+     * @return Iterator<string, array<(bool | string)>>
      */
-    public static function provider_date_after_date(): array
+    public static function provider_date_after_date(): Iterator
     {
-        return [
-            'long before' => ['2022-10-02 13:04:03', '2015-11-02 10:03:02', false],
-            'just before' => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:03.999998', false],
-            'exact moment' => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:03.999999', false],
-            'just after' => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:04.000000', true],
-            'seconds after' => ['2022-10-02 13:01:03', '2022-10-02 13:01:06.000000', true],
-            'long after' => ['2022-10-02 13:01:03', '2023-03-05 18:01:06.000000', true],
-        ];
+        yield 'long before' => ['2022-10-02 13:04:03', '2015-11-02 10:03:02', false];
+        yield 'just before' => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:03.999998', false];
+        yield 'exact moment' => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:03.999999', false];
+        yield 'just after' => ['2022-10-02 13:01:03.999999', '2022-10-02 13:01:04.000000', true];
+        yield 'seconds after' => ['2022-10-02 13:01:03', '2022-10-02 13:01:06.000000', true];
+        yield 'long after' => ['2022-10-02 13:01:03', '2023-03-05 18:01:06.000000', true];
     }
 
     #[DataProvider('provider_date_after_date')]
