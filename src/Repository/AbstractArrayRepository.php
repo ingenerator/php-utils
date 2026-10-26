@@ -70,10 +70,7 @@ abstract class AbstractArrayRepository
     /**
      * @return string
      */
-    protected static function getEntityBaseClass()
-    {
-        throw new \BadMethodCallException('Implement your own '.__METHOD__.'!');
-    }
+    abstract protected static function getEntityBaseClass();
 
     /**
      * @param array $data
@@ -136,7 +133,7 @@ abstract class AbstractArrayRepository
         return \sprintf(
             "%s (object %s) with data:\n%s\n",
             \get_class($entity),
-            \spl_object_hash($entity),
+            \spl_object_id($entity),
             JSON::encode($this->entityToArray($entity))
         );
     }
@@ -153,7 +150,7 @@ abstract class AbstractArrayRepository
      */
     protected function entityToArray($entity, & $seen_objects = [])
     {
-        $entity_hash = \spl_object_hash($entity);
+        $entity_hash = \spl_object_id($entity);
         if (isset($seen_objects[$entity_hash])) {
             return '**RECURSION**';
         } else {
@@ -168,7 +165,7 @@ abstract class AbstractArrayRepository
             $entity
         );
         $obj_identity = function ($a) {
-            return \get_class($a).'#'.\spl_object_hash($a);
+            return \get_class($a).'#'.\spl_object_id($a);
         };
         $result       = [];
         foreach ($all_props($entity) as $key => $var) {

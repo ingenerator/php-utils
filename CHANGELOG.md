@@ -1,5 +1,6 @@
 ### Unreleased
 
+* BREAKING: AbstractArrayRepository::getEntityBaseClass() is now abstract.
 * Refactored ConsistentStringScrambler to use Randomizer rather than mt_rand.
 * BREAKING: Drop custom Metrics interfaces and implementations.
 * BREAKING: Drop InvalidUserDateTime and validation / factory methods that interact with it.
