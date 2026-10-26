@@ -37,7 +37,7 @@ class CookieWrapper
     /**
      * @param array<string, mixed> $options
      */
-    public function set(string $name, ?string $value = null, array $options = []): void
+    public function set(string $name, string $value = '', array $options = []): void
     {
         if ($this->headers_sent($file, $line)) {
             throw new HeadersSentException($name, $file, $line);
@@ -97,7 +97,7 @@ class CookieWrapper
     }
 
     /** @param array<string, mixed> $options */
-    protected function set_cookie(string $name, ?string $value, array $options): void
+    protected function set_cookie(string $name, string $value, array $options): void
     {
         setcookie($name, $value, $options);
     }

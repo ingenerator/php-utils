@@ -14,14 +14,14 @@ class ArrayCookieWrapperStub extends CookieWrapper
         $this->cookies = $cookies;
     }
 
-    public function set(string $name, ?string $value = null, array $options = []): void
+    public function set(string $name, string $value = '', array $options = []): void
     {
         parent::set($name, $value, $options);
         $this->set_cookie_calls[$name][] = ['value' => $value, 'opts' => $options];
     }
 
     /** @param array<string, mixed> $options */
-    protected function set_cookie(string $name, ?string $value, array $options): void
+    protected function set_cookie(string $name, string $value, array $options): void
     {
         // No-op
     }

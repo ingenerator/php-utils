@@ -229,7 +229,7 @@ class TestableCookieWrapper extends CookieWrapper
     /** @param array<string, mixed> $options */
     protected function set_cookie(
         string $name,
-        ?string $value,
+        string $value,
         array $options,
     ): void {
         $this->setcookie_calls[] = [
