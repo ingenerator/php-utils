@@ -114,8 +114,9 @@ final class ConfigMapDeclarationParserTest extends TestCase
         return array_map(fn (array $declarations): array => [$declarations], $invalid);
     }
 
+    /** @param array<mixed> $declarations */
     #[DataProvider('provider_invalid_declarations')]
-    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues(mixed $declarations): void
+    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues(array $declarations): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidConfigException::class);
