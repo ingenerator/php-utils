@@ -8,51 +8,23 @@ use UnexpectedValueException;
 
 use function array_map;
 
-use const PHP_MAJOR_VERSION;
+class BasicPDOStatementStub extends PDOStatement
+{
+    protected $result;
 
-if (PHP_MAJOR_VERSION < 8) {
-    class BasicPDOStatementStub extends PDOStatement
+    public function __construct(array $result)
     {
-        protected $result;
-
-        public function __construct(array $result)
-        {
-            $this->result = $result;
-        }
-
-        public function fetchAll($fetch_style = null, $fetch_argument = null, $ctor_args = null): array
-        {
-            if ($fetch_style === null) {
-                return $this->result;
-            }
-            if ($fetch_style === PDO::FETCH_COLUMN) {
-                return array_map(
-                    fn (array $row) => $row[$fetch_argument],
-                    $this->result
-                );
-            }
-            throw new UnexpectedValueException('Not mocked '.$fetch_style);
-        }
+        $this->result = $result;
     }
-} else {
-    class BasicPDOStatementStub extends PDOStatement
+
+    public function fetchAll(?int $mode = null, mixed ...$fetch_argument): array
     {
-        protected $result;
-
-        public function __construct(array $result)
-        {
-            $this->result = $result;
+        if ($mode === null) {
+            return $this->result;
         }
-
-        public function fetchAll(?int $fetch_style = null, mixed ...$fetch_argument): array
-        {
-            if ($fetch_style === null) {
-                return $this->result;
-            }
-            if ($fetch_style === PDO::FETCH_COLUMN) {
-                return array_map(fn (array $row) => $row[$fetch_argument[0]], $this->result);
-            }
-            throw new UnexpectedValueException('Not mocked '.$fetch_style);
+        if ($mode === PDO::FETCH_COLUMN) {
+            return array_map(fn (array $row) => $row[$fetch_argument[0]], $this->result);
         }
+        throw new UnexpectedValueException('Not mocked '.$mode);
     }
 }
