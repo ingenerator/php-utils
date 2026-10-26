@@ -7,6 +7,7 @@ namespace Ingenerator\PHPUtils\ArrayHelpers;
 use ArrayAccess;
 use ArrayIterator;
 use Countable;
+use InvalidArgumentException;
 use IteratorAggregate;
 use OutOfBoundsException;
 use Traversable;
@@ -41,6 +42,10 @@ class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetGet(mixed $offset): mixed
     {
+        if (!is_string($offset)) {
+            throw new InvalidArgumentException('Map keys must be strings');
+        }
+
         if (!array_key_exists($offset, $this->items)) {
             throw new OutOfBoundsException('No item with key '.$offset);
         }
@@ -50,6 +55,10 @@ class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetSet(mixed $offset, mixed $value): void
     {
+        if (!is_string($offset)) {
+            throw new InvalidArgumentException('Map keys must be strings');
+        }
+
         if (array_key_exists($offset, $this->items)) {
             throw new DuplicateMapItemException('Map already contains an item with key '.$offset);
         }
