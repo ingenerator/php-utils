@@ -143,7 +143,7 @@ final class RealtimeClockTest extends TestCase
         return new RealtimeClock();
     }
 
-    protected function assertBetween(mixed $expect_min, mixed $expect_max, mixed $actual, string $msg)
+    protected function assertBetween(mixed $expect_min, mixed $expect_max, mixed $actual, string $msg): void
     {
         $this->assertGreaterThanOrEqual($expect_min, $actual, $msg);
         $this->assertLessThanOrEqual($expect_max, $actual, $msg);

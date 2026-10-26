@@ -285,7 +285,7 @@ final class CSVWriterTest extends TestCase
         }
     }
 
-    protected function assertCSVContent(array $expect, $file)
+    protected function assertCSVContent(array $expect, $file): void
     {
         rewind($file);
         $actual = [];

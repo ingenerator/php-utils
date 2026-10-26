@@ -156,7 +156,7 @@ final class AbstractArrayRepositoryTest extends TestCase
         );
     }
 
-    protected function assertAssertionFails($callable)
+    protected function assertAssertionFails($callable): void
     {
         try {
             $callable();
