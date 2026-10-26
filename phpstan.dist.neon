@@ -4,3 +4,16 @@ parameters:
     paths:
         - src
         - test
+
+    ignoreErrors:
+        -
+            # These classes really shouldn't ship in this package without a doctrine dependency
+            message: '#Doctrine\\ORM\\EntityManagerInterface#'
+            paths:
+                - src/Database/Doctrine2TransactionWrapper.php
+                - test/unit/Database/Doctrine2TransactionWrapperTest.php
+        -
+            # These classes really shouldn't ship in this package without a doctrine dependency
+            message: '#Doctrine\\Common\\Collections\\Collection#'
+            paths:
+                - src/Repository/AbstractArrayRepository.php
