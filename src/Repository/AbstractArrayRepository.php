@@ -42,8 +42,14 @@ abstract class AbstractArrayRepository
     /**
      * @param array<int, T> $entities
      */
-    protected function __construct(protected array $entities)
+    final protected function __construct(protected array $entities)
     {
+        $this->onConstruct();
+    }
+
+    protected function onConstruct(): void
+    {
+        // Extension point, to allow us to finalise the constructor to make it safe to do `new static`
     }
 
     /**
@@ -113,7 +119,7 @@ abstract class AbstractArrayRepository
         Assert::assertEquals(
             '',
             $this->save_log,
-            'Expected no saved entities'
+            'Expected no saved entities',
         );
     }
 
@@ -127,7 +133,7 @@ abstract class AbstractArrayRepository
         Assert::assertEquals(
             $this->save_log,
             $this->formatSaveLog($entity),
-            'Expected entity to be saved exactly once with matching data'
+            'Expected entity to be saved exactly once with matching data',
         );
     }
 
@@ -142,7 +148,7 @@ abstract class AbstractArrayRepository
             "%s (object %s) with data:\n%s\n",
             $entity::class,
             spl_object_id($entity),
-            JSON::encode($this->entityToArray($entity))
+            JSON::encode($this->entityToArray($entity)),
         );
     }
 
@@ -162,7 +168,7 @@ abstract class AbstractArrayRepository
         $all_props = Closure::bind(
             fn ($e): array => get_object_vars($e),
             null,
-            $entity
+            $entity,
         );
         $obj_identity = (fn ($a): string => $a::class.'#'.spl_object_id($a));
         $result = [];
@@ -244,7 +250,7 @@ abstract class AbstractArrayRepository
         $entities = $this->listWith($callable);
         if (count($entities) > 1) {
             throw new UnexpectedValueException(
-                'Found multiple entities : expected unique condition.'
+                'Found multiple entities : expected unique condition.',
             );
         }
 
