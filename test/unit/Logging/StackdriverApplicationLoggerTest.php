@@ -664,57 +664,6 @@ class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
-    public function test_it_can_be_created_with_metrics_agent_to_publish_counter_on_each_log()
-    {
-        $agent   = new ArrayMetricsAgent;
-        $subject = StackdriverApplicationLogger::withMetrics(
-            $agent,
-            'some-metric-name',
-            $this->log_stream,
-            ...$this->meta_args
-        );
-        $subject->error('An error');
-        $subject->info('And an info');
-        $subject->info('Another info');
-        // Note the request logger does not produce a metric
-        $subject->logRequest($_SERVER);
-
-        $expect = new ArrayMetricsAgent;
-        $expect->incrementCounterByOne(MetricId::nameAndSource('some-metric-name', 'error'));
-        $expect->incrementCounterByOne(MetricId::nameAndSource('some-metric-name', 'info'));
-        $expect->incrementCounterByOne(MetricId::nameAndSource('some-metric-name', 'info'));
-
-        $this->assertSame($expect->getMetrics(), $agent->getMetrics());
-    }
-
-    public function test_it_logs_as_expected_when_using_the_with_metrics_constructor()
-    {
-        $logger = StackdriverApplicationLogger::withMetrics(
-            new NullMetricsAgent,
-            'some-name',
-            $this->log_stream,
-            ['context' => ['foo' => 'bar']],
-            fn() => ['context' => ['other' => 'stuff']],
-            new class implements LogMetadataProvider {
-                public function getMetadata(): array
-                {
-                    return ['context' => ['from' => 'provider']];
-                }
-            }
-        );
-        $logger->info('Anything');
-        $entry = $this->assertLoggedOneLine();
-        $this->assertSame(
-            [
-                'foo' => 'bar',
-                'other' => 'stuff',
-                'from' => 'provider',
-            ],
-            $entry['context']
-        );
-    }
-
-
     /**
      * @return array
      */
@@ -805,4 +754,3 @@ class StackdriverApplicationLoggerTest extends TestCase
     }
 
 }
-

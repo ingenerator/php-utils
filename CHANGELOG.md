@@ -1,5 +1,6 @@
 ### Unreleased
 
+* BREAKING: Drop custom Metrics interfaces and implementations.
 * BREAKING: Drop InvalidUserDateTime and validation / factory methods that interact with it.
 
 ### v2.5.1 (2025-09-17)
