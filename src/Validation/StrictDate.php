@@ -53,7 +53,7 @@ class StrictDate
     /**
      * Value is NULL or a valid DateTimeImmutable.
      */
-    public static function date_immutable($value): bool
+    public static function date_immutable(mixed $value): bool
     {
         return static::datetime_immutable($value);
     }
@@ -61,7 +61,7 @@ class StrictDate
     /**
      * Value is NULL or a valid DateTimeImmutable.
      */
-    public static function datetime_immutable($value): bool
+    public static function datetime_immutable(mixed $value): bool
     {
         if ($value === null) {
             return true;
@@ -70,17 +70,17 @@ class StrictDate
         return $value instanceof DateTimeImmutable;
     }
 
-    public static function iso_datetime(string $value): bool
+    public static function iso_datetime(mixed $value): bool
     {
         return self::is_datetime_format('Y-m-d H:i:s', $value);
     }
 
-    public static function iso_date(string $value): bool
+    public static function iso_date(mixed $value): bool
     {
         return self::is_datetime_format('Y-m-d', $value);
     }
 
-    protected static function is_datetime_format($format, $value): bool
+    protected static function is_datetime_format(string $format, mixed $value): bool
     {
         $dt = DateTimeImmutable::createFromFormat($format, (string) $value);
 

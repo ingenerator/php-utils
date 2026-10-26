@@ -43,7 +43,7 @@ class StoppedMockClock extends RealtimeClock
         return new static(new DateTimeImmutable());
     }
 
-    public static function at(string $time): static
+    public static function at(string|DateTimeImmutable $time): static
     {
         if (!$time instanceof DateTimeImmutable) {
             $time = new DateTimeImmutable($time);
