@@ -5,6 +5,7 @@ namespace Ingenerator\PHPUtils\Random;
 use InvalidArgumentException;
 use Random\Engine\Mt19937;
 use Random\Randomizer;
+use RuntimeException;
 
 use function array_filter;
 use function array_values;
@@ -24,7 +25,11 @@ class ConsistentStringScrambler
         }
 
         // Break the string into words (and return null if there is no content / only whitespace)
-        $words = array_filter(preg_split('/\s+/', $input ?? ''));
+        $parts = preg_split('/\s+/', $input ?? '');
+        if ($parts === false) {
+            throw new RuntimeException('Unable to split input into words');
+        }
+        $words = array_values(array_filter($parts));
 
         if ($words === []) {
             return null;
@@ -60,6 +65,6 @@ class ConsistentStringScrambler
             $items[$rnd] = $old_item_i;
         }
 
-        return $items;
+        return array_values($items);
     }
 }

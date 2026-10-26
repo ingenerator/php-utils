@@ -27,8 +27,13 @@ final class CryptoBoxPublicKey implements Stringable
             throw new InvalidArgumentException('Invalid public key string format');
         }
 
+        $public_key = Base64Url::decode($matches['key_b64']);
+        if ($public_key === false) {
+            throw new InvalidArgumentException('Invalid public key encoding');
+        }
+
         return new self(
-            public_key: Base64Url::decode($matches['key_b64']),
+            public_key: $public_key,
             // public key is not secret, no need for constant-time encoding
             keypair_id: $matches['keypair_id']
         );

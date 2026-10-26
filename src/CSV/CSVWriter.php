@@ -104,7 +104,7 @@ class CSVWriter
     }
 
     /**
-     * @param int[]|string[] $keys
+     * @param list<array-key> $keys
      */
     private function writeHeaders(array $keys): void
     {
@@ -113,7 +113,7 @@ class CSVWriter
         } else {
             array_walk(
                 $keys,
-                fn (string $str): true => !str_contains($str, ',')
+                fn (int|string $str): true => !str_contains((string) $str, ',')
                     ?: throw new RuntimeException(
                         "Column header `$str` cannot contain comma if headers are not quoted"
                     )

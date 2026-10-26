@@ -8,6 +8,8 @@
 
 namespace Ingenerator\PHPUtils\ArrayHelpers;
 
+use InvalidArgumentException;
+
 use function array_key_exists;
 use function array_keys;
 use function array_shift;
@@ -120,11 +122,17 @@ class AssociativeArrayUtils
      */
     public static function setPath(array &$array, string|array $path, mixed $value, string $delimiter = '.'): void
     {
-        // The path has already been separated into keys
-        $keys = $path;
-        if (!is_array($path)) {
+        if (is_array($path)) {
+            $keys = $path;
+        } else {
+            if ($delimiter === '') {
+                throw new InvalidArgumentException('Path delimiter cannot be empty');
+            }
             // Split the keys by delimiter
             $keys = explode($delimiter, $path);
+        }
+        if ($keys === []) {
+            throw new InvalidArgumentException('Path must not be empty');
         }
 
         // Set current $array to inner-most array path

@@ -79,6 +79,9 @@ abstract class AbstractArrayRepository
         $entities = [];
         foreach ($entity_data as $entity) {
             if (!$entity instanceof $entity_class) {
+                if (!is_array($entity)) {
+                    throw new InvalidArgumentException('Expected '.$entity_class.' or array, got '.get_debug_type($entity));
+                }
                 $entity = static::stubEntity($entity);
             }
             $entities[] = $entity;

@@ -25,8 +25,13 @@ final class CryptoBoxString implements Stringable
             throw new InvalidArgumentException('Invalid ciphertext string format');
         }
 
+        $ciphertext = Base64Url::decode($matches['ciphertext_b64']);
+        if ($ciphertext === false) {
+            throw new InvalidArgumentException('Invalid ciphertext encoding');
+        }
+
         return new self(
-            ciphertext: Base64Url::decode($matches['ciphertext_b64']),
+            ciphertext: $ciphertext,
             // ciphertext is not secret, no need for constant-time encoding
             keypair_id: $matches['keypair_id']
         );

@@ -40,6 +40,9 @@ class DateTimeImmutableFactory
         // First, a float with a .00 casts to string with no decimal point, which causes the createFromFormat to fail
         // on exact seconds. Use sprintf to ensure there's always a decimal present
         $dt = DateTimeImmutable::createFromFormat('U.u', sprintf('%.6F', $microtime));
+        if (!$dt instanceof DateTimeImmutable) {
+            throw new InvalidArgumentException(sprintf('Could not parse microtime value %s', $microtime));
+        }
 
         // Second, creating from unix timestamp of any kind always sets the TZ to UTC (*even* if you specify a timezone
         // in the constructor).
@@ -95,6 +98,10 @@ class DateTimeImmutableFactory
     {
         // Cope with Z for Zulu time instead of +00:00 - PHP offers `p` for this, but that then doesn't accept '+00:00'
         $fixed_value = preg_replace('/Z/i', '+00:00', $value);
+        if ($fixed_value === null) {
+            // regex failed
+            throw new InvalidArgumentException('Failed to replace text in iso string');
+        }
 
         // Pad / truncate milliseconds to 6 digits as that's the precision PHP can support
         // Regex is a bit dull here, but we need to be sure we can reliably find the (possibly absent)
@@ -111,10 +118,14 @@ class DateTimeImmutableFactory
                             .$matches['tz_prefix'],
             $fixed_value
         );
+        if ($fixed_value === null) {
+            // regex failed
+            throw new InvalidArgumentException("Cannot replace parts in `$value` ISO string");
+        }
 
         // Not using fromStrictFormat as I want to throw with the original value, not the parsed value
         $date = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i:s.uP', $fixed_value);
-        if (DateString::isoMS($date ?: null) === $fixed_value) {
+        if ($date instanceof DateTimeImmutable && DateString::isoMS($date) === $fixed_value) {
             return $date;
         }
         throw new InvalidArgumentException("`$value` cannot be parsed as a valid ISO date-time");

@@ -20,10 +20,12 @@ final class ConstantDirectory
      */
     private array $constants;
 
+    /** @param class-string $class_name */
     private function __construct(private readonly string $class_name)
     {
     }
 
+    /** @param class-string $class */
     public static function forClass(string $class): static
     {
         return new self($class);
