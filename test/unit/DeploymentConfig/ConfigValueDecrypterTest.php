@@ -50,7 +50,7 @@ final class ConfigValueDecrypterTest extends TestCase
             ['default.secret-config.key' => base64_encode($default)],
         ];
         yield [
-            '#SECRET#'.base64_encode(sodium_crypto_box_seal(159, $default_pub)),
+            '#SECRET#'.base64_encode(sodium_crypto_box_seal('159', $default_pub)),
             '159',
             ['default.secret-config.key' => base64_encode($default)],
         ];

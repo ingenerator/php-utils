@@ -18,7 +18,7 @@ class ValidNumber
     {
     }
 
-    public static function minimum(string $number, float|int $min): bool
+    public static function minimum(mixed $number, float|int $min): bool
     {
         if (!is_numeric($number)) {
             return false;

@@ -34,7 +34,7 @@ class DateTimeImmutableFactory
      * which causes createFromFormat('U.u') to fail on exact seconds unless you format the string with sprintf
      * to have the expected number of decimal places.
      */
-    public static function atMicrotime(float $microtime): DateTimeImmutable
+    public static function atMicrotime(float|string $microtime): DateTimeImmutable
     {
         // Work round some PHP edge cases.
         // First, a float with a .00 casts to string with no decimal point, which causes the createFromFormat to fail
