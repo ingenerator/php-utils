@@ -139,6 +139,7 @@ final class DeviceIdentifierTest extends TestCase
     {
         ScopeChangingCaller::call(
             DeviceIdentifier::class,
+            /** @phpstan-ignore staticProperty.protected (intentional modification of state to reset singleton) */
             function (): void { DeviceIdentifier::$instance = null; }
         );
 
@@ -162,6 +163,7 @@ final class DeviceIdentifierTest extends TestCase
     {
         ScopeChangingCaller::call(
             DeviceIdentifier::class,
+            /** @phpstan-ignore staticProperty.protected (intentional modification of state to reset singleton) */
             function (): void { DeviceIdentifier::$instance = null; }
         );
 
@@ -174,6 +176,7 @@ final class DeviceIdentifierTest extends TestCase
     {
         ScopeChangingCaller::call(
             DeviceIdentifier::class,
+            /** @phpstan-ignore staticProperty.protected (intentional modification of state to reset singleton) */
             function (): void { DeviceIdentifier::$instance = null; }
         );
 
@@ -207,6 +210,7 @@ final class DeviceIdentifierTest extends TestCase
     {
         return ScopeChangingCaller::call(
             DeviceIdentifier::class,
+            /** @phpstan-ignore new.protectedConstructor (intentional modification of state to reset singleton) */
             fn ($cookies): DeviceIdentifier => new DeviceIdentifier($cookies),
             $this->cookies
         );
