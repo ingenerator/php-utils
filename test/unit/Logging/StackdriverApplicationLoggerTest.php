@@ -130,7 +130,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
         $entries = $this->assertLoggedJSONLines();
         $this->assertSame(['previous' => 'content'], array_shift($entries));
-        $this->assertSame('Another message appended', array_shift($entries)['message']);
+        $this->assertSame('Another message appended', array_shift($entries)['message'] ?? null);
     }
 
     /**
