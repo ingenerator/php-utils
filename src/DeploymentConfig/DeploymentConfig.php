@@ -51,10 +51,7 @@ class DeploymentConfig
         $this->value_decrypter = new ConfigValueDecrypter($this->config_dir.'/app-config-keys');
     }
 
-    /**
-     * @return string
-     */
-    public function getEnvironment()
+    public function getEnvironment(): string
     {
         return $this->environment;
     }
@@ -75,10 +72,8 @@ class DeploymentConfig
      *
      * [!!] NOTE: This method always returns values as strings - if they are type-sensitive you will instead
      *      need to provision the configs as JSON values and load them with getJson()
-     *
-     * @return string
      */
-    public function read(string $path)
+    public function read(string $path): ?string
     {
         if ($this->environment === static::STANDALONE) {
             return null;

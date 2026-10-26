@@ -30,10 +30,8 @@ class ObjectPropertyRipper
      *
      * @param object   $object
      * @param string[] $properties
-     *
-     * @return array
      */
-    public static function rip($object, array $properties)
+    public static function rip($object, array $properties): array
     {
         $ripper = static::getRipper($object::class);
 
@@ -84,10 +82,8 @@ class ObjectPropertyRipper
     /**
      * Create a callback bound to the scope of the provided class so that it has access to internal
      * properties.
-     *
-     * @return Closure
      */
-    protected static function getRipper(string $class)
+    protected static function getRipper(string $class): Closure
     {
         static::$rippers[$class] ??= self::bindScopedClosure(
             function ($object, $properties): array {

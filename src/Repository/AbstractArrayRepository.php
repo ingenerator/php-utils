@@ -73,10 +73,7 @@ abstract class AbstractArrayRepository
         return new static($entities);
     }
 
-    /**
-     * @return string
-     */
-    abstract protected static function getEntityBaseClass();
+    abstract protected static function getEntityBaseClass(): string;
 
     /**
      * @return object
@@ -130,10 +127,8 @@ abstract class AbstractArrayRepository
      * Build a save-log record to allow the class to identify what's been saved for assertions.
      *
      * @param object $entity
-     *
-     * @return string
      */
-    protected function formatSaveLog($entity)
+    protected function formatSaveLog($entity): string
     {
         return sprintf(
             "%s (object %s) with data:\n%s\n",
@@ -150,10 +145,8 @@ abstract class AbstractArrayRepository
      *
      * @param object $entity
      * @param array<int, mixed> $seen_objects
-     *
-     * @return array
      */
-    protected function entityToArray($entity, array &$seen_objects = [])
+    protected function entityToArray($entity, array &$seen_objects = []): array
     {
         $entity_hash = spl_object_id($entity);
         if (isset($seen_objects[$entity_hash])) {
@@ -203,7 +196,7 @@ abstract class AbstractArrayRepository
      *
      * @return int[]
      */
-    protected function countWith($callable)
+    protected function countWith($callable): array
     {
         $counts = [];
         foreach ($this->entities as $entity) {
@@ -258,7 +251,7 @@ abstract class AbstractArrayRepository
      *
      * @return object[]
      */
-    protected function listWith($callable)
+    protected function listWith($callable): array
     {
         $entities = [];
         foreach ($this->entities as $entity) {

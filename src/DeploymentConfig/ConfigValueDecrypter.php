@@ -49,9 +49,6 @@ class ConfigValueDecrypter
         return $cleartext;
     }
 
-    /**
-     * @return bool|string
-     */
     protected function loadAndValidateKeypair(string $name): string
     {
         $keypair_file = sprintf('%s/%s.secret-config.key', $this->keypair_dir, $name);

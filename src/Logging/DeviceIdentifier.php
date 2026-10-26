@@ -74,7 +74,7 @@ class DeviceIdentifier
     public const COOKIE_LIFETIME = 'P5Y';
     public const VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
 
-    protected ?string $id;
+    protected ?string $id = null;
 
     protected function __construct(protected CookieWrapper $cookies)
     {

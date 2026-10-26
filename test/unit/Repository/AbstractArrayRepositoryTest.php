@@ -222,10 +222,7 @@ class AnyArrayRepository extends AbstractArrayRepository
         return AnyEntity::class;
     }
 
-    /**
-     * @return array
-     */
-    public function getEntities()
+    public function getEntities(): array
     {
         return $this->entities;
     }
@@ -248,7 +245,7 @@ class AnyArrayRepository extends AbstractArrayRepository
      *
      * @return int[]
      */
-    public function countWith($callable)
+    public function countWith($callable): array
     {
         return parent::countWith($callable);
     }
@@ -276,7 +273,7 @@ class AnyArrayRepository extends AbstractArrayRepository
      *
      * @return object[]
      */
-    public function listWith($callable)
+    public function listWith($callable): array
     {
         return parent::listWith($callable);
     }

@@ -45,7 +45,7 @@ class ConstantDirectory
     /**
      * @return array keyed by the constant id
      */
-    public function listConstants()
+    public function listConstants(): array
     {
         if (!isset($this->constants)) {
             $this->constants = $this->loadConstants();

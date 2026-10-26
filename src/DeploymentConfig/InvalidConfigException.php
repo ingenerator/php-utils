@@ -8,9 +8,6 @@ use RuntimeException;
 
 class InvalidConfigException extends RuntimeException
 {
-    /**
-     * @return InvalidConfigException
-     */
     public static function badJSON(string $path, string $error): static
     {
         return new static(
