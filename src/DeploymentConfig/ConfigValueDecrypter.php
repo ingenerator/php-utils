@@ -55,7 +55,11 @@ class ConfigValueDecrypter
         if (!is_file($keypair_file)) {
             throw InvalidConfigException::missingKeypair($keypair_file);
         }
-        $keypair = base64_decode(file_get_contents($keypair_file), true);
+        $keypair_content = file_get_contents($keypair_file);
+        if ($keypair_content === false) {
+            throw InvalidConfigException::corruptKeypair($keypair_file, 'could not read file');
+        }
+        $keypair = base64_decode($keypair_content, true);
         if ($keypair === false) {
             throw InvalidConfigException::corruptKeypair($keypair_file, 'invalid base64');
         }

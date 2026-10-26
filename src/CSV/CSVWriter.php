@@ -52,7 +52,11 @@ class CSVWriter
             $this->resource = $file;
             $this->owns_resource = false;
         } elseif (is_string($file)) {
-            $this->resource = fopen($file, 'w');
+            $resource = fopen($file, 'w');
+            if ($resource === false) {
+                throw new RuntimeException('Unable to open CSV file '.$file);
+            }
+            $this->resource = $resource;
             $this->owns_resource = true;
         } else {
             throw new InvalidArgumentException(
