@@ -3,12 +3,12 @@
 namespace Ingenerator\PHPUtils\Random;
 
 use InvalidArgumentException;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 use function array_filter;
 use function array_values;
 use function crc32;
 use function implode;
-use function mt_rand;
-use function mt_srand;
 use function preg_split;
 
 class ConsistentStringScrambler
@@ -43,26 +43,20 @@ class ConsistentStringScrambler
      */
     private function seededShuffle(array $items, int $seed): array
     {
-        mt_srand($seed);
+        $randomizer = new Randomizer(new MT19937($seed));
+
         // Ensure the array is 0-indexed
         $items = array_values($items);
 
-        try {
-
-            for ($i = count($items) - 1; $i > 0; $i--) {
-                // Swap each item with an item from a random position (which may mean some values
-                // are swapped more than once).
-                $rnd         = mt_rand(0, $i);
-                $old_item_i  = $items[$i];
-                $items[$i]   = $items[$rnd];
-                $items[$rnd] = $old_item_i;
-            }
-
-            return $items;
-        } finally {
-            // Reset the random seed to be random again so that this does not impact on later
-            // random numbers from elsewhere in the app.
-            mt_srand();
+        for ($i = count($items) - 1; $i > 0; $i--) {
+            // Swap each item with an item from a random position (which may mean some values
+            // are swapped more than once).
+            $rnd = $randomizer->getInt(0, $i);
+            $old_item_i = $items[$i];
+            $items[$i] = $items[$rnd];
+            $items[$rnd] = $old_item_i;
         }
+
+        return $items;
     }
 }
