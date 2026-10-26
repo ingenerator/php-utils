@@ -10,6 +10,7 @@ namespace Ingenerator\PHPUtils\Object;
 
 use Closure;
 use DomainException;
+use LogicException;
 use stdClass;
 
 use function get_object_vars;
@@ -34,7 +35,8 @@ class ObjectPropertyRipper
      */
     public static function rip(object $object, array $properties): array
     {
-        $ripper = static::getRipper($object::class);
+        $class = $object::class;
+        $ripper = static::getRipper($class);
 
         return $ripper($object, $properties);
     }
@@ -83,6 +85,8 @@ class ObjectPropertyRipper
     /**
      * Create a callback bound to the scope of the provided class so that it has access to internal
      * properties.
+     *
+     * @param class-string $class
      */
     protected static function getRipper(string $class): Closure
     {
@@ -102,9 +106,9 @@ class ObjectPropertyRipper
     }
 
     /**
-     * @param object|class-string<object> $scope
+     * @param object|class-string $scope
      */
-    private static function bindScopedClosure(callable $callback, object|string $scope): Closure
+    private static function bindScopedClosure(Closure $callback, object|string $scope): Closure
     {
         $scope_class = is_object($scope) ? $scope::class : $scope;
         if ($scope_class === stdClass::class) {
@@ -115,6 +119,7 @@ class ObjectPropertyRipper
             $scope = null;
         }
 
-        return Closure::bind($callback, newThis: null, newScope: $scope);
+        return Closure::bind($callback, newThis: null, newScope: $scope)
+            ?? throw new LogicException('Unable to bind closure to requested scope');
     }
 }

@@ -3,6 +3,7 @@
 namespace Ingenerator\PHPUtils\Object;
 
 use Closure;
+use LogicException;
 
 class ScopeChangingCaller
 {
@@ -27,12 +28,14 @@ class ScopeChangingCaller
      * @template TReturn of mixed
      * @template TArgs
      *
-     * @param callable(TArgs):TReturn $func
+     * @param class-string $class
+     * @param Closure(TArgs):TReturn $func
      * @param TArgs $args,...
      */
-    public static function call(string $class, callable $func, mixed ...$args): mixed
+    public static function call(string $class, Closure $func, mixed ...$args): mixed
     {
-        $func = Closure::bind($func, null, $class);
+        $func = Closure::bind($func, null, $class)
+            ?? throw new LogicException('Unable to bind closure to requested scope');
 
         return $func(...$args);
     }
