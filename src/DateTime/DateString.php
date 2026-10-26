@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -15,7 +17,7 @@ use DateTimeImmutable;
  */
 class DateString
 {
-    public static function format(?DateTimeImmutable $date, string $format, string $empty_value = ''): string
+    public static function format(?DateTimeImmutable $date, string $format, ?string $empty_value = ''): ?string
     {
         if (!$date instanceof DateTimeImmutable) {
             return $empty_value;
@@ -35,7 +37,7 @@ class DateString
     /**
      * Formats as Y-m-d H:i:s.
      */
-    public static function ymd(?DateTimeImmutable $date, string $empty_value = ''): string
+    public static function ymd(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
         return static::format($date, 'Y-m-d', $empty_value);
     }
@@ -43,7 +45,7 @@ class DateString
     /**
      * Formats as Y-m-d H:i:s.
      */
-    public static function ymdhis(?DateTimeImmutable $date, string $empty_value = ''): string
+    public static function ymdhis(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
         return static::format($date, 'Y-m-d H:i:s', $empty_value);
     }
