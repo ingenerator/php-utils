@@ -55,7 +55,7 @@ final class JSONTest extends TestCase
 
     public function testDecodeArrayReturnsEmptyArrayForJsonNullInput(): void
     {
-        $this->assertSame([], JSON::decodeArray(json_encode(null)));
+        $this->assertSame([], JSON::decodeArray('null'));
     }
 
     /**

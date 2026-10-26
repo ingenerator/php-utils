@@ -247,7 +247,7 @@ final class DeploymentConfigTest extends TestCase
     #[TestWith([1234.5, 1234.5])]
     public function testItsReadJsonReturnsJsonDecodedFileContentIfPresentOutsideStandalone(mixed $json, mixed $expect): void
     {
-        $path = $this->givenConfigDirWithFile('config/some_scalar', json_encode($json));
+        $path = $this->givenConfigDirWithFile('config/some_scalar', json_encode($json, JSON_THROW_ON_ERROR));
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -318,7 +318,7 @@ final class DeploymentConfigTest extends TestCase
         return $creator();
     }
 
-    private function givenConfigDirWithFile(string $path, string|bool $content): string
+    private function givenConfigDirWithFile(string $path, string $content): string
     {
         $vfs = vfsStream::setup('var');
         $cfg_dir = vfsStream::newDirectory('config')

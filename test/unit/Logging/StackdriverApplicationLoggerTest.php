@@ -11,6 +11,7 @@ use Ingenerator\PHPUtils\Logging\LogMetadataProvider;
 use Ingenerator\PHPUtils\Logging\StackdriverApplicationLogger;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
 use InvalidArgumentException;
+use Iterator;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -27,7 +28,6 @@ use function array_intersect_key;
 use function array_map;
 use function array_pop;
 use function array_shift;
-use function call_user_func_array;
 use function explode;
 use function file_get_contents;
 use function http_response_code;
@@ -43,7 +43,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
     private string $log_stream;
 
-    /** @var array<int, mixed> */
+    /** @var list<array<string, mixed>|callable(): array<string, mixed>|LogMetadataProvider> */
     private array $meta_args = [];
 
     public function testItIsInitialisable(): void
@@ -66,17 +66,15 @@ final class StackdriverApplicationLoggerTest extends TestCase
     }
 
     /**
-     * @return array<int, array<int, string[]>>
+     * @return Iterator<int, array<int, array<string>>>
      */
-    public static function provider_log_lines(): array
+    public static function provider_log_lines(): Iterator
     {
-        return [
-            [
-                ['This is my info'],
-            ],
-            [
-                ['This info', 'Another msg'],
-            ],
+        yield [
+            ['This is my info'],
+        ];
+        yield [
+            ['This info', 'Another msg'],
         ];
     }
 
@@ -136,14 +134,12 @@ final class StackdriverApplicationLoggerTest extends TestCase
     }
 
     /**
-     * @return array<int, string[]>
+     * @return Iterator<int, array<string>>
      */
-    public static function provider_severity_levels(): array
+    public static function provider_severity_levels(): Iterator
     {
-        return [
-            [LogLevel::DEBUG, 'DEBUG'],
-            [LogLevel::EMERGENCY, 'EMERGENCY'],
-        ];
+        yield [LogLevel::DEBUG, 'DEBUG'];
+        yield [LogLevel::EMERGENCY, 'EMERGENCY'];
     }
 
     #[DataProvider('provider_severity_levels')]
@@ -259,6 +255,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
     public function testItSwallowsAndLogsAnyErrorsWhileRetrievingMetadataCallbacks(): void
     {
+        // @phpstan-ignore assign.propertyType (this test deliberately supplies malformed metadata callbacks)
         $this->meta_args = [
             ['sources' => ['first_ok']],
             /* @phpstan-ignore argument.type (intentional, to make it have an error) */
@@ -316,8 +313,14 @@ final class StackdriverApplicationLoggerTest extends TestCase
     #[TestWith(['info', ['Some info']])]
     public function testItLogsWithSourceLocationAsImmediateCaller(string $log_method, array $args): void
     {
-        $expect_line = __LINE__ + 1;
-        call_user_func_array([$this->newSubject(), $log_method], $args);
+        $logger = $this->newSubject();
+        if ($log_method === 'log') {
+            $expect_line = __LINE__ + 1;
+            $logger->log(...$args);
+        } else {
+            $expect_line = __LINE__ + 1;
+            $logger->info(...$args);
+        }
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             [
@@ -378,9 +381,9 @@ final class StackdriverApplicationLoggerTest extends TestCase
     }
 
     /**
-     * @return array<int, mixed[]>
+     * @return Iterator<int, array<mixed>>
      */
-    public static function provider_exception_chains(): array
+    public static function provider_exception_chains(): Iterator
     {
         $e1 = new InvalidArgumentException('I am an exception', 102);
         $e1_line = __LINE__ - 1;
@@ -390,43 +393,40 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
         $e3 = new TypeError('Stuff happened', 02, $e2);
         $e3_line = __LINE__ - 1;
-
-        return [
+        yield [
+            $e1,
             [
-                $e1,
-                [
-                    'class' => InvalidArgumentException::class,
-                    'msg' => 'I am an exception',
-                    'code' => 102,
-                    'file' => __FILE__,
-                    'line' => $e1_line,
-                    'trace' => self::makeExpectedSanitisedTrace($e1),
-                ],
+                'class' => InvalidArgumentException::class,
+                'msg' => 'I am an exception',
+                'code' => 102,
+                'file' => __FILE__,
+                'line' => $e1_line,
+                'trace' => self::makeExpectedSanitisedTrace($e1),
             ],
+        ];
+        yield [
+            $e3,
             [
-                $e3,
-                [
-                    'class' => TypeError::class,
-                    'msg' => 'Stuff happened',
+                'class' => TypeError::class,
+                'msg' => 'Stuff happened',
+                'code' => 02,
+                'file' => __FILE__,
+                'line' => $e3_line,
+                'trace' => self::makeExpectedSanitisedTrace($e1),
+                'previous' => [
+                    'class' => RuntimeException::class,
+                    'msg' => 'It went wrong',
                     'code' => 02,
                     'file' => __FILE__,
-                    'line' => $e3_line,
-                    'trace' => self::makeExpectedSanitisedTrace($e1),
+                    'line' => $e2_line,
+                    'trace' => self::makeExpectedSanitisedTrace($e2),
                     'previous' => [
-                        'class' => RuntimeException::class,
-                        'msg' => 'It went wrong',
-                        'code' => 02,
+                        'class' => InvalidArgumentException::class,
+                        'msg' => 'I am an exception',
+                        'code' => 102,
                         'file' => __FILE__,
-                        'line' => $e2_line,
-                        'trace' => self::makeExpectedSanitisedTrace($e2),
-                        'previous' => [
-                            'class' => InvalidArgumentException::class,
-                            'msg' => 'I am an exception',
-                            'code' => 102,
-                            'file' => __FILE__,
-                            'line' => $e1_line,
-                            'trace' => self::makeExpectedSanitisedTrace($e3),
-                        ],
+                        'line' => $e1_line,
+                        'trace' => self::makeExpectedSanitisedTrace($e3),
                     ],
                 ],
             ],
@@ -522,19 +522,17 @@ final class StackdriverApplicationLoggerTest extends TestCase
     }
 
     /**
-     * @return array<int, int[]|string[]>
+     * @return Iterator<int, array<(int | string)>>
      */
-    public static function provider_request_status_level(): array
+    public static function provider_request_status_level(): Iterator
     {
-        return [
-            [200, 'INFO'],
-            [202, 'INFO'],
-            [400, 'NOTICE'],
-            [403, 'WARNING'],
-            [422, 'NOTICE'],
-            [500, 'ERROR'],
-            [502, 'ERROR'],
-        ];
+        yield [200, 'INFO'];
+        yield [202, 'INFO'];
+        yield [400, 'NOTICE'];
+        yield [403, 'WARNING'];
+        yield [422, 'NOTICE'];
+        yield [500, 'ERROR'];
+        yield [502, 'ERROR'];
     }
 
     #[DataProvider('provider_request_status_level')]
@@ -677,6 +675,9 @@ final class StackdriverApplicationLoggerTest extends TestCase
         }
 
         $content = file_get_contents($this->log_stream);
+        if ($content === false) {
+            throw new RuntimeException('Unable to read log stream '.$this->log_stream);
+        }
         $lines = explode("\n", $content);
         $this->assertSame('', array_pop($lines), 'Expect trailing newline after last message');
 
@@ -692,7 +693,11 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entries = $this->assertLoggedJSONLines();
         $this->assertCount(1, $entries, 'Expected a single log entry');
 
-        return array_shift($entries);
+        $entry = array_shift($entries);
+        // Could only happen if PHP or PHPUnit was broken, we asserted a nonzero array above
+        $this->assertNotNull($entry, 'Expected a single log entry');
+
+        return $entry;
     }
 
     protected static function makeExpectedSanitisedTrace(Throwable $e): string

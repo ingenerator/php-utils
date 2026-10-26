@@ -78,6 +78,7 @@ final class DefaultLogMetadataTest extends TestCase
     public function testItsRequestTracingDataAddsTraceIdWithRequestIdIfNoHeadersAvailable(
     ): void {
         $result = DefaultLogMetadata::requestTrace();
+        $this->assertArrayHasKey('logging.googleapis.com/trace', $result);
         $this->assertSame(
             $result['context']['req'],
             $result['logging.googleapis.com/trace'],
@@ -125,6 +126,7 @@ final class DefaultLogMetadataTest extends TestCase
         string $expect,
     ): void {
         $result = DefaultLogMetadata::requestTrace($server, $project);
+        $this->assertArrayHasKey('logging.googleapis.com/trace', $result);
         $this->assertSame(
             $expect,
             $result['logging.googleapis.com/trace'],

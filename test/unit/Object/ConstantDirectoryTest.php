@@ -62,6 +62,7 @@ final class ConstantDirectoryTest extends TestCase
         );
     }
 
+    /** @param class-string $class */
     protected function newSubject(string $class = self::class): ConstantDirectory
     {
         return ConstantDirectory::forClass($class);

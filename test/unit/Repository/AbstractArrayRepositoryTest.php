@@ -235,7 +235,7 @@ class AnyArrayRepository extends AbstractArrayRepository
         return AnyEntity::class;
     }
 
-    /** @return list<AnyEntity> */
+    /** @return array<int, AnyEntity> */
     public function getEntities(): array
     {
         return $this->entities;

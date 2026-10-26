@@ -65,7 +65,7 @@ final class CSVWriterTest extends TestCase
 
     public function testOpenAcceptsAndAllowsWritingToExistingStreamResource(): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         try {
             $subj = $this->newSubject();
             $subj->open($file);
@@ -79,7 +79,7 @@ final class CSVWriterTest extends TestCase
 
     public function testItThrowsIfWritingToExternallyClosedResource(): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         try {
             $subj = $this->newSubject();
             $subj->open($file);
@@ -108,7 +108,7 @@ final class CSVWriterTest extends TestCase
 
     public function testItWritesColumnHeadersBeforeFirstRow(): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         $subj = $this->newSubject();
         $subj->open($file);
         $subj->write(['our' => 'data', 'is' => 'here']);
@@ -124,7 +124,7 @@ final class CSVWriterTest extends TestCase
 
     public function testItDoesNotWriteColumnHeadersBeforeSubsequentRows(): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         $subj = $this->newSubject();
         $subj->open($file);
         $subj->write(['our' => 'data', 'is' => 'here']);
@@ -177,12 +177,12 @@ final class CSVWriterTest extends TestCase
 
     /**
      * @param array<string, string> $row
-     * @param array<string, bool|string> $options
+     * @param array{write_utf8_bom?: bool, quote_headers?: bool, eol?: string} $options
      */
     #[DataProvider('providerQuotedHeaders')]
     public function testItOptionallyWritesColumnHeadersWithoutQuotes(array $row, array $options, string $expect): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         $subj = $this->newSubject();
         $subj->open($file, $options);
         $subj->write($row);
@@ -193,7 +193,7 @@ final class CSVWriterTest extends TestCase
 
     public function testItThrowsIfColumnHeadersContainCommaWhenUnquoted(): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         $subj = $this->newSubject();
         $subj->open($file, ['quote_headers' => false]);
         $this->expectException(RuntimeException::class);
@@ -233,11 +233,11 @@ final class CSVWriterTest extends TestCase
         ];
     }
 
-    /** @param array<string, bool|string> $options */
+    /** @param array{write_utf8_bom?: bool, quote_headers?: bool, eol?: string} $options */
     #[DataProvider('providerLineEndings')]
     public function testItsLineEndingsCanBeConfigured(array $options, string $expect): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         $subj = $this->newSubject();
         $subj->open($file, $options);
         $subj->write(['our big' => 'data', 'is' => 'here']);
@@ -250,7 +250,7 @@ final class CSVWriterTest extends TestCase
     #[TestWith([false])]
     public function testItOptionallyWritesByteOrderMarkAtStartOfFile(bool $write_bom): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         $subj = $this->newSubject();
         $subj->open($file, ['write_utf8_bom' => $write_bom]);
         $subj->write(['first' => 'row']);
@@ -266,7 +266,7 @@ final class CSVWriterTest extends TestCase
     #[TestWith([['our' => 'things', 'went' => 'bad']])]
     public function testItThrowsIfSubsequentRowHeadersDoNotMatch(array $second_row): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         try {
             $subj = $this->newSubject();
             $subj->open($file);
@@ -280,7 +280,7 @@ final class CSVWriterTest extends TestCase
 
     public function testItDoesNotCloseExternallyProvidedStream(): void
     {
-        $file = fopen('php://memory', 'w');
+        $file = $this->openMemoryStream();
         try {
             $subj = $this->newSubject();
             $subj->open($file);
@@ -304,6 +304,17 @@ final class CSVWriterTest extends TestCase
         }
 
         $this->assertSame($expect, $actual, 'CSV content should match');
+    }
+
+    /** @return resource */
+    private function openMemoryStream()
+    {
+        $file = fopen('php://memory', 'w');
+        if ($file === false) {
+            throw new RuntimeException('Unable to open in-memory CSV stream');
+        }
+
+        return $file;
     }
 
     private function newSubject(): CSVWriter
