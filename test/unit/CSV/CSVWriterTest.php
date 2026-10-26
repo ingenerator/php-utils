@@ -291,7 +291,10 @@ final class CSVWriterTest extends TestCase
         }
     }
 
-    /** @param array<array<string|null>> $expect */
+    /**
+     * @param array<array<string|null>> $expect
+     * @param resource $file
+     */
     protected function assertCSVContent(array $expect, $file): void
     {
         rewind($file);

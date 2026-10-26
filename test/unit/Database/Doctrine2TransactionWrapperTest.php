@@ -65,7 +65,7 @@ final class Doctrine2TransactionWrapperTest extends TestCase
  */
 class StubEntityManager
 {
-    public function transactional($func)
+    public function transactional(callable $func): mixed
     {
         return $func();
     }

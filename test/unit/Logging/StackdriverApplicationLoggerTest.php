@@ -12,6 +12,7 @@ use Ingenerator\PHPUtils\Logging\StackdriverApplicationLogger;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
 use InvalidArgumentException;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -38,7 +39,7 @@ use function str_replace;
 
 final class StackdriverApplicationLoggerTest extends TestCase
 {
-    private $vfs;
+    private vfsStreamDirectory $vfs;
 
     private string $log_stream;
 
@@ -217,7 +218,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     public function testItCanLazilyRetrieveMetadataFromProviderClass(): void
     {
         $meta_provider_class = new class implements LogMetadataProvider {
-            protected $call_count = 0;
+            protected int $call_count = 0;
 
             /** @return array<string, mixed> */
             public function getMetadata(): array
@@ -225,7 +226,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
                 return ['context' => ['call_count' => ++$this->call_count]];
             }
 
-            public function getCallCount()
+            public function getCallCount(): int
             {
                 return $this->call_count;
             }
@@ -599,9 +600,9 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([[], ''])]
     #[TestWith([['HTTP_USER_AGENT' => 'chrome 10'], 'chrome 10'])]
-    /** @param array<string, string> $server */
     #[TestWith([
         ['HTTP_USER_AGENT' => "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff"],
         'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',

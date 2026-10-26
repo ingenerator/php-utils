@@ -21,6 +21,9 @@ use function array_key_exists;
  *
  * Note that you can still explicitly access it like `$foo = $map['undefined'] ?? 'default'` if
  * you want to access a key that may or may not exist (just like a standard array).
+ *
+ * @implements ArrayAccess<string, mixed>
+ * @implements IteratorAggregate<string, mixed>
  */
 class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
 {
@@ -59,6 +62,7 @@ class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
         unset($this->items[$offset]);
     }
 
+    /** @return ArrayIterator<string, mixed> */
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->items);

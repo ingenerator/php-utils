@@ -6,6 +6,7 @@ namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
+use Ingenerator\PHPUtils\Cookie\CookieWrapper;
 use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
 use Ingenerator\PHPUtils\Object\ScopeChangingCaller;
 use PHPUnit\Framework\Attributes\TestWith;
@@ -15,9 +16,10 @@ final class DeviceIdentifierTest extends TestCase
 {
     private ArrayCookieWrapperStub $cookies;
 
+    /** @param array<string, string> $cookie */
     #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA']])]
     #[TestWith([['didf' => 'OfLAtnofliaNqvkAjhhsFA']])]
-    public function testItsInitDoesNotSetNewCookieIfEitherCookiePresent($cookie): void
+    public function testItsInitDoesNotSetNewCookieIfEitherCookiePresent(array $cookie): void
     {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
         $this->newSubject()->init();
@@ -215,12 +217,12 @@ final class DeviceIdentifierTest extends TestCase
         $this->cookies = new ArrayCookieWrapperStub();
     }
 
-    protected function newSubject()
+    protected function newSubject(): DeviceIdentifier
     {
         return ScopeChangingCaller::call(
             DeviceIdentifier::class,
             /** @phpstan-ignore new.protectedConstructor (intentional modification of state to reset singleton) */
-            fn ($cookies): DeviceIdentifier => new DeviceIdentifier($cookies),
+            fn (CookieWrapper $cookies): DeviceIdentifier => new DeviceIdentifier($cookies),
             $this->cookies
         );
     }

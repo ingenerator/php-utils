@@ -32,8 +32,10 @@ class CSVWriter
 
     protected bool $owns_resource;
 
+    /** @var list<array-key>|null */
     protected ?array $expect_schema = null;
 
+    /** @var array{write_utf8_bom: bool, quote_headers: bool, eol: string} */
     protected array $options = [
         'write_utf8_bom' => false,
         'quote_headers' => true,
@@ -61,6 +63,7 @@ class CSVWriter
         $this->options = array_merge($this->options, $options);
     }
 
+    /** @param array<array-key, mixed> $row */
     public function write(array $row): void
     {
         if (!$this->isResourceOpen()) {

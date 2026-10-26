@@ -91,7 +91,7 @@ class DefaultLogMetadata
      *
      * If the file does not exist or cannot be read the version will be returned as '#ERROR#'
      *
-     * @return array|array[]
+     * @return array{serviceContext: array{service: string, version: mixed}}
      */
     public static function serviceContext(string $service_name, ?string $version_file_path = null): array
     {

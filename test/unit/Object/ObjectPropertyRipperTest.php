@@ -101,8 +101,8 @@ class TestRippingClass
 {
     /* @phpstan-ignore property.onlyWritten (read by the ripper in tests) */
     private string $something_private = 'precious';
-    protected $something_protected = 'water';
-    protected $something_else = 'else';
+    protected string $something_protected = 'water';
+    protected string $something_else = 'else';
 }
 
 class ExtensionRippingClass extends TestRippingClass

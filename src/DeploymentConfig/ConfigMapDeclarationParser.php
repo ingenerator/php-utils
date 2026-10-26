@@ -22,6 +22,11 @@ class ConfigMapDeclarationParser
      *
      * This can then be used as a simple lookup table in the deployment config class
      */
+    /**
+     * @param array<mixed> $declarations
+     *
+     * @return array<string, mixed>
+     */
     public function parse(array $declarations): array
     {
         $result = [];

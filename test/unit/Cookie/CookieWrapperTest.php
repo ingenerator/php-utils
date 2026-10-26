@@ -220,13 +220,17 @@ final class CookieWrapperTest extends TestCase
 
 class TestableCookieWrapper extends CookieWrapper
 {
+    /** @var list<array{name: string, value: ?string, options: array<string, mixed>}> */
     public $setcookie_calls = [];
+
+    /** @var false|array{file: string, line: int} */
     public $headers_sent = false;
 
+    /** @param array<string, mixed> $options */
     protected function set_cookie(
-        $name,
-        $value,
-        $options,
+        string $name,
+        ?string $value,
+        array $options,
     ): void {
         $this->setcookie_calls[] = [
             'name' => $name,
@@ -235,7 +239,7 @@ class TestableCookieWrapper extends CookieWrapper
         ];
     }
 
-    protected function headers_sent(&$file, &$line): bool
+    protected function headers_sent(?string &$file = null, ?int &$line = null): bool
     {
         if ($this->headers_sent === false) {
             return false;

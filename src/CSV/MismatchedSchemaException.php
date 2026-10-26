@@ -15,6 +15,9 @@ use InvalidArgumentException;
 
 final class MismatchedSchemaException extends InvalidArgumentException
 {
+    /** @param list<array-key> $expected
+     *  @param list<array-key> $actual
+     */
     public static function forSchema(array $expected, array $actual): self
     {
         return new self(

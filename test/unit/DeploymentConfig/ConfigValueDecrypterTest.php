@@ -8,6 +8,7 @@ use Ingenerator\PHPUtils\DeploymentConfig\ConfigValueDecrypter;
 use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use Iterator;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,7 @@ use function uniqid;
 
 final class ConfigValueDecrypterTest extends TestCase
 {
-    private $vfs;
+    private vfsStreamDirectory $vfs;
 
     public function testItIsInitialisable(): void
     {

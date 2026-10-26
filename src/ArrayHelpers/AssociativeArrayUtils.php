@@ -37,8 +37,10 @@ class AssociativeArrayUtils
      *
      * Updated PHP7 implementation of Kohana's \Arr::merge, with the same behaviour
      *
-     * @param array $merge_base        initial array
-     * @param array $merge_patches,... array to merge
+     * @param array<mixed> $merge_base        initial array
+     * @param array<mixed> ...$merge_patches array to merge
+     *
+     * @return array<mixed>
      */
     public static function deepMerge(array $merge_base, array ...$merge_patches): array
     {
@@ -74,7 +76,7 @@ class AssociativeArrayUtils
      *
      * Imported from the Kohana framework.
      *
-     * @param array $array array to check
+     * @param array<mixed> $array array to check
      *
      * @author Kohana Team
      */
@@ -91,6 +93,11 @@ class AssociativeArrayUtils
     /**
      * Turns 'this.thing.here => bar' into ['this']['thing']['here'] = bar.
      */
+    /**
+     * @param array<string, mixed> $input
+     *
+     * @return array<mixed>
+     */
     public static function pathsToNested(array $input): array
     {
         $result = [];
@@ -104,8 +111,8 @@ class AssociativeArrayUtils
     /**
      * Set a value on an array by path.
      *
-     * @param array        $array     Array to update
-     * @param string|array $path      Path
+     * @param array<mixed> $array     Array to update
+     * @param string|list<string> $path Path
      * @param mixed        $value     Value to set
      * @param string       $delimiter Path delimiter
      *
@@ -147,6 +154,12 @@ class AssociativeArrayUtils
      *   $result = AssociativeArrayUtils::popKeys($array, ['things', 'might', 'undefined']);
      *   assert($array === ['mix' => 'of', 'useful' => 'separately']);
      *   assert($result === ['things' => 'that', 'might' => 'be']); // Note `undefined` not present in source or result
+     */
+    /**
+     * @param array<array-key, mixed> $source
+     * @param list<array-key> $pop_keys
+     *
+     * @return array<array-key, mixed>
      */
     public static function popKeys(array &$source, array $pop_keys): array
     {

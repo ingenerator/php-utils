@@ -8,9 +8,10 @@ use PHPUnit\Framework\Assert;
 
 class BasicPDOStub extends PDO
 {
+    /** @var list<array{sql: string, result: array<mixed>}> */
     protected $query_stack = [];
 
-    /** @param array<mixed> $stack */
+    /** @param list<array{sql: string, result: array<mixed>}> $stack */
     public static function withQueryStack(array $stack): self
     {
         $i = new self();
@@ -28,8 +29,11 @@ class BasicPDOStub extends PDO
         return '{quoted-'.$string.'}';
     }
 
-    public function query($statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetch_mode_args): PDOStatement|false
-    {
+    public function query(
+        string $statement,
+        ?int $mode = PDO::ATTR_DEFAULT_FETCH_MODE,
+        mixed ...$fetch_mode_args,
+    ): PDOStatement|false {
         Assert::assertNotEmpty($this->query_stack, 'No expectation defined for query '.$statement);
         $next_query = array_shift($this->query_stack);
         Assert::assertSame($next_query['sql'], $statement);

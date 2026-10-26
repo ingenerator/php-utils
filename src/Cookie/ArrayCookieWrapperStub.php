@@ -4,8 +4,10 @@ namespace Ingenerator\PHPUtils\Cookie;
 
 class ArrayCookieWrapperStub extends CookieWrapper
 {
+    /** @var array<string, list<array{value: ?string, opts: array<string, mixed>}>> */
     protected $set_cookie_calls = [];
 
+    /** @param array<string, mixed> $cookies */
     public function __construct(array $cookies = [])
     {
         parent::__construct(has_ssl_available: false);

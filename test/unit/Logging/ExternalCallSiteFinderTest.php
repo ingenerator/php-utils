@@ -258,9 +258,11 @@ class TestCallsiteCaller extends TestCallSiteCallerParent
 
 abstract class TestCallSiteCallerParent
 {
-    abstract public function singleExternal(ExternalCallSiteFinder $finder);
+    /** @return array<string, mixed> */
+    abstract public function singleExternal(ExternalCallSiteFinder $finder): array;
 
-    public function throughParentMethod(ExternalCallSiteFinder $finder)
+    /** @return array<string, mixed> */
+    public function throughParentMethod(ExternalCallSiteFinder $finder): array
     {
         return $this->singleExternal($finder);
     }

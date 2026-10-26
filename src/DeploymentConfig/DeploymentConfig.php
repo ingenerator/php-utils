@@ -37,7 +37,7 @@ final class DeploymentConfig
     }
 
     /**
-     * @param array|null $env_vars - if missing will default to reading from $_SERVER
+     * @param array<string, mixed>|null $env_vars - if missing will default to reading from $_SERVER
      */
     private function __construct(
         ?array $env_vars = null,

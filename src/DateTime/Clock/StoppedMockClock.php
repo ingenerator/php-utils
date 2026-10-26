@@ -17,9 +17,7 @@ final class StoppedMockClock extends RealtimeClock
 {
     private float $current_microtime;
 
-    /**
-     * @var int[]
-     */
+    /** @var list<int> */
     private array $sleeps = [];
 
     /**

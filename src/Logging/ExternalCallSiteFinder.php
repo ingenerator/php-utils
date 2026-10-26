@@ -48,6 +48,12 @@ class ExternalCallSiteFinder
      *      }
      *    }
      */
+    /**
+     * @param list<array<string, mixed>> $trace
+     * @param list<class-string> $ignore_classes
+     *
+     * @return array<string, mixed>
+     */
     public function findExternalCall(array $trace, array $ignore_classes): array
     {
         $orig_trace = $trace;
@@ -102,6 +108,7 @@ class ExternalCallSiteFinder
         ];
     }
 
+    /** @param list<class-string> $ignore_classes */
     protected function isIgnoredClass(string $class, array $ignore_classes): bool
     {
         foreach ($ignore_classes as $ignored_class) {
