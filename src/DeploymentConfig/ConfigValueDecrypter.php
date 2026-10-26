@@ -7,18 +7,12 @@ use SodiumException;
 class ConfigValueDecrypter
 {
     /**
-     * @var string
-     */
-    protected $keypair_dir;
-
-    /**
      * @var string[]
      */
     private array $keypairs = [];
 
-    public function __construct(string $keypair_dir)
+    public function __construct(protected string $keypair_dir)
     {
-        $this->keypair_dir = $keypair_dir;
     }
 
     public function decrypt($value)

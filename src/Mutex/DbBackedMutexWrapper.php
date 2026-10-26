@@ -6,14 +6,8 @@ use PDO;
 
 class DbBackedMutexWrapper implements MutexWrapper
 {
-    /**
-     * @var PDO
-     */
-    protected $db;
-
-    public function __construct(PDO $db)
+    public function __construct(protected PDO $db)
     {
-        $this->db = $db;
     }
 
     public function withLock(string $name, int $timeout_seconds, callable $exclusive_code)

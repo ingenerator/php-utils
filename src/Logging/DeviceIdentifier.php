@@ -26,10 +26,7 @@ use function random_bytes;
  */
 class DeviceIdentifier
 {
-    /**
-     * @var DeviceIdentifier
-     */
-    protected static $instance;
+    protected static ?DeviceIdentifier $instance;
 
     /**
      * Forces the singleton state to a known value for use in testing.
@@ -77,19 +74,10 @@ class DeviceIdentifier
     public const COOKIE_LIFETIME = 'P5Y';
     public const VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
 
-    /**
-     * @var string|null
-     */
-    protected $id;
+    protected ?string $id;
 
-    /**
-     * @var CookieWrapper
-     */
-    protected $cookies;
-
-    protected function __construct(CookieWrapper $cookies)
+    protected function __construct(protected CookieWrapper $cookies)
     {
-        $this->cookies = $cookies;
     }
 
     /**
@@ -97,7 +85,7 @@ class DeviceIdentifier
      */
     public function getValue(): string
     {
-        if ($this->id === null) {
+        if (!isset($this->id)) {
             $id = $this->cookies->get('did') ?: $this->cookies->get('didf');
             if (empty($id)) {
                 $id = '-unset-';

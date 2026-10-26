@@ -8,6 +8,7 @@ class ArrayCookieWrapperStub extends CookieWrapper
 
     public function __construct(array $cookies = [])
     {
+        parent::__construct(has_ssl_available: false);
         $this->cookies = $cookies;
     }
 

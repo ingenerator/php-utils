@@ -27,17 +27,11 @@ class CookieWrapper
     /**
      * @var mixed[]
      */
-    protected $cookies = [];
+    protected array $cookies = [];
 
-    /**
-     * @var bool
-     */
-    protected $has_ssl_available;
-
-    public function __construct(bool $has_ssl_available = true)
+    public function __construct(protected bool $has_ssl_available = true)
     {
         $this->cookies = $_COOKIE;
-        $this->has_ssl_available = $has_ssl_available;
     }
 
     /**

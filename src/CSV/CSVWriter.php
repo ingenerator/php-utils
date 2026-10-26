@@ -30,20 +30,11 @@ class CSVWriter
      */
     protected $resource;
 
-    /**
-     * @var bool
-     */
-    protected $owns_resource;
+    protected bool $owns_resource;
 
-    /**
-     * @var array
-     */
-    protected $expect_schema;
+    protected ?array $expect_schema = null;
 
-    /**
-     * @var array
-     */
-    protected $options = [
+    protected array $options = [
         'write_utf8_bom' => false,
         'quote_headers' => true,
         'eol' => "\n",

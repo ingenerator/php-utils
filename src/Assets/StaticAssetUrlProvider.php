@@ -39,20 +39,11 @@ class StaticAssetUrlProvider
     public const MODE_LOCAL = 'local';
     public const MODE_REMOTE = 'remote';
 
-    /**
-     * @var string
-     */
-    protected $local_asset_path;
+    protected string $local_asset_path;
 
-    /**
-     * @var string
-     */
-    protected $mode;
+    protected string $mode;
 
-    /**
-     * @var string
-     */
-    protected $remote_asset_url;
+    protected string $remote_asset_url;
 
     /**
      * @param string $mode                local or remote mode (see above) - commonly toggle based on runtime environment

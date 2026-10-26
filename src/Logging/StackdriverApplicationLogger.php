@@ -43,25 +43,11 @@ class StackdriverApplicationLogger extends AbstractLogger
     public const PROP_SOURCE_LOCATION = 'logging.googleapis.com/sourceLocation';
     public const TYPE_STACKDRIVER_ERROR = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
 
-    /**
-     * @var ExternalCallSiteFinder
-     */
-    protected $call_site_finder;
+    protected ExternalCallSiteFinder $call_site_finder;
 
-    /**
-     * @var string
-     */
-    protected $log_destination;
+    protected array $metadata;
 
-    /**
-     * @var array
-     */
-    protected $metadata;
-
-    /**
-     * @var array
-     */
-    protected $metadata_sources;
+    protected array $metadata_sources;
 
     /**
      * Create an instance of the logger and provide metadata.
@@ -117,11 +103,10 @@ class StackdriverApplicationLogger extends AbstractLogger
      * @param array|callable|LogMetadataProvider ...$metadata_sources Sources of metadata to merge together
      */
     public function __construct(
-        string $log_destination,
+        protected string $log_destination,
         ...$metadata_sources,
     ) {
         $this->metadata_sources = array_pad($metadata_sources, 2, []);
-        $this->log_destination = $log_destination;
         $this->call_site_finder = new ExternalCallSiteFinder();
     }
 
@@ -211,7 +196,7 @@ class StackdriverApplicationLogger extends AbstractLogger
      */
     protected function getMetadata(): array
     {
-        if ($this->metadata !== null) {
+        if (isset($this->metadata)) {
             return $this->metadata;
         }
 
@@ -232,7 +217,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         }
 
         // Clean up any references to the sources, they're no longer needed
-        $this->metadata_sources = null;
+        $this->metadata_sources = [];
 
         $this->metadata = $metadata;
 

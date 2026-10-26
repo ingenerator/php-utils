@@ -28,42 +28,24 @@ use function sha1;
 
 class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface, SessionIdInterface
 {
-    /**
-     * @var PDO
-     */
-    protected $db;
+    protected int $session_lifetime;
 
-    /**
-     * @var int
-     */
-    protected $session_lifetime;
-
-    /**
-     * @var string
-     */
-    protected $session_lock;
+    protected string $session_lock;
 
     /**
      * @var string[]
      */
-    protected $data_cache;
+    protected array $data_cache;
 
-    /**
-     * @var string
-     */
-    protected $client_ip;
+    protected string $client_ip;
 
-    /**
-     * @var string
-     */
-    protected $client_user_agent;
+    protected string $client_user_agent;
 
     /**
      * @param int    $lock_timeout seconds to wait for MySQL lock
      */
-    public function __construct(PDO $db, protected string $hash_salt, protected int $lock_timeout = 20)
+    public function __construct(protected PDO $db, protected string $hash_salt, protected int $lock_timeout = 20)
     {
-        $this->db = $db;
         $this->session_lifetime = \ini_get('session.gc_maxlifetime');
         $this->client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
         $this->client_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';

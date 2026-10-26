@@ -34,19 +34,10 @@ use function sprintf;
  */
 abstract class AbstractArrayRepository
 {
-    /**
-     * @var array
-     */
-    protected $entities;
+    protected string $save_log = '';
 
-    /**
-     * @var string
-     */
-    protected $save_log;
-
-    protected function __construct(array $entities)
+    protected function __construct(protected array $entities)
     {
-        $this->entities = $entities;
     }
 
     /**

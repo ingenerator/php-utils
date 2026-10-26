@@ -15,15 +15,12 @@ use PHPUnit\Framework\Assert;
 
 class StoppedMockClock extends RealtimeClock
 {
-    /**
-     * @var float
-     */
-    protected $current_microtime;
+    protected float $current_microtime;
 
     /**
      * @var int[]
      */
-    protected $sleeps;
+    protected array $sleeps = [];
 
     /**
      * Use descriptive static constructors for a new instance.
@@ -94,6 +91,6 @@ class StoppedMockClock extends RealtimeClock
 
     public function assertNeverSlept($msg = ''): void
     {
-        Assert::assertNull($this->sleeps, $msg);
+        Assert::assertSame([], $this->sleeps, $msg);
     }
 }

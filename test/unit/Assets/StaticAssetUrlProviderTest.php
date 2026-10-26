@@ -18,10 +18,7 @@ class StaticAssetUrlProviderTest extends TestCase
         'asset_base_url_file' => __FILE__,
     ];
 
-    /**
-     * @var vfsStreamDirectory
-     */
-    protected $vfs;
+    protected vfsStreamDirectory $vfs;
 
     public function testItIsInitialisable(): void
     {

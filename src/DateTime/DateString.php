@@ -34,20 +34,16 @@ class DateString
 
     /**
      * Formats as Y-m-d H:i:s.
-     *
-     * @return string
      */
-    public static function ymd(?DateTimeImmutable $date, string $empty_value = '')
+    public static function ymd(?DateTimeImmutable $date, string $empty_value = ''): string
     {
         return static::format($date, 'Y-m-d', $empty_value);
     }
 
     /**
      * Formats as Y-m-d H:i:s.
-     *
-     * @return string
      */
-    public static function ymdhis(?DateTimeImmutable $date, string $empty_value = '')
+    public static function ymdhis(?DateTimeImmutable $date, string $empty_value = ''): string
     {
         return static::format($date, 'Y-m-d H:i:s', $empty_value);
     }

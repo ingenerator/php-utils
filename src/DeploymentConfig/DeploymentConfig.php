@@ -15,25 +15,13 @@ class DeploymentConfig
     public const QA = 'qa';
     public const LOADTEST = 'loadtest';
 
-    /**
-     * @var string
-     */
-    protected $config_dir = '/etc/ingenerator/conf';
+    protected string $config_dir = '/etc/ingenerator/conf';
 
-    /**
-     * @var string
-     */
-    protected $environment;
+    protected string $environment;
 
-    /**
-     * @var ConfigMapDeclarationParser
-     */
-    protected $map_parser;
+    protected ConfigMapDeclarationParser $map_parser;
 
-    /**
-     * @var ConfigValueDecrypter
-     */
-    protected $value_decrypter;
+    protected ConfigValueDecrypter $value_decrypter;
 
     /**
      * @return static

@@ -23,7 +23,7 @@ class ObjectPropertyRipper
     /**
      * @var Closure[]
      */
-    protected static $rippers = [];
+    protected static array $rippers = [];
 
     /**
      * Grab the values of all these (presumably private / protected) properties from inside object.

@@ -15,10 +15,7 @@ use function strncmp;
 
 class ConstantDirectory
 {
-    /**
-     * @var array
-     */
-    protected $constants;
+    protected array $constants;
 
     protected function __construct(protected string $class_name)
     {
@@ -50,7 +47,7 @@ class ConstantDirectory
      */
     public function listConstants()
     {
-        if ($this->constants === null) {
+        if (!isset($this->constants)) {
             $this->constants = $this->loadConstants();
         }
 
