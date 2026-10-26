@@ -215,7 +215,6 @@ PHP,
         try {
             // Include the code block in anonymous scope so the call is not related to this method
             $func = (fn (TestCallSiteAsserter $asserter) => require $temp);
-            $func->bindTo(null, null);
             $result = $func(new TestCallSiteAsserter($this->newSubject()));
         } finally {
             unlink($temp);

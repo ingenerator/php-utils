@@ -32,7 +32,7 @@ final class UniqueMapTest extends TestCase
     {
         $subject = new UniqueMap(['any' => 'item']);
         $this->expectException(OutOfBoundsException::class);
-        $subject['other-item'];
+        $f = $subject['other-item'];
     }
 
     public function testItAcceptsNewItems(): void
@@ -83,7 +83,7 @@ final class UniqueMapTest extends TestCase
         unset($subject['any']);
         $this->assertFalse(isset($subject['any']), 'not set after deletion');
         try {
-            $subject['any'];
+            $f = $subject['any'];
             $this->fail('Cannot access key after removal');
         } catch (OutOfBoundsException) {
             // Expected

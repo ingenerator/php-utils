@@ -152,10 +152,13 @@ final class DeviceIdentifierTest extends TestCase
             // Note that here the init method has assigned a global instance so changes to $_COOKIE
             // don't do anything
             $_COOKIE['did'] = '12345678901234567890AA';
+            /* @phpstan-ignore method.alreadyNarrowedType (PHPStan can already tell this passes but I'd like to prove it again) */
             $this->assertSame('1234567890123456789012', DeviceIdentifier::get());
         } finally {
             $_COOKIE = $old_cookie;
         }
+
+        /* @phpstan-ignore method.alreadyNarrowedType (PHPStan can already tell this passes but I'd like to prove it again) */
         $this->assertSame('1234567890123456789012', DeviceIdentifier::get());
     }
 

@@ -7,7 +7,6 @@ namespace test\unit\Ingenerator\PHPUtils\Filesystem;
 use Ingenerator\PHPUtils\Filesystem\TemporaryDirectoryManager;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 
 use function array_map;
 use function decoct;
@@ -50,10 +49,10 @@ final class TemporaryDirectoryManagerTest extends TestCase
     public function testItThrowsIfDirectoryCannotBeCreated(): void
     {
         $this->markTestSkipped('Skipping due to standalone tests now running as root, this will not fail');
-        $this->base_dir = '/';
-        $subject = $this->newSubject();
-        $this->expectException(RuntimeException::class);
-        $subject->mkTemp('my-dir');
+        // $this->base_dir = '/';
+        // $subject = $this->newSubject();
+        // $this->expectException(RuntimeException::class);
+        // $subject->mkTemp('my-dir');
     }
 
     public function testItRecursivelyRemovesTemporaryDirectoryOnExplicitCleanup(): void

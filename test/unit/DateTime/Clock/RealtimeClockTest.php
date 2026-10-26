@@ -44,7 +44,6 @@ final class RealtimeClockTest extends TestCase
     public function testItReturnsMicrotime(): void
     {
         $mt = $this->newSubject()->getMicrotime();
-        $this->assertIsFloat($mt);
         $this->assertEqualsWithDelta(
             microtime(true),
             $mt,

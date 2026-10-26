@@ -31,7 +31,7 @@ final class CryptoBoxKeypairSetTest extends TestCase
         $a1 = CryptoBoxKeypair::generate('key-a');
         $a2 = CryptoBoxKeypair::generate('key-a');
         $this->expectException(UnexpectedValueException::class);
-        new CryptoBoxKeypairSet($a1, $a2);
+        $f = new CryptoBoxKeypairSet($a1, $a2);
     }
 
     public function testItThrowsOnRequestForUndefinedKey(): void

@@ -54,6 +54,7 @@ final class ObjectPropertyPopulatorTest extends TestCase
 
 class TestPopulatingClass
 {
+    /* @phpstan-ignore property.onlyRead (written by the populator in tests) */
     private $something_private;
     protected $something_protected;
     protected $already_init = 'Foo';

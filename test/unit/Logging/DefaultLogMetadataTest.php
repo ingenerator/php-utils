@@ -22,7 +22,6 @@ final class DefaultLogMetadataTest extends TestCase
     public function testItsDeviceIdentityProvidesDeviceIdAsDeferredValue(): void
     {
         $result = DefaultLogMetadata::deviceIdentityLazy();
-        $this->assertIsCallable($result);
         DeviceIdentifier::forceGlobalTestValue('abc4567890123456789012');
         $this->assertSame(['context' => ['did' => 'abc4567890123456789012']], $result());
     }

@@ -36,8 +36,6 @@ use function microtime;
 use function preg_replace;
 use function str_replace;
 
-use const PHP_MAJOR_VERSION;
-
 final class StackdriverApplicationLoggerTest extends TestCase
 {
     private $vfs;
@@ -286,27 +284,15 @@ final class StackdriverApplicationLoggerTest extends TestCase
             $actual[] = $line['severity'].': '.$line['message'];
         }
 
-        if (PHP_MAJOR_VERSION < 8) {
-            $this->assertSame(
-                [
-                    'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct() expects parameter 1 to be string, object given',
-                    'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
-                    'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
-                    'INFO: I am an info',
-                ],
-                $actual
-            );
-        } else {
-            $this->assertSame(
-                [
-                    'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct(): Argument #1 ($datetime) must be of type string, stdClass given',
-                    'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
-                    'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
-                    'INFO: I am an info',
-                ],
-                $actual
-            );
-        }
+        $this->assertSame(
+            [
+                'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct(): Argument #1 ($datetime) must be of type string, stdClass given',
+                'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
+                'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
+                'INFO: I am an info',
+            ],
+            $actual
+        );
     }
 
     #[TestWith([[], 'app'])]

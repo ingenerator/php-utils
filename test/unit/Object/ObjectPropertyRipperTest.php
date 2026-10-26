@@ -71,6 +71,7 @@ final class ObjectPropertyRipperTest extends TestCase
         // This is an edge case and should be fairly unlikely IRL, but it is valid.
 
         $c = new class extends stdClass {
+            /* @phpstan-ignore property.onlyWritten (read by the ripper in tests) */
             private string $hidden = 'whatever';
         };
         $c->data = 'something';
@@ -98,6 +99,7 @@ final class ObjectPropertyRipperTest extends TestCase
 
 class TestRippingClass
 {
+    /* @phpstan-ignore property.onlyWritten (read by the ripper in tests) */
     private string $something_private = 'precious';
     protected $something_protected = 'water';
     protected $something_else = 'else';
@@ -105,5 +107,6 @@ class TestRippingClass
 
 class ExtensionRippingClass extends TestRippingClass
 {
+    /* @phpstan-ignore property.onlyWritten (read by the ripper in tests) */
     private string $child_private = 'other-private';
 }

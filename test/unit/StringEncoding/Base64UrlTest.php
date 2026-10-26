@@ -33,7 +33,6 @@ final class Base64UrlTest extends TestCase
     public function testItsEncodedOutputIsAlwaysUrlSafe(string $value): void
     {
         $encoded = Base64Url::encode($value);
-        $this->assertIsString($encoded);
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\-\_]+$/', $encoded);
     }
 }
