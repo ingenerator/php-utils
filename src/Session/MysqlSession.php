@@ -109,6 +109,9 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
     public function create_sid(): string
     {
         $session_id = session_create_id();
+        if ($session_id === false) {
+            throw new RuntimeException('Unable to create session ID');
+        }
 
         /*
          * The session does not exist, so create it in the DB
