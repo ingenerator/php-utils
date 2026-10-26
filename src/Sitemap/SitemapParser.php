@@ -16,8 +16,14 @@ use function libxml_use_internal_errors;
 use function simplexml_import_dom;
 use function sprintf;
 
+/**
+ * @phpstan-type TSitemapEntry array{lastmod: string|null, changefreq: string|null, priority: string|null}
+ */
 class SitemapParser
 {
+    /**
+     * @return array<string, TSitemapEntry>
+     */
     public static function parse(string $sitemap): array
     {
         $doc = self::validateSitemapXML($sitemap);

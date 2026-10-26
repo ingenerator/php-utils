@@ -9,7 +9,7 @@ use RuntimeException;
 
 class MutexTimedOutException extends RuntimeException
 {
-    public function __construct(string $name, int $timeout, $result)
+    public function __construct(string $name, int $timeout, mixed $result)
     {
         parent::__construct(
             sprintf(

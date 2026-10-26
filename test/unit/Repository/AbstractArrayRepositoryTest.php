@@ -61,14 +61,18 @@ final class AbstractArrayRepositoryTest extends TestCase
         $this->assertSame([$e1, $e2], $subject->getEntities());
     }
 
+    /**
+     * @param list<array<string, mixed>> $entities
+     * @param array<string, int> $expect
+     */
     #[TestWith([[], []])]
     #[TestWith([[['prop1' => 'foo'], ['prop1' => 'bar'], ['prop1' => 'foo']], ['foo' => 2, 'bar' => 1]])]
-    public function testItProvidesBaseLayerForCountingEntitiesByGroup($entities, $expect): void
+    public function testItProvidesBaseLayerForCountingEntitiesByGroup(array $entities, array $expect): void
     {
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
-            $subject->countWith(fn (AnyEntity $e) => $e->getProp1())
+            $subject->countWith(fn (AnyEntity $e): mixed => $e->getProp1())
         );
     }
 
@@ -115,15 +119,19 @@ final class AbstractArrayRepositoryTest extends TestCase
         $subject->findWith(fn (AnyEntity $e): true => true);
     }
 
+    /**
+     * @param list<array<string, mixed>> $entities
+     * @param list<int> $expect
+     */
     #[TestWith([[], []])]
     #[TestWith([[['prop1' => 'ok', 'prop2' => 0], ['prop1' => 'nah-ah', 'prop2' => 1], ['prop1' => 'ok', 'prop2' => 2]], [0, 2]])]
-    public function testItsListWithReturnsAllMatchedEntities($entities, $expect): void
+    public function testItsListWithReturnsAllMatchedEntities(array $entities, array $expect): void
     {
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
             array_map(
-                fn (AnyEntity $e) => $e->getProp2(),
+                fn (AnyEntity $e): mixed => $e->getProp2(),
                 $subject->listWith(fn (AnyEntity $e): bool => $e->getProp1() === 'ok')
             )
         );
@@ -156,7 +164,7 @@ final class AbstractArrayRepositoryTest extends TestCase
         );
     }
 
-    protected function assertAssertionFails($callable): void
+    protected function assertAssertionFails(callable $callable): void
     {
         try {
             $callable();
@@ -227,6 +235,7 @@ class AnyArrayRepository extends AbstractArrayRepository
         return AnyEntity::class;
     }
 
+    /** @return list<AnyEntity> */
     public function getEntities(): array
     {
         return $this->entities;
@@ -270,20 +279,20 @@ class AnyArrayRepository extends AbstractArrayRepository
 
 class AnyEntity
 {
-    protected $prop1;
-    protected $prop2;
+    protected mixed $prop1;
+    protected mixed $prop2;
 
-    public function getProp1()
+    public function getProp1(): mixed
     {
         return $this->prop1;
     }
 
-    public function getProp2()
+    public function getProp2(): mixed
     {
         return $this->prop2;
     }
 
-    public function setProp2($string): void
+    public function setProp2(mixed $string): void
     {
         $this->prop2 = $string;
     }

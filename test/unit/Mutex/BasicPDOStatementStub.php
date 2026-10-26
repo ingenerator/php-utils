@@ -12,6 +12,7 @@ class BasicPDOStatementStub extends PDOStatement
 {
     protected $result;
 
+    /** @param array<mixed> $result */
     public function __construct(array $result)
     {
         $this->result = $result;

@@ -21,6 +21,8 @@ interface LogMetadataProvider
      * if appropriate return a warning value in your array. Only unexpected / system-level exceptions (failure to
      * connect to external service / invalid configuration even when fully bootstrapped / etc) should bubble to allow
      * these to be detected and fixed.
+     *
+     * @return array<string, mixed>
      */
     public function getMetadata(): array;
 }

@@ -303,7 +303,7 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
     /**
      * @throws ErrorException
      */
-    protected function getLock($session_id): bool
+    protected function getLock(string $session_id): bool
     {
         $this->session_lock = 'session_'.$session_id;
 

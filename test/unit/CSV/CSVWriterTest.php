@@ -175,6 +175,10 @@ final class CSVWriterTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<string, string> $row
+     * @param array<string, bool|string> $options
+     */
     #[DataProvider('providerQuotedHeaders')]
     public function testItOptionallyWritesColumnHeadersWithoutQuotes(array $row, array $options, string $expect): void
     {
@@ -229,6 +233,7 @@ final class CSVWriterTest extends TestCase
         ];
     }
 
+    /** @param array<string, bool|string> $options */
     #[DataProvider('providerLineEndings')]
     public function testItsLineEndingsCanBeConfigured(array $options, string $expect): void
     {
@@ -243,7 +248,7 @@ final class CSVWriterTest extends TestCase
 
     #[TestWith([true])]
     #[TestWith([false])]
-    public function testItOptionallyWritesByteOrderMarkAtStartOfFile($write_bom): void
+    public function testItOptionallyWritesByteOrderMarkAtStartOfFile(bool $write_bom): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -256,9 +261,10 @@ final class CSVWriterTest extends TestCase
         $this->assertSame(['first'], fgetcsv($file, escape: '\\'));
     }
 
+    /** @param array<string, string> $second_row */
     #[TestWith([['is' => 'jumbled', 'our' => 'up']])]
     #[TestWith([['our' => 'things', 'went' => 'bad']])]
-    public function testItThrowsIfSubsequentRowHeadersDoNotMatch($second_row): void
+    public function testItThrowsIfSubsequentRowHeadersDoNotMatch(array $second_row): void
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -285,6 +291,7 @@ final class CSVWriterTest extends TestCase
         }
     }
 
+    /** @param array<array<string|null>> $expect */
     protected function assertCSVContent(array $expect, $file): void
     {
         rewind($file);

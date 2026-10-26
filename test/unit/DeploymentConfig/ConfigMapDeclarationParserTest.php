@@ -85,6 +85,7 @@ final class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
+    /** @return array<int, array<mixed>> */
     public static function provider_invalid_declarations(): array
     {
         // Compose like this because by the time you nest the different levels of data provider cases and argument arrays
@@ -114,7 +115,7 @@ final class ConfigMapDeclarationParserTest extends TestCase
     }
 
     #[DataProvider('provider_invalid_declarations')]
-    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues($declarations): void
+    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues(mixed $declarations): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidConfigException::class);

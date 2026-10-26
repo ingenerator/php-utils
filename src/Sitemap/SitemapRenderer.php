@@ -13,6 +13,9 @@ use function implode;
 
 class SitemapRenderer
 {
+    /**
+     * @var list<string>
+     */
     private array $urls = [];
 
     private bool $is_rendered = false;

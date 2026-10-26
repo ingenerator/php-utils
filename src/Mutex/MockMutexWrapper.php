@@ -4,13 +4,19 @@ namespace Ingenerator\PHPUtils\Mutex;
 
 use LogicException;
 
+/**
+ * @phpstan-type  TLockHistoryEntry array{name: string, timeout: int}
+ */
 class MockMutexWrapper implements MutexWrapper
 {
-    protected $always_timeout = false;
+    protected bool $always_timeout = false;
 
-    protected $current_lock_name;
+    protected ?string $current_lock_name = null;
 
-    protected $lock_history = [];
+    /**
+     * @var list<TLockHistoryEntry>
+     */
+    protected array $lock_history = [];
 
     public function withLock(string $name, int $timeout_seconds, callable $exclusive_code)
     {
@@ -59,6 +65,8 @@ class MockMutexWrapper implements MutexWrapper
      * This is useful where you can only observe the outside of your process, but does not provide a way
      * to verify that the application code actually ran *inside* the mutex rather than before / after it.
      * Where possible use an injected callback and the ->getCurrentLockName method.
+     *
+     * @return list<TLockHistoryEntry>
      */
     public function getLockHistory(): array
     {

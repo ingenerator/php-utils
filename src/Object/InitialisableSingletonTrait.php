@@ -10,16 +10,17 @@ use LogicException;
  */
 trait InitialisableSingletonTrait
 {
+    /**
+     * @var static
+     */
     protected static $instance;
 
     /**
      * Return the singleton instance.
      *
-     * @return static
-     *
      * @throws SingletonNotInitialisedException if the class has not been initialised
      */
-    public static function instance()
+    public static function instance(): static
     {
         if (!static::$instance) {
             throw new SingletonNotInitialisedException('Cannot access '.static::class.' - class not initialised');

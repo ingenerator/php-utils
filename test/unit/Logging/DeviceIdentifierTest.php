@@ -48,10 +48,13 @@ final class DeviceIdentifierTest extends TestCase
         );
     }
 
+    /**
+     * @param array<string, string> $cookie
+     */
     #[TestWith([[]])]
     #[TestWith([['did' => "i am an abusive person!!! \$\$@@~~##''\$\$\$"]])]
     #[TestWith([['did' => '', 'didf' => '']])]
-    public function testItsInitSetsNewCookiesIfNotPresentOrNotValid($cookie): void
+    public function testItsInitSetsNewCookiesIfNotPresentOrNotValid(array $cookie): void
     {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
 
@@ -111,6 +114,9 @@ final class DeviceIdentifierTest extends TestCase
         );
     }
 
+    /**
+     * @param array<string, string> $cookie
+     */
     #[TestWith([[], '-unset-'])]
     #[TestWith([['did' => ''], '-unset-'])]
     #[TestWith([['didf' => ''], '-unset-'])]
@@ -119,8 +125,8 @@ final class DeviceIdentifierTest extends TestCase
     #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA', 'didf' => 'OfLAtnofliaNqvkAjhhsFA'], 'OfLAtnofliaNqvkAjhhsFA'])]
     #[TestWith([['did' => "i am an abusive person!!! \$\$@@~~##''\$\$\$"], '-invalid-'])]
     public function testItsGetterReturnsValidCookieValueOrUnsetIfInitialisedNeverCalled(
-        $cookie,
-        $expect,
+        array $cookie,
+        string $expect,
     ): void {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
         $this->assertSame($expect, $this->newSubject()->getValue());

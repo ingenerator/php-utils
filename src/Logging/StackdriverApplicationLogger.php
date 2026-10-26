@@ -32,6 +32,9 @@ use function substr;
  * again with appropriate application-level metadata.
  *
  * Exceptions will be formatted and (by default) tagged to be reported to Stackdriver Errors - see `->log()` for details
+ *
+ * @phpstan-type TLogMetadataGroup array<string, mixed>
+ * @phpstan-type TLogMetadataSource TLogMetadataGroup|callable(): TLogMetadataGroup|LogMetadataProvider
  */
 class StackdriverApplicationLogger extends AbstractLogger
 {
@@ -45,8 +48,14 @@ class StackdriverApplicationLogger extends AbstractLogger
 
     protected ExternalCallSiteFinder $call_site_finder;
 
+    /**
+     * @var array<string, mixed>
+     */
     protected array $metadata;
 
+    /**
+     * @var list<TLogMetadataSource>
+     */
     protected array $metadata_sources;
 
     /**
@@ -100,11 +109,11 @@ class StackdriverApplicationLogger extends AbstractLogger
      *   return StackdriverApplicationLogger::instance();
      *
      * @param string                             $log_destination     A PHP file / stream destination to append, commonly php://stdout
-     * @param array|callable|LogMetadataProvider ...$metadata_sources Sources of metadata to merge together
+     * @param TLogMetadataSource ...$metadata_sources Sources of metadata to merge together
      */
     public function __construct(
         protected string $log_destination,
-        ...$metadata_sources,
+        array|callable|LogMetadataProvider ...$metadata_sources,
     ) {
         $this->metadata_sources = array_pad($metadata_sources, 2, []);
         $this->call_site_finder = new ExternalCallSiteFinder();
@@ -193,6 +202,8 @@ class StackdriverApplicationLogger extends AbstractLogger
 
     /**
      * Lazily compiles all provided metadata.
+     *
+     * @return TLogMetadataGroup
      */
     protected function getMetadata(): array
     {
@@ -233,6 +244,17 @@ class StackdriverApplicationLogger extends AbstractLogger
         return $this->metadata;
     }
 
+    /**
+     * @return array{
+     *     class: string,
+     *     msg: string,
+     *     code: int,
+     *     file: string,
+     *     line: int,
+     *     trace: string,
+     *     previous?: array<string, mixed>
+     * }
+     */
     protected function formatException(Throwable $e): array
     {
         $result = [
@@ -260,6 +282,8 @@ class StackdriverApplicationLogger extends AbstractLogger
      *
      * This method renders a string trace that follows the format of the standard trace (so it can be
      * parsed by tools that are looking for that) but without including any function argument details.
+     *
+     * @param array<int, array{file?: string, line?: int, class: string, type: string, function: string }> $trace_stack
      */
     protected function getExceptionTraceAsStringWithoutArgs(array $trace_stack): string
     {
@@ -282,6 +306,8 @@ class StackdriverApplicationLogger extends AbstractLogger
 
     /**
      * @param array<string, mixed> $log_entry
+     *
+     * @return array<string, mixed> $server
      */
     protected function addStackdriverErrorReportingData(array $log_entry): array
     {
@@ -313,6 +339,9 @@ class StackdriverApplicationLogger extends AbstractLogger
         return $log_entry;
     }
 
+    /**
+     * @param array<string, mixed> $log_entry
+     */
     protected function writeLog(array $log_entry): void
     {
         try {
@@ -343,7 +372,7 @@ class StackdriverApplicationLogger extends AbstractLogger
      * Log entries have a severity set based on http_response_code, to provide a second route for detection/altering of
      * 4xx and 5xx responses.
      *
-     * @param array|null $server             The $_SERVER array
+     * @param array<string, mixed>|null $server             The $_SERVER array
      * @param float|null $request_start_time The microtime when the request started processing - usually a const defined at the very start of your PHP
      */
     public function logRequest(?array $server, ?float $request_start_time = null): void

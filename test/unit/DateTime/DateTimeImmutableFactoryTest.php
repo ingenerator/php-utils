@@ -26,7 +26,7 @@ use function date_default_timezone_set;
 final class DateTimeImmutableFactoryTest extends TestCase
 {
     #[TestWith(['2017-07-09 10:01:02', '2017-07-09T10:01:02.000000+01:00'])]
-    public function testItFactoriesCorrectObjectFromValidYmdhisInDefaultTz($input, $expect): void
+    public function testItFactoriesCorrectObjectFromValidYmdhisInDefaultTz(string $input, string $expect): void
     {
         $old_default = date_default_timezone_get();
         try {
@@ -46,7 +46,7 @@ final class DateTimeImmutableFactoryTest extends TestCase
     #[TestWith(['2017-11-10 26:10:10'])]
     #[TestWith(['2017-14-10'])]
     #[TestWith(['10/11/2017'])]
-    public function testItThrowsFromInvalidYmdhisInput($input): void
+    public function testItThrowsFromInvalidYmdhisInput(string $input): void
     {
         $this->expectException(InvalidArgumentException::class);
         DateTimeImmutableFactory::fromYmdHis($input);
@@ -70,7 +70,7 @@ final class DateTimeImmutableFactoryTest extends TestCase
     #[TestWith([1274437650, '2010-05-21T11:27:30.000000+01:00'])]
     #[TestWith([1274437650, '2010-05-21T11:27:30.000000+01:00'])]
     #[TestWith([1274437650.0, '2010-05-21T11:27:30.000000+01:00'])]
-    public function testItFactoriesFromMicrotimeInDefaultTz($val, $expect): void
+    public function testItFactoriesFromMicrotimeInDefaultTz(int|float|string $val, string $expect): void
     {
         try {
             $old_default = date_default_timezone_get();

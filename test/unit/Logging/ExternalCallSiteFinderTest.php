@@ -231,16 +231,19 @@ PHP,
 
 class TestCallsiteCaller extends TestCallSiteCallerParent
 {
+    /** @return array<string, mixed> */
     public function singleExternal(ExternalCallSiteFinder $finder): array
     {
         return $finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
     }
 
+    /** @return array<string, mixed> */
     public function throughInternalMethod(ExternalCallSiteFinder $finder): array
     {
         return $this->singleExternal($finder);
     }
 
+    /** @return array<string, mixed> */
     public function fromManager(ExternalCallSiteFinder $finder): array
     {
         return $finder->findExternalCall(
@@ -265,6 +268,7 @@ abstract class TestCallSiteCallerParent
 
 class TestCallSiteProxy
 {
+    /** @return array<string, mixed> */
     public function throughExpectedDependency(ExternalCallSiteFinder $finder): array
     {
         $caller = new TestCallsiteCaller();
@@ -280,6 +284,8 @@ class TestCallSiteAsserter
     }
 
     /**
+     * @param array<string, mixed> $expected
+     *
      * @return array<string, mixed[]>
      */
     public function test(array $expected): array

@@ -35,7 +35,7 @@ final class ConsistentStringScramblerTest extends TestCase
 Foo
 '])]
     public function testItReturnsSameOutputForSingleWordStringEvenWithExtraWhitespace(
-        $input,
+        string $input,
     ): void {
         $this->assertSame('Foo', $this->newSubject()->shuffleWords($input, 'any'));
     }
@@ -74,7 +74,7 @@ Foo
 spake Zarathustra  ', 'spake Zarathustra Thus!'])]
     #[TestWith([' 51 Niddry St
 ', 'Niddry St 51'])]
-    public function testItStripsRepeatedAndEnclosingWhitespaceInIncomingString($input, $expect): void
+    public function testItStripsRepeatedAndEnclosingWhitespaceInIncomingString(string $input, string $expect): void
     {
         $this->assertSame($expect, $this->newSubject()->shuffleWords($input, 'any-hash'));
     }

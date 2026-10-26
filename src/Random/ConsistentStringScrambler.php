@@ -40,7 +40,9 @@ class ConsistentStringScrambler
     /**
      * Seeded Fisher-Yates shuffle implemented as per https://stackoverflow.com/a/19658344.
      *
-     * @param string[] $items
+     * @param list<string> $items
+     *
+     * @return list<string>
      */
     private function seededShuffle(array $items, int $seed): array
     {

@@ -153,6 +153,9 @@ final class SitemapParserTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<string,array<string,mixed>> $expect
+     */
     #[DataProvider('provider_parse')]
     public function testItParsesValidSitemapToMapOfUrlToProperties(string $xml, array $expect): void
     {

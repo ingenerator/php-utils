@@ -32,7 +32,7 @@ final class StrictDateTest extends TestCase
     #[TestWith(['2016-01-01 50:12:00', false])]
     #[TestWith(['2016-01-01T10:00:00', false])]
     #[TestWith(['2016-01-01 10:00:00', true])]
-    public function testItValidatesIsoDatetime($value, $expect): void
+    public function testItValidatesIsoDatetime(mixed $value, bool $expect): void
     {
         $this->assertSame($expect, StrictDate::iso_datetime($value));
     }
@@ -45,7 +45,7 @@ final class StrictDateTest extends TestCase
     #[TestWith(['2016-02-30', false])]
     #[TestWith(['2016-01-01', true])]
     #[TestWith(['2016-02-30 10:00:00', false])]
-    public function testItValidatesIsoDate($value, $expect): void
+    public function testItValidatesIsoDate(mixed $value, bool $expect): void
     {
         $this->assertSame($expect, StrictDate::iso_date($value));
     }
@@ -84,6 +84,9 @@ final class StrictDateTest extends TestCase
         yield [['from' => null, 'to' => new DateTimeImmutable()], 'from', 'to', true];
     }
 
+    /**
+     * @param array<string, (DateTimeImmutable|null)> $data
+     */
     #[DataProvider('provider_date_before_after_invalid_inputs')]
     public function testDateCompareFuncsValidateInvalidInput(array $data, string $from_field, string $to_field): void
     {
@@ -132,7 +135,7 @@ final class StrictDateTest extends TestCase
     #[TestWith(['2017-01-04 00:00:00', '2017-01-04 00:00:00', true])]
     #[TestWith(['2017-01-04 10:00:00', '2017-01-04 08:00:00', true])]
     #[TestWith(['2017-05-06 10:00:00', '2018-12-30 00:00:00', true])]
-    public function testItValidatesDateOnOrAfterDate($from, $to, $expect): void
+    public function testItValidatesDateOnOrAfterDate(string $from, string $to, bool $expect): void
     {
         $this->assertSame(
             $expect,

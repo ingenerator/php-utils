@@ -101,6 +101,7 @@ final class DeploymentConfigTest extends TestCase
         yield [DeploymentConfig::DEV, ['junk-env'], false];
     }
 
+    /** @param list<string> $args */
     #[DataProvider('provider_is_current_env')]
     public function testItsIsEnvironmentReturnsWhetherCurrentEnvironmentOneOfThoseListed(
         string $env,
@@ -112,6 +113,7 @@ final class DeploymentConfigTest extends TestCase
         $this->assertSame($expect, $result);
     }
 
+    /** @param list<string> $args */
     #[DataProvider('provider_is_current_env')]
     public function testItsNotEnvironmentReturnsWhetherCurrentEnvironmentNoneOfThoseListed(
         string $env,
@@ -130,7 +132,7 @@ final class DeploymentConfigTest extends TestCase
     #[TestWith(['ci', null])]
     #[TestWith(['imagined', 'who-knows-what-i-am'])]
     #[TestWith(['standalone', 'i-am-standalone'])]
-    public function testItsMapReturnsValueOrDefaultForTheCurrentEnv($env, $expect): void
+    public function testItsMapReturnsValueOrDefaultForTheCurrentEnv(string $env, ?string $expect): void
     {
         $subject = $this->newSubjectWithEnv($env);
         $this->assertSame(
@@ -148,7 +150,7 @@ final class DeploymentConfigTest extends TestCase
     #[TestWith(['dev'])]
     #[TestWith(['standalone'])]
     #[TestWith(['ci'])]
-    public function testItsMapReturnsAnyForEnvThatIsNotDefined($env): void
+    public function testItsMapReturnsAnyForEnvThatIsNotDefined(string $env): void
     {
         $subject = $this->newSubjectWithEnv($env);
         $this->assertSame(
@@ -243,7 +245,7 @@ final class DeploymentConfigTest extends TestCase
     #[TestWith(['string', 'string'])]
     #[TestWith([1234, 1234])]
     #[TestWith([1234.5, 1234.5])]
-    public function testItsReadJsonReturnsJsonDecodedFileContentIfPresentOutsideStandalone($json, $expect): void
+    public function testItsReadJsonReturnsJsonDecodedFileContentIfPresentOutsideStandalone(mixed $json, mixed $expect): void
     {
         $path = $this->givenConfigDirWithFile('config/some_scalar', json_encode($json));
         $subject = $this->newSubjectWithEnvAndConfigDir(

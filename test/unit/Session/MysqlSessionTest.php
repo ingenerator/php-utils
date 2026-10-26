@@ -22,6 +22,7 @@ use UnexpectedValueException;
 
 final class MysqlSessionTest extends TestCase
 {
+    /** @var array<string, string|false> */
     private array $old_ini_vars = [];
 
     public function testItIsInitialisable(): void
@@ -72,6 +73,7 @@ final class MysqlSessionTest extends TestCase
         ];
     }
 
+    /** @param array<string, string> $config */
     #[DataProvider('provider_validate_invalid_sid')]
     public function testItRejectsInvalidSessionIdsWithoutCheckingDatabase(array $config, string $sid): void
     {
@@ -107,6 +109,7 @@ final class MysqlSessionTest extends TestCase
         ];
     }
 
+    /** @param array<string, string> $config */
     #[DataProvider('provider_validate_own_sid')]
     public function testSidThatItCreatesIsValid(array $config, string $expected_pattern): void
     {

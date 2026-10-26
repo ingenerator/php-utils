@@ -38,7 +38,7 @@ final class CryptoBoxKeypairTest extends TestCase
     #[TestWith(['multi words'])]
     #[TestWith([''])]
     #[TestWith(['Whoopdedo!'])]
-    public function testItCannotBeCreatedWithKeypairIdInInvalidFormat($key_id): void
+    public function testItCannotBeCreatedWithKeypairIdInInvalidFormat(string $key_id): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxKeypair::generate($key_id);

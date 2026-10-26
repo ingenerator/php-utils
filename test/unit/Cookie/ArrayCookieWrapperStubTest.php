@@ -15,9 +15,9 @@ final class ArrayCookieWrapperStubTest extends TestCase
     #[TestWith(['has', true, 'values'])]
     #[TestWith(['anything', false, null])]
     public function testItHasCookiesFromConstructorIgnoringSuperglobal(
-        $name,
-        $expect_has,
-        $expect_val,
+        string $name,
+        bool $expect_has,
+        ?string $expect_val,
     ): void {
         $old_cookie = $_COOKIE;
         try {
@@ -59,6 +59,7 @@ final class ArrayCookieWrapperStubTest extends TestCase
         );
     }
 
+    /** @param array<string, mixed> $cookies */
     protected function newSubject(array $cookies = []): ArrayCookieWrapperStub
     {
         return new ArrayCookieWrapperStub($cookies);

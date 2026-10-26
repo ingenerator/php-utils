@@ -10,6 +10,7 @@ class BasicPDOStub extends PDO
 {
     protected $query_stack = [];
 
+    /** @param array<mixed> $stack */
     public static function withQueryStack(array $stack): self
     {
         $i = new self();

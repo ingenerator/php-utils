@@ -18,10 +18,11 @@ use PHPUnit\Framework\TestCase;
 
 final class AssociativeArrayUtilsTest extends TestCase
 {
+    /** @param array<mixed> $array */
     #[TestWith([['one', 'two', 'three'], false])]
     #[TestWith([[1 => 'mixed indices', 5 => 'also mixed'], true])]
     #[TestWith([['one' => 'o clock', 'two' => 'o clock', 'three' => 'o clock'], true])]
-    public function testIsAssociative(array $array, $expected): void
+    public function testIsAssociative(array $array, bool $expected): void
     {
         $this->assertSame(
             $expected,
@@ -56,6 +57,10 @@ final class AssociativeArrayUtilsTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<mixed> $input
+     * @param array<mixed> $expect
+     */
     #[DataProvider('provider_paths_to_nested')]
     public function testItConvertsPathedHashToNestedArrays(array $input, array $expect): void
     {
@@ -94,6 +99,11 @@ final class AssociativeArrayUtilsTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<mixed> $source
+     * @param list<string> $pop_keys
+     * @param array<mixed> $expect
+     */
     #[DataProvider('provider_pop_keys')]
     public function testItCanPopKeysFromASourceArray(array $source, array $pop_keys, array $expect): void
     {
@@ -125,8 +135,12 @@ final class AssociativeArrayUtilsTest extends TestCase
         yield [['kohana' => ['is' => 'awesome']], [], ['kohana', 'is'], 'awesome'];
     }
 
+    /**
+     * @param array<mixed> $expected
+     * @param array<mixed> $array
+     */
     #[DataProvider('provider_set_path')]
-    public function testSetPath(array $expected, array $array, ...$args): void
+    public function testSetPath(array $expected, array $array, mixed ...$args): void
     {
         AssociativeArrayUtils::setPath($array, ...$args);
 
@@ -261,8 +275,9 @@ final class AssociativeArrayUtilsTest extends TestCase
         ];
     }
 
+    /** @param array<mixed> $expected */
     #[DataProvider('provider_merge')]
-    public function testDeepMerge(array $expected, ...$args): void
+    public function testDeepMerge(array $expected, mixed ...$args): void
     {
         $this->assertSame(
             $expected,

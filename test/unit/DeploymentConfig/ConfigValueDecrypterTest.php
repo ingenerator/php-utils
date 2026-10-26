@@ -29,7 +29,7 @@ final class ConfigValueDecrypterTest extends TestCase
     #[TestWith([1.29])]
     #[TestWith(['anything'])]
     #[TestWith([['any' => 'thing', 'other' => ['things' => 'here']]])]
-    public function testItReturnsUnchangedValueIfNotEncrypted($value): void
+    public function testItReturnsUnchangedValueIfNotEncrypted(mixed $value): void
     {
         $this->assertSame($value, $this->newSubject()->decrypt($value));
     }
@@ -74,6 +74,7 @@ final class ConfigValueDecrypterTest extends TestCase
         ];
     }
 
+    /** @param array<string, string> $keypairs */
     #[DataProvider('provider_decrypt')]
     public function testItReturnsValueDecryptedWithSpecifiedOrDefaultKey(string $value, string $expect, array $keypairs): void
     {

@@ -28,7 +28,7 @@ final class ValidNumberTest extends TestCase
     #[TestWith([13, 13.5, false])]
     #[TestWith([13.5, 13.5, true])]
     #[TestWith([14, 13.5, true])]
-    public function testItValidatesMinimumAsGreaterOrEqual($value, $min, $expect): void
+    public function testItValidatesMinimumAsGreaterOrEqual(mixed $value, mixed $min, bool $expect): void
     {
         $this->assertSame($expect, ValidNumber::minimum($value, $min));
     }

@@ -46,7 +46,7 @@ final class StaticAssetUrlProviderTest extends TestCase
 
     #[TestWith(['assets/my-file.css'])]
     #[TestWith(['/assets/my-file.css'])]
-    public function testInLocalModeGetUrlReturnsAbsoluteUrlWithMtimeSuffix($rel_path): void
+    public function testInLocalModeGetUrlReturnsAbsoluteUrlWithMtimeSuffix(string $rel_path): void
     {
         $dir = $this->vfs->getChild('docroot');
         $this->assertInstanceOf(vfsStreamDirectory::class, $dir);
@@ -78,7 +78,7 @@ final class StaticAssetUrlProviderTest extends TestCase
     #[TestWith(['some content that is not php'])]
     #[TestWith(['<?php $a = 1;'])]
     #[TestWith(["<?php return '';"])]
-    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotReturnString($file_content): void
+    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotReturnString(string $file_content): void
     {
         vfsStream::create(
             ['asset-base-url.php' => $file_content],
@@ -94,7 +94,7 @@ final class StaticAssetUrlProviderTest extends TestCase
 
     #[TestWith(['assets/my-file.css'])]
     #[TestWith(['/assets/my-file.css'])]
-    public function testItRemoteModeGetUrlReturnsUrlPrefixedWithBaseUrl($rel_path): void
+    public function testItRemoteModeGetUrlReturnsUrlPrefixedWithBaseUrl(string $rel_path): void
     {
         vfsStream::create(
             ['asset-base-url.php' => '<?php return "https://i.am.the.walrus/branch/sha";'],

@@ -15,6 +15,9 @@ use function strncmp;
 
 final class ConstantDirectory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $constants;
 
     private function __construct(private readonly string $class_name)
@@ -27,7 +30,7 @@ final class ConstantDirectory
     }
 
     /**
-     * @return array keyed by the constant id
+     * @return array<string, mixed> keyed by the constant id
      */
     public function filterConstants(string $prefix): array
     {
@@ -43,7 +46,7 @@ final class ConstantDirectory
     }
 
     /**
-     * @return array keyed by the constant id
+     * @return array<string, mixed> keyed by the constant id
      */
     public function listConstants(): array
     {
@@ -55,7 +58,7 @@ final class ConstantDirectory
     }
 
     /**
-     * @return array keyed by the constant id
+     * @return array<string, mixed> keyed by the constant id
      */
     private function loadConstants(): array
     {

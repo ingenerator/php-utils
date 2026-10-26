@@ -155,6 +155,7 @@ final class StoppedMockClockTest extends TestCase
         ];
     }
 
+    /** @param list<int> $expected */
     #[DataProvider('provider_assert_slept_fails')]
     public function testAssertSleptFailsIfNotSleptForExpectedIntervals(Closure $callback, array $expected, string $msg): void
     {

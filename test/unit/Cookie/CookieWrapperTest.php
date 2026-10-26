@@ -12,14 +12,15 @@ use PHPUnit\Framework\TestCase;
 
 final class CookieWrapperTest extends TestCase
 {
+    /** @var array<string, mixed> */
     private array $_old_cookie_var;
 
-    private $ssl_available = true;
+    private bool $ssl_available = true;
 
     #[TestWith(['my', true, 'cookie'])]
     #[TestWith(['has', true, 'values'])]
     #[TestWith(['anything', false, null])]
-    public function testItHasCookiesFromSuperglobal($name, $expect_has, $expect_val): void
+    public function testItHasCookiesFromSuperglobal(string $name, bool $expect_has, ?string $expect_val): void
     {
         $_COOKIE = ['my' => 'cookie', 'has' => 'values'];
         $subject = $this->newSubject();
@@ -135,10 +136,11 @@ final class CookieWrapperTest extends TestCase
         );
     }
 
+    /** @param array<string, mixed> $opts */
     #[TestWith([['secure' => true], false])]
     #[TestWith([['secure' => false], false])]
     #[TestWith([[], false])]
-    public function testItDowngradesSecureCookiesWhenNoSslAvailable($opts, $expect): void
+    public function testItDowngradesSecureCookiesWhenNoSslAvailable(array $opts, bool $expect): void
     {
         $this->ssl_available = false;
         $subject = $this->newSubject();
@@ -147,11 +149,12 @@ final class CookieWrapperTest extends TestCase
         $this->assertSame($expect, $subject->setcookie_calls[0]['options']['secure']);
     }
 
+    /** @param array<string, mixed> $opts */
     #[TestWith([true, [], null])]
     #[TestWith([true, ['samesite' => 'Lax'], 'Lax'])]
     #[TestWith([true, ['samesite' => 'None'], 'None'])]
     #[TestWith([false, ['samesite' => 'None'], null])]
-    public function testItAddsSamesiteAttributeOnlyIfSslAvailable($has_ssl, $opts, $expect): void
+    public function testItAddsSamesiteAttributeOnlyIfSslAvailable(bool $has_ssl, array $opts, ?string $expect): void
     {
         $this->ssl_available = $has_ssl;
         $subject = $this->newSubject();

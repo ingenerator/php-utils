@@ -23,6 +23,9 @@ class JSON
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public static function decodeArray(string $json): array
     {
         $value = static::decode($json);
@@ -37,7 +40,7 @@ class JSON
      * @param bool $escaped_slashes defaults true to match the PHP default
      */
     public static function encode(
-        $value,
+        mixed $value,
         bool $pretty = true,
         bool $escaped_slashes = true,
     ): string {

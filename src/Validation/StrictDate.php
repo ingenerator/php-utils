@@ -19,6 +19,8 @@ class StrictDate
     /**
      * Validate that value of one field is a date after the value of another.
      *
+     * @param ArrayAccess<string, mixed> $validation
+     *
      * @deprecated validate input before creating DateTimeImmutable objects
      */
     public static function date_after(ArrayAccess $validation, string $from_field, string $to_field): bool
@@ -36,6 +38,8 @@ class StrictDate
 
     /**
      * Validate that value of one field is a date on or after value of another (>= ignoring time).
+     *
+     * @param ArrayAccess<string, mixed> $validation
      *
      * @deprecated validate input before creating DateTimeImmutable objects
      */

@@ -23,8 +23,14 @@ class ScopeChangingCaller
      *       ACachedThing::class,
      *       function () { ACachedThing::$cache = NULL; }
      *   );
+     *
+     * @template TReturn of mixed
+     * @template TArgs
+     *
+     * @param callable(TArgs):TReturn $func
+     * @param TArgs $args,...
      */
-    public static function call(string $class, callable $func, ...$args)
+    public static function call(string $class, callable $func, ...$args): mixed
     {
         $func = Closure::bind($func, null, $class);
 

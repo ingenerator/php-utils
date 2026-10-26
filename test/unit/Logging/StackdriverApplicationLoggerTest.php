@@ -42,6 +42,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
     private string $log_stream;
 
+    /** @var array<int, mixed> */
     private array $meta_args = [];
 
     public function testItIsInitialisable(): void
@@ -78,6 +79,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         ];
     }
 
+    /** @param list<string> $messages */
     #[DataProvider('provider_log_lines')]
     public function testItLogsToSpecifiedLocationAsJsonLineWithExpectedMessage(array $messages): void
     {
@@ -87,7 +89,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         }
 
         $entries = $this->assertLoggedJSONLines();
-        $actual = array_map(fn (array $msg) => $msg['message'], $entries);
+        $actual = array_map(fn (array $msg): mixed => $msg['message'], $entries);
         $this->assertSame($messages, $actual, 'Expect correct log messages');
     }
 
@@ -217,6 +219,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $meta_provider_class = new class implements LogMetadataProvider {
             protected $call_count = 0;
 
+            /** @return array<string, mixed> */
             public function getMetadata(): array
             {
                 return ['context' => ['call_count' => ++$this->call_count]];
@@ -263,6 +266,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
             function (): never { throw new InvalidArgumentException('Broken'); },
             ['sources' => ['fifth_ok']],
             new class implements LogMetadataProvider {
+                /** @return array<string, mixed> */
                 public function getMetadata(): array
                 {
                     throw new BadMethodCallException('The class broke');
@@ -296,18 +300,20 @@ final class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
+    /** @param array<string, string> $context */
     #[TestWith([[], 'app'])]
     #[TestWith([['@ingenType' => 'rqst'], 'rqst'])]
-    public function testItAssignsIngeneratorTypeUnlessOverridden($context, $expect_type): void
+    public function testItAssignsIngeneratorTypeUnlessOverridden(array $context, string $expect_type): void
     {
         $this->newSubject()->warning('Anything', $context);
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect_type, $entry['@ingenType']);
     }
 
+    /** @param list<string> $args */
     #[TestWith(['log', ['info', 'Some info']])]
     #[TestWith(['info', ['Some info']])]
-    public function testItLogsWithSourceLocationAsImmediateCaller($log_method, $args): void
+    public function testItLogsWithSourceLocationAsImmediateCaller(string $log_method, array $args): void
     {
         $expect_line = __LINE__ + 1;
         call_user_func_array([$this->newSubject(), $log_method], $args);
@@ -426,6 +432,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         ];
     }
 
+    /** @param array<mixed> $expect */
     #[DataProvider('provider_exception_chains')]
     public function testItRecursivelyFormatsExceptionChainAsStructsWithTraceExcludingArgs(InvalidArgumentException|TypeError $e, array $expect): void
     {
@@ -563,7 +570,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
     #[TestWith(['message'])]
     #[TestWith(['logging.googleapis.com/sourceLocation'])]
-    public function testItsRequestLoggerDoesNotLogIrrelevantProperties($prop): void
+    public function testItsRequestLoggerDoesNotLogIrrelevantProperties(string $prop): void
     {
         $this->newSubject()->logRequest([]);
         $entry = $this->assertLoggedOneLine();
@@ -594,11 +601,12 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
     #[TestWith([[], ''])]
     #[TestWith([['HTTP_USER_AGENT' => 'chrome 10'], 'chrome 10'])]
+    /** @param array<string, string> $server */
     #[TestWith([
         ['HTTP_USER_AGENT' => "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff"],
         'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
     ])]
-    public function testItsRequestLoggerLogsUserAgentFromGlobalArray($server, $expect): void
+    public function testItsRequestLoggerLogsUserAgentFromGlobalArray(array $server, string $expect): void
     {
         http_response_code(402);
         $logger = $this->newSubject();
@@ -660,6 +668,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
+    /** @return list<array<string, mixed>> */
     protected function assertLoggedJSONLines(): array
     {
         if (!is_file($this->log_stream)) {
@@ -676,6 +685,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
+    /** @return array<string, mixed> */
     protected function assertLoggedOneLine(): array
     {
         $entries = $this->assertLoggedJSONLines();

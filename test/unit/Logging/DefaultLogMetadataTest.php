@@ -26,26 +26,29 @@ final class DefaultLogMetadataTest extends TestCase
         $this->assertSame(['context' => ['did' => 'abc4567890123456789012']], $result());
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([['REMOTE_ADDR' => '192.182.382.39'], '192.182.382.39'])]
     #[TestWith([[], '{na}'])]
-    public function testItsHttpContextProvidesClientIpFromServerVars($server, $expect): void
+    public function testItsHttpContextProvidesClientIpFromServerVars(array $server, string $expect): void
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['remoteIp']);
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([['REQUEST_URI' => '/foobar/foo'], '/foobar/foo'])]
     #[TestWith([['REQUEST_URI' => '/foobar/foo?arg=what'], '/foobar/foo?arg=what'])]
     #[TestWith([[], null])]
-    public function testItsHttpContextProvidesRequestUrlFromServerVars($server, $expect): void
+    public function testItsHttpContextProvidesRequestUrlFromServerVars(array $server, ?string $expect): void
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['requestUrl']);
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([['REQUEST_METHOD' => 'POST'], 'POST'])]
     #[TestWith([[], null])]
-    public function testItsHttpContextProvidesRequestMethodFromServerVars($server, $expect): void
+    public function testItsHttpContextProvidesRequestMethodFromServerVars(array $server, ?string $expect): void
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['requestMethod']);
@@ -114,6 +117,7 @@ final class DefaultLogMetadataTest extends TestCase
         ];
     }
 
+    /** @param array<string, string> $server */
     #[DataProvider('provider_trace_header')]
     public function testItsRequestTracingDataAddsTraceIdWithFromHeaderAndOptionallyProjectIfAvailable(
         array $server,
@@ -144,7 +148,7 @@ final class DefaultLogMetadataTest extends TestCase
     #[TestWith(["<?php 'abcdefe';", '#ERROR#'])]
     #[TestWith(["<?php return 'abcdef123';", 'abcdef123'])]
     #[TestWith([false, '#ERROR#'])]
-    public function testItsServiceContextLoadsVersionFromFileIgnoringAnyErrors($file_content, $expect): void
+    public function testItsServiceContextLoadsVersionFromFileIgnoringAnyErrors(string|false $file_content, string $expect): void
     {
         $vfs = vfsStream::setup();
         if ($file_content !== false) {

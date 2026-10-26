@@ -98,6 +98,9 @@ final class StringSanitiserTest extends TestCase
         ];
     }
 
+    /**
+     * @param array<int,string> $expected
+     */
     #[DataProvider('provider_printable_utf8_max_length')]
     public function testItCanConstrainPrintableUtf8ToAMaxLength(string $input, array $expected): void
     {

@@ -28,10 +28,11 @@ class ObjectPropertyRipper
     /**
      * Grab the values of all these (presumably private / protected) properties from inside object.
      *
-     * @param object   $object
      * @param string[] $properties
+     *
+     * @return array<string, mixed>
      */
-    public static function rip($object, array $properties): array
+    public static function rip(object $object, array $properties): array
     {
         $ripper = static::getRipper($object::class);
 
@@ -43,6 +44,8 @@ class ObjectPropertyRipper
      *
      * Note it does not support objects where a parent class has any private properties, as these cannot be reliably
      * exported.
+     *
+     * @return array<string, mixed>
      */
     public static function ripAll(object $object): array
     {
@@ -71,10 +74,8 @@ class ObjectPropertyRipper
 
     /**
      * Grab a single property value from the object.
-     *
-     * @param object $object
      */
-    public static function ripOne($object, string $property)
+    public static function ripOne(object $object, string $property): mixed
     {
         return static::rip($object, [$property])[$property];
     }

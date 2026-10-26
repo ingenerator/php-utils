@@ -33,14 +33,16 @@ use function sprintf;
  * Base class for an array-based memory repository for use in unit tests. Provides helpers to allow
  * easy and quick creation of array-backed implementations of a project-specific repository interface.
  *
- * @template T of object
+ * @template TEntityInstance of object
+ *
+ * @phpstan-type TEntityData array<string, mixed>
  */
 abstract class AbstractArrayRepository
 {
     protected string $save_log = '';
 
     /**
-     * @param array<int, T> $entities
+     * @param array<int, TEntityInstance> $entities
      */
     final protected function __construct(protected array $entities)
     {
@@ -55,11 +57,11 @@ abstract class AbstractArrayRepository
     /**
      * Create a repo with the provided entities. Pass entities, or arrays of properties to stub.
      *
-     * @param array|T $entity ,...
+     * @param TEntityData|TEntityInstance $entity ,...
      *
      * @return static
      */
-    public static function with($entity)
+    public static function with(array|object $entity)
     {
         return static::withList(func_get_args());
     }
@@ -67,7 +69,7 @@ abstract class AbstractArrayRepository
     /**
      * Same as ::with, but takes an array rather than a list of method parameters.
      *
-     * @param list<array|T> $entity_data
+     * @param list<TEntityData|TEntityInstance> $entity_data
      *
      * @return static
      */
@@ -86,14 +88,14 @@ abstract class AbstractArrayRepository
     }
 
     /**
-     * @return class-string<T>
+     * @return class-string<TEntityInstance>
      */
     abstract protected static function getEntityBaseClass(): string;
 
     /**
-     * @param array<string, mixed> $data
+     * @param TEntityData $data
      *
-     * @return T
+     * @return TEntityInstance
      */
     protected static function stubEntity(array $data): object
     {
@@ -126,7 +128,7 @@ abstract class AbstractArrayRepository
     /**
      * This, and only this, entity should have been saved.
      *
-     * @param T $entity
+     * @param TEntityInstance $entity
      */
     protected function assertSavedOnly(object $entity): void
     {
@@ -140,7 +142,7 @@ abstract class AbstractArrayRepository
     /**
      * Build a save-log record to allow the class to identify what's been saved for assertions.
      *
-     * @param T $entity
+     * @param TEntityInstance $entity
      */
     protected function formatSaveLog(object $entity): string
     {
@@ -156,6 +158,10 @@ abstract class AbstractArrayRepository
      * Creates a simple array representation of a set of entities that can be formatted as JSON.
      *
      * Used to capture a snapshot of entity state at the time it's saved to allow later comparison
+     *
+     * @param WeakMap<object,true> $seen_objects
+     *
+     * @return array<mixed>
      */
     protected function entityToArray(object $entity, ?WeakMap $seen_objects = null): array
     {
@@ -203,7 +209,7 @@ abstract class AbstractArrayRepository
      *       );
      *     }
      *
-     * @param callable(T):string $callable
+     * @param callable(TEntityInstance):string $callable
      *
      * @return array<string, int>
      */
@@ -225,9 +231,9 @@ abstract class AbstractArrayRepository
      *       return $this->loadWith(function (MyEntity $e) use ($id) { return $e->getId() === $id; });
      *     }
      *
-     * @param callable(T):bool $callable
+     * @param callable(TEntityInstance):bool $callable
      *
-     * @return T
+     * @return TEntityInstance
      */
     protected function loadWith(callable $callable): object
     {
@@ -241,9 +247,9 @@ abstract class AbstractArrayRepository
     /**
      * Find a single entity matching the callback, or null (throws if non-unique).
      *
-     * @param callable(T):bool $callable
+     * @param callable(TEntityInstance):bool $callable
      *
-     * @return T|null
+     * @return TEntityInstance|null
      */
     protected function findWith(callable $callable): ?object
     {
@@ -260,9 +266,9 @@ abstract class AbstractArrayRepository
     /**
      * Find all entities that the callable matches (like array_filter).
      *
-     * @param callable(T):bool $callable
+     * @param callable(TEntityInstance):bool $callable
      *
-     * @return array<T>
+     * @return array<TEntityInstance>
      */
     protected function listWith($callable): array
     {
@@ -282,7 +288,7 @@ abstract class AbstractArrayRepository
      * The state of all entity properties will be captured at time of save to allow verifying that
      * it hasn't been subsequently modified.
      *
-     * @param T $entity
+     * @param TEntityInstance $entity
      */
     protected function saveEntity($entity): void
     {

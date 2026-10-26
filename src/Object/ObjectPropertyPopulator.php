@@ -26,10 +26,7 @@ class ObjectPropertyPopulator
     {
     }
 
-    /**
-     * @param object $object
-     */
-    public static function assign($object, string $property, $value): void
+    public static function assign(object $object, string $property, mixed $value): void
     {
         static::assignHash($object, [$property => $value]);
     }
@@ -37,10 +34,9 @@ class ObjectPropertyPopulator
     /**
      * Assign an array of properties on the object keyed by their name, throwing if any property is undefined.
      *
-     * @param object $object
      * @param array<string, mixed> $properties
      */
-    public static function assignHash($object, array $properties): void
+    public static function assignHash(object $object, array $properties): void
     {
         if ($undefined = self::listUndefinedProperties($object, array_keys($properties))) {
             throw new InvalidArgumentException(
@@ -65,8 +61,10 @@ class ObjectPropertyPopulator
 
     /**
      * @param string[] $property_names
+     *
+     * @return list<string>
      */
-    private static function listUndefinedProperties($object, array $property_names): array
+    private static function listUndefinedProperties(object $object, array $property_names): array
     {
         return array_values(
             array_filter(
