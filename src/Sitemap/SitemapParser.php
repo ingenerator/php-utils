@@ -7,6 +7,7 @@ namespace Ingenerator\PHPUtils\Sitemap;
 use DOMDocument;
 use InvalidArgumentException;
 use LibXMLError;
+use SimpleXMLElement;
 
 use function array_map;
 use function implode;
@@ -29,6 +30,9 @@ class SitemapParser
         $doc = self::validateSitemapXML($sitemap);
 
         $xml = simplexml_import_dom($doc);
+        if (!$xml instanceof SimpleXMLElement) {
+            throw new InvalidArgumentException('Failed to parse sitemap XML');
+        }
         $urls = [];
         foreach ($xml->url as $x_url) {
             $url = (string) $x_url->loc;
