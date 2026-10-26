@@ -55,7 +55,7 @@ class DefaultLogMetadata
      *
      * @param array<string, mixed> $server
      *
-     * @return array<string, string|array<string, string>>
+     * @return array{context: array{req: string}, 'logging.googleapis.com/trace': string}
      */
     public static function requestTrace(array $server = [], ?string $gcp_project = null): array
     {

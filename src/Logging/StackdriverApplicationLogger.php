@@ -12,6 +12,7 @@ use Stringable;
 use Throwable;
 
 use function array_pad;
+use function array_values;
 use function debug_backtrace;
 use function file_put_contents;
 use function http_response_code;
@@ -115,7 +116,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         protected string $log_destination,
         array|callable|LogMetadataProvider ...$metadata_sources,
     ) {
-        $this->metadata_sources = array_pad($metadata_sources, 2, []);
+        $this->metadata_sources = array_values(array_pad($metadata_sources, 2, []));
         $this->call_site_finder = new ExternalCallSiteFinder();
     }
 
@@ -283,7 +284,7 @@ class StackdriverApplicationLogger extends AbstractLogger
      * This method renders a string trace that follows the format of the standard trace (so it can be
      * parsed by tools that are looking for that) but without including any function argument details.
      *
-     * @param array<int, array{file?: string, line?: int, class: string, type: string, function: string }> $trace_stack
+     * @param list<array{file?: string, line?: int, class?: string, type?: string, function?: string}> $trace_stack
      */
     protected function getExceptionTraceAsStringWithoutArgs(array $trace_stack): string
     {
@@ -293,10 +294,10 @@ class StackdriverApplicationLogger extends AbstractLogger
             $trace_lines[] = sprintf(
                 '#%d %s: %s%s%s()',
                 $index,
-                isset($trace['file']) ? $trace['file'].'('.$trace['line'].')' : '[internal function]',
+                isset($trace['file'], $trace['line']) ? $trace['file'].'('.$trace['line'].')' : '[internal function]',
                 $trace['class'] ?? '',
                 $trace['type'] ?? '',
-                $trace['function']
+                $trace['function'] ?? ''
             );
         }
         $trace_lines[] = '#'.count($trace_stack).' {main}';
@@ -382,7 +383,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         $meta = $this->getMetadata();
         $log_entry = AssociativeArrayUtils::deepMerge(
             [
-                'severity' => strtoupper($this->getLogPriorityForHttpCode($http_code)),
+                'severity' => strtoupper($this->getLogPriorityForHttpCode((string) $http_code)),
                 self::PROP_INGEN_TYPE => 'rqst',
                 'httpRequest' => $meta['context']['httpRequest'] ?? [],
                 'context' => [
