@@ -19,7 +19,7 @@ use const SODIUM_CRYPTO_BOX_PUBLICKEYBYTES;
 /**
  * Represents the public key of a keypair, together with an identifier to support key rotation.
  */
-class CryptoBoxPublicKey implements Stringable
+final class CryptoBoxPublicKey implements Stringable
 {
     public static function fromString(string $exported): static
     {
@@ -27,7 +27,7 @@ class CryptoBoxPublicKey implements Stringable
             throw new InvalidArgumentException('Invalid public key string format');
         }
 
-        return new static(
+        return new self(
             public_key: Base64Url::decode($matches['key_b64']),
             // public key is not secret, no need for constant-time encoding
             keypair_id: $matches['keypair_id']

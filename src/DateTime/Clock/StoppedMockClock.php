@@ -13,14 +13,14 @@ use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use PHPUnit\Framework\Assert;
 
-class StoppedMockClock extends RealtimeClock
+final class StoppedMockClock extends RealtimeClock
 {
-    protected float $current_microtime;
+    private float $current_microtime;
 
     /**
      * @var int[]
      */
-    protected array $sleeps = [];
+    private array $sleeps = [];
 
     /**
      * Use descriptive static constructors for a new instance.
@@ -32,12 +32,12 @@ class StoppedMockClock extends RealtimeClock
 
     public static function atMicrotime(float $microtime): static
     {
-        return new static(DateTimeImmutableFactory::atMicrotime($microtime));
+        return new self(DateTimeImmutableFactory::atMicrotime($microtime));
     }
 
     public static function atNow(): static
     {
-        return new static(new DateTimeImmutable());
+        return new self(new DateTimeImmutable());
     }
 
     public static function at(string|DateTimeImmutable $time): static
@@ -46,7 +46,7 @@ class StoppedMockClock extends RealtimeClock
             $time = new DateTimeImmutable($time);
         }
 
-        return new static($time);
+        return new self($time);
     }
 
     public static function atTimeAgo(string $interval_spec): static
@@ -54,7 +54,7 @@ class StoppedMockClock extends RealtimeClock
         $now = new DateTimeImmutable();
         $ago = $now->sub(new DateInterval($interval_spec));
 
-        return new static($ago);
+        return new self($ago);
     }
 
     public function getDateTime(): DateTimeImmutable

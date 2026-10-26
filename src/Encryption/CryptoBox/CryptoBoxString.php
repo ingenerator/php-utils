@@ -10,7 +10,7 @@ use Stringable;
 
 use function preg_match;
 
-class CryptoBoxString implements Stringable
+final class CryptoBoxString implements Stringable
 {
     /**
      * Hydrate from a value that has previously been serialized to a string.
@@ -25,7 +25,7 @@ class CryptoBoxString implements Stringable
             throw new InvalidArgumentException('Invalid ciphertext string format');
         }
 
-        return new static(
+        return new self(
             ciphertext: Base64Url::decode($matches['ciphertext_b64']),
             // ciphertext is not secret, no need for constant-time encoding
             keypair_id: $matches['keypair_id']

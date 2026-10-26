@@ -6,37 +6,37 @@ namespace Ingenerator\PHPUtils\DeploymentConfig;
 
 use RuntimeException;
 
-class InvalidConfigException extends RuntimeException
+final class InvalidConfigException extends RuntimeException
 {
     public static function badJSON(string $path, string $error): static
     {
-        return new static(
+        return new self(
             "Config `$path` contains invalid JSON ($error) - should it be a quoted string?"
         );
     }
 
     public static function decryptFailed(string $reason): InvalidConfigException
     {
-        return new static('Config decrypt failed: '.$reason);
+        return new self('Config decrypt failed: '.$reason);
     }
 
     public static function corruptKeypair(string $keypair_file, string $reason): InvalidConfigException
     {
-        return new static('Corrupt config keypair file '.$keypair_file.' ('.$reason.')');
+        return new self('Corrupt config keypair file '.$keypair_file.' ('.$reason.')');
     }
 
     public static function duplicateEnvironmentMap($env): InvalidConfigException
     {
-        return new static('Duplicate environment mapping for '.$env);
+        return new self('Duplicate environment mapping for '.$env);
     }
 
     public static function invalidMapDeclaration(string $reason): static
     {
-        return new static('Invalid config map declaration: '.$reason);
+        return new self('Invalid config map declaration: '.$reason);
     }
 
     public static function missingKeypair(string $keypair_file): InvalidConfigException
     {
-        return new static('Unknown config decryption key '.$keypair_file);
+        return new self('Unknown config decryption key '.$keypair_file);
     }
 }

@@ -24,7 +24,7 @@ use const SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING;
  * Wrapping the keypair in an object allows this instance to be passed around without making copies
  * of the keypair in memory.
  */
-class CryptoBoxKeypair
+final class CryptoBoxKeypair
 {
     private CryptoBoxPublicKey $public_key;
 
@@ -43,7 +43,7 @@ class CryptoBoxKeypair
             // Use constant-time base64 decoding to avoid timing attacks
             $keypair = sodium_base642bin($matches['keypair_b64'], SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
 
-            return new static(
+            return new self(
                 keypair: $keypair,
                 keypair_id: $matches['keypair_id']
             );
@@ -68,7 +68,7 @@ class CryptoBoxKeypair
 
         $keypair = sodium_crypto_box_keypair();
         try {
-            return new static(
+            return new self(
                 keypair: $keypair,
                 keypair_id: $keypair_id,
             );
@@ -78,13 +78,13 @@ class CryptoBoxKeypair
     }
 
     /**
-     * @param string $keypair The raw binary string for the keypair
+     * @param ?string $keypair The raw binary string for the keypair
      * @param string $keypair_id An application-level identifier for this keypair
      */
-    protected function __construct(
+    private function __construct(
         // $keypair can't be readonly because we need to zero the memory on destruct
         #[SensitiveParameter]
-        private string $keypair,
+        private ?string $keypair,
         public readonly string $keypair_id,
     ) {
         // Creating the public key now is the easiest way to validate that the incoming keypair string is actually valid

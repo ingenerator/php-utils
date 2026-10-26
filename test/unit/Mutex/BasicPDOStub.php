@@ -13,9 +13,9 @@ if (PHP_MAJOR_VERSION < 8) {
     {
         protected $query_stack = [];
 
-        public static function withQueryStack(array $stack): static
+        public static function withQueryStack(array $stack): self
         {
-            $i = new static();
+            $i = new self();
             $i->query_stack = $stack;
 
             return $i;
@@ -53,9 +53,9 @@ if (PHP_MAJOR_VERSION < 8) {
     {
         protected $query_stack = [];
 
-        public static function withQueryStack(array $stack): static
+        public static function withQueryStack(array $stack): self
         {
-            $i = new static();
+            $i = new self();
             $i->query_stack = $stack;
 
             return $i;

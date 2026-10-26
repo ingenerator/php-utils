@@ -5,7 +5,7 @@ namespace Ingenerator\PHPUtils\DeploymentConfig;
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
 
-class DeploymentConfig
+final class DeploymentConfig
 {
     public const ANY = '*';
     public const STANDALONE = 'standalone';
@@ -15,13 +15,13 @@ class DeploymentConfig
     public const QA = 'qa';
     public const LOADTEST = 'loadtest';
 
-    protected string $config_dir = '/etc/ingenerator/conf';
+    private string $config_dir = '/etc/ingenerator/conf';
 
-    protected string $environment;
+    private string $environment;
 
-    protected ConfigMapDeclarationParser $map_parser;
+    private readonly ConfigMapDeclarationParser $map_parser;
 
-    protected ConfigValueDecrypter $value_decrypter;
+    private readonly ConfigValueDecrypter $value_decrypter;
 
     /**
      * @return static
@@ -30,7 +30,7 @@ class DeploymentConfig
     {
         static $instance;
         if (!$instance) {
-            $instance = new static();
+            $instance = new self();
         }
 
         return $instance;
@@ -39,16 +39,18 @@ class DeploymentConfig
     /**
      * @param array|null $env_vars - if missing will default to reading from $_SERVER
      */
-    protected function __construct(?array $env_vars = null)
-    {
+    private function __construct(
+        ?array $env_vars = null,
+        ?ConfigValueDecrypter $decrypter = null,
+    ) {
         $env_vars ??= $_SERVER;
         if (isset($env_vars['INGENERATOR_ENV'])) {
             $this->environment = $env_vars['INGENERATOR_ENV'];
         } else {
-            $this->environment = static::PRODUCTION;
+            $this->environment = self::PRODUCTION;
         }
         $this->map_parser = new ConfigMapDeclarationParser();
-        $this->value_decrypter = new ConfigValueDecrypter($this->config_dir.'/app-config-keys');
+        $this->value_decrypter = $decrypter ?? new ConfigValueDecrypter($this->config_dir.'/app-config-keys');
     }
 
     public function getEnvironment(): string
@@ -75,7 +77,7 @@ class DeploymentConfig
      */
     public function read(string $path): ?string
     {
-        if ($this->environment === static::STANDALONE) {
+        if ($this->environment === self::STANDALONE) {
             return null;
         }
 
@@ -108,9 +110,9 @@ class DeploymentConfig
         $map = $this->map_parser->parse($declarations);
         if (array_key_exists($this->environment, $map)) {
             $value = $map[$this->environment];
-        } elseif (array_key_exists(static::ANY, $map)) {
-            $value = $map[static::ANY];
-        } elseif ($this->environment === static::STANDALONE) {
+        } elseif (array_key_exists(self::ANY, $map)) {
+            $value = $map[self::ANY];
+        } elseif ($this->environment === self::STANDALONE) {
             return null;
         } else {
             throw MissingConfigException::missingMapValue($this->environment);

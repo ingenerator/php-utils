@@ -13,17 +13,17 @@ use ReflectionClass;
 use function strlen;
 use function strncmp;
 
-class ConstantDirectory
+final class ConstantDirectory
 {
-    protected array $constants;
+    private array $constants;
 
-    protected function __construct(protected string $class_name)
+    private function __construct(private readonly string $class_name)
     {
     }
 
     public static function forClass(string $class): static
     {
-        return new static($class);
+        return new self($class);
     }
 
     /**
@@ -57,7 +57,7 @@ class ConstantDirectory
     /**
      * @return array keyed by the constant id
      */
-    protected function loadConstants(): array
+    private function loadConstants(): array
     {
         $consts = [];
         $refl = new ReflectionClass($this->class_name);

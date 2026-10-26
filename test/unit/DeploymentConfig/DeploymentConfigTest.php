@@ -297,15 +297,12 @@ final class DeploymentConfigTest extends TestCase
     private function newSubject(array $env_vars): DeploymentConfig
     {
         $creator = Closure::bind(
-            fn (): DeploymentConfig => new DeploymentConfig($env_vars),
+            fn (ConfigValueDecrypter $d): DeploymentConfig => new DeploymentConfig($env_vars, $d),
             null,
             DeploymentConfig::class
         );
 
-        $subject = $creator();
-        ObjectPropertyPopulator::assign($subject, 'value_decrypter', $this->decrypter);
-
-        return $subject;
+        return $creator($this->decrypter);
     }
 
     private function newSubjectWithNoArgs(): DeploymentConfig

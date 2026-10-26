@@ -16,7 +16,7 @@ use function sodium_memzero;
  * Used primarily to support key rotation, load a keypairset with all currently active keys to
  * allow loading both old and new values.
  */
-class CryptoBoxKeypairSet
+final class CryptoBoxKeypairSet
 {
     private UniqueMap $keys;
 
@@ -37,7 +37,7 @@ class CryptoBoxKeypairSet
             }
         }
 
-        return new static(...$keypairs);
+        return new self(...$keypairs);
     }
 
     public function __construct(
