@@ -86,9 +86,15 @@ class CSVWriter
             throw MismatchedSchemaException::forSchema($this->expect_schema, $row_schema);
         }
 
+        if (!$this->isResourceOpen()) {
+            throw new LogicException('Cannot write to a closed file');
+        }
         fputcsv($this->resource, $row, eol: $this->options['eol']);
     }
 
+    /**
+     * @phpstan-assert-if-true resource $this->resource
+     */
     protected function isResourceOpen(): bool
     {
         return $this->resource && (get_resource_type($this->resource) === 'stream');
@@ -113,6 +119,9 @@ class CSVWriter
     private function writeHeaders(array $keys): void
     {
         if ($this->options['quote_headers']) {
+            if (!$this->isResourceOpen()) {
+                throw new LogicException('Cannot write to a closed file');
+            }
             fputcsv($this->resource, $keys, eol: $this->options['eol']);
         } else {
             array_walk(
@@ -122,6 +131,9 @@ class CSVWriter
                         "Column header `$str` cannot contain comma if headers are not quoted"
                     )
             );
+            if (!$this->isResourceOpen()) {
+                throw new LogicException('Cannot write to a closed file');
+            }
             fwrite($this->resource, implode(',', $keys).$this->options['eol']);
         }
     }
