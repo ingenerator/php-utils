@@ -89,7 +89,7 @@ final class CryptoBoxKeypair
     ) {
         // Creating the public key now is the easiest way to validate that the incoming keypair string is actually valid
         try {
-            $this->public_key = new CryptoBoxPublicKey(sodium_crypto_box_publickey($this->keypair), $this->keypair_id);
+            $this->public_key = new CryptoBoxPublicKey(sodium_crypto_box_publickey($this->requireKeypair()), $this->keypair_id);
         } catch (SodiumException $e) {
             throw new InvalidArgumentException('Invalid keypair: '.$e->getMessage(), $e->getCode(), $e);
         }
@@ -120,7 +120,7 @@ final class CryptoBoxKeypair
         }
 
         try {
-            $result = sodium_crypto_box_seal_open($encrypted->ciphertext, $this->keypair);
+            $result = sodium_crypto_box_seal_open($encrypted->ciphertext, $this->requireKeypair());
             if ($result === false) {
                 throw new DecryptionFailedException('Failed to decrypt - invalid key or ciphertext?');
             }
@@ -140,6 +140,18 @@ final class CryptoBoxKeypair
     public function exportToString(): string
     {
         // Use constant-time base64 decoding to avoid timing attacks
-        return $this->keypair_id.'.'.sodium_bin2base64($this->keypair, SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+        return $this->keypair_id.'.'.sodium_bin2base64($this->requireKeypair(), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
+    }
+
+    private function requireKeypair(): string
+    {
+        if ($this->keypair === null) {
+            // This shouldn't be possible if created through our constructors which all take a `string` not a `?string`.
+            // However the property itself has to be nullable to allow us to null it on __destruct, meaning phpstan
+            // (and we) cannot *guarantee* that it will never be null when we attempt to use it.
+            throw new InvalidArgumentException('Unexpected state: keypair is null');
+        }
+
+        return $this->keypair;
     }
 }
