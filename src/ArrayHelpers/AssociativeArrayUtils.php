@@ -144,8 +144,13 @@ class AssociativeArrayUtils
                 $key = (int) $key;
             }
 
-            $array[$key] ??= [];
+            if (isset($array[$key]) && !is_array($array[$key])) {
+                throw new InvalidArgumentException(
+                    sprintf('Cannot write keys within a non-array path %s (got %s)', $key, get_debug_type($array[$key]))
+                );
+            }
 
+            $array[$key] ??= [];
             $array = &$array[$key];
         }
 

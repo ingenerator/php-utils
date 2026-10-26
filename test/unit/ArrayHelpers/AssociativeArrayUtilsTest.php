@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
+use InvalidArgumentException;
 use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
@@ -138,13 +139,30 @@ final class AssociativeArrayUtilsTest extends TestCase
     /**
      * @param array<mixed> $expected
      * @param array<mixed> $array
+     * @param list<string>|string $path
      */
     #[DataProvider('provider_set_path')]
-    public function testSetPath(array $expected, array $array, mixed ...$args): void
+    public function testSetPath(array $expected, array $array, string|array $path, mixed $value, string $delimiter = '.'): void
     {
-        AssociativeArrayUtils::setPath($array, ...$args);
+        AssociativeArrayUtils::setPath($array, $path, $value, $delimiter);
 
         $this->assertSame($expected, $array);
+    }
+
+    #[TestWith(['foo.things'])]
+    #[TestWith(['bil.baz.whatever'])]
+    #[TestWith(['bil.baz.boo.bam'])]
+    public function testSetPathThrowsOnOverwritingNonArray(string $path): void
+    {
+        $array = [
+            'foo' => 'bar',
+            'bil' => [
+                'baz' => 15,
+            ],
+        ];
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot write keys within a non-array path ');
+        AssociativeArrayUtils::setPath($array, $path, 'something');
     }
 
     /**
@@ -275,13 +293,16 @@ final class AssociativeArrayUtilsTest extends TestCase
         ];
     }
 
-    /** @param array<mixed> $expected */
+    /**
+     * @param array<mixed> $expected
+     * @param array<mixed> ...$args
+     */
     #[DataProvider('provider_merge')]
-    public function testDeepMerge(array $expected, mixed ...$args): void
+    public function testDeepMerge(array $expected, array ...$args): void
     {
         $this->assertSame(
             $expected,
-            AssociativeArrayUtils::deepMerge(...$args)
+            AssociativeArrayUtils::deepMerge(...$args),
         );
     }
 }
