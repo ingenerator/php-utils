@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\StringEncoding;
 
 use JsonException;
@@ -17,14 +19,14 @@ class JSON
         try {
             return json_decode($json, associative: true, flags: JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw new InvalidJSONException('Invalid JSON: '.$e->getMessage());
+            throw new InvalidJSONException('Invalid JSON: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     public static function decodeArray(string $json): array
     {
         $value = static::decode($json);
-        if ($value and !is_array($value)) {
+        if ($value && !is_array($value)) {
             throw new InvalidJSONException('Unexepected JSON value - expected array, got ' . gettype($value));
         }
 
@@ -50,7 +52,7 @@ class JSON
         try {
             return json_encode($value, $flags);
         } catch (JsonException $e) {
-            throw new InvalidJSONException('Could not encode as JSON: '.$e->getMessage());
+            throw new InvalidJSONException('Could not encode as JSON: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 

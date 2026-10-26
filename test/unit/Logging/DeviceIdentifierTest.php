@@ -208,7 +208,7 @@ class DeviceIdentifierTest extends TestCase
     {
         return ScopeChangingCaller::call(
             DeviceIdentifier::class,
-            function ($cookies) { return new DeviceIdentifier($cookies); },
+            fn ($cookies) => new DeviceIdentifier($cookies),
             $this->cookies
         );
     }

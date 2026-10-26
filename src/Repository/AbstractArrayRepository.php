@@ -22,7 +22,6 @@ use function array_pop;
 use function call_user_func;
 use function count;
 use function func_get_args;
-use function get_class;
 use function get_object_vars;
 use function in_array;
 use function is_object;
@@ -147,7 +146,7 @@ abstract class AbstractArrayRepository
     {
         return sprintf(
             "%s (object %s) with data:\n%s\n",
-            get_class($entity),
+            $entity::class,
             spl_object_id($entity),
             JSON::encode($this->entityToArray($entity))
         );
@@ -172,15 +171,11 @@ abstract class AbstractArrayRepository
         $seen_objects[$entity_hash] = true;
 
         $all_props = Closure::bind(
-            function ($e) {
-                return get_object_vars($e);
-            },
+            fn ($e) => get_object_vars($e),
             null,
             $entity
         );
-        $obj_identity = function ($a) {
-            return get_class($a).'#'.spl_object_id($a);
-        };
+        $obj_identity = (fn ($a) => $a::class.'#'.spl_object_id($a));
         $result = [];
         foreach ($all_props($entity) as $key => $var) {
             if (!is_object($var)) {
@@ -193,7 +188,7 @@ abstract class AbstractArrayRepository
                     ];
                 }
             } elseif ($var instanceof DateTimeInterface) {
-                $result[$key][get_class($var)] = $var->format(DateTime::ISO8601);
+                $result[$key][$var::class] = $var->format(DateTime::ISO8601);
             } else {
                 $result[$key] = [
                     $obj_identity($var) => $this->entityToArray($var, $seen_objects),

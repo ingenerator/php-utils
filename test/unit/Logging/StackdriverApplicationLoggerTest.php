@@ -84,7 +84,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         }
 
         $entries = $this->assertLoggedJSONLines();
-        $actual = array_map(function (array $msg) { return $msg['message']; }, $entries);
+        $actual = array_map(fn (array $msg) => $msg['message'], $entries);
         $this->assertSame($messages, $actual, 'Expect correct log messages');
     }
 
@@ -103,7 +103,7 @@ class StackdriverApplicationLoggerTest extends TestCase
                     'logging.googleapis.com/sourceLocation' => [
                         'file' => __FILE__,
                         'line' => $line,
-                        'function' => __CLASS__.'->'.__FUNCTION__,
+                        'function' => self::class.'->'.__FUNCTION__,
                     ],
                     'custom_context' => [
                         'and' => 'this was junk��',
@@ -251,7 +251,7 @@ class StackdriverApplicationLoggerTest extends TestCase
     {
         $this->meta_args = [
             ['sources' => ['first_ok']],
-            function () { return new DateTimeImmutable(new stdClass()); },
+            fn () => new DateTimeImmutable(new stdClass()),
             ['sources' => ['third_ok']],
             function () { throw new InvalidArgumentException('Broken'); },
             ['sources' => ['fifth_ok']],
@@ -321,7 +321,7 @@ class StackdriverApplicationLoggerTest extends TestCase
             [
                 'file' => __FILE__,
                 'line' => $expect_line,
-                'function' => __CLASS__.'->'.__FUNCTION__,
+                'function' => self::class.'->'.__FUNCTION__,
             ],
             $entry['logging.googleapis.com/sourceLocation']
         );
@@ -654,8 +654,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         // memory usage that the logger saw - but it must be no less than the value before we called it, and no more
         // than the value immediately after we called it
         $this->assertTrue(
-            ($logged_meg >= round($peak_before / 1000 / 1000, 2))
-            and ($logged_meg <= round($peak_after / 1000 / 1000, 2)),
+            $logged_meg >= round($peak_before / 1000 / 1000, 2) && $logged_meg <= round($peak_after / 1000 / 1000, 2),
             "Logged value should be within $peak_before and $peak_after and in the right units"
         );
     }
@@ -671,7 +670,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame('', array_pop($lines), 'Expect trailing newline after last message');
 
         return array_map(
-            function (string $line) { return JSON::decodeArray($line); },
+            JSON::decodeArray(...),
             $lines
         );
     }

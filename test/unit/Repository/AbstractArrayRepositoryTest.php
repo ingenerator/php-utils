@@ -66,7 +66,7 @@ class AbstractArrayRepositoryTest extends TestCase
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
-            $subject->countWith(function (AnyEntity $e) { return $e->getProp1(); })
+            $subject->countWith(fn (AnyEntity $e) => $e->getProp1())
         );
     }
 
@@ -74,13 +74,13 @@ class AbstractArrayRepositoryTest extends TestCase
     {
         $subject = AnyArrayRepository::with(['prop1' => 'boo']);
         $this->expectException(InvalidArgumentException::class);
-        $subject->loadWith(function (AnyEntity $e) { return $e->getProp1() === 'baz'; });
+        $subject->loadWith(fn (AnyEntity $e) => $e->getProp1() === 'baz');
     }
 
     public function testItsLoadWithReturnsEntity()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
-        $e = $subject->loadWith(function (AnyEntity $e) { return $e->getProp1() === 'boo'; });
+        $e = $subject->loadWith(fn (AnyEntity $e) => $e->getProp1() === 'boo');
         $this->assertSame($subject->getEntities()[1], $e);
     }
 
@@ -88,21 +88,21 @@ class AbstractArrayRepositoryTest extends TestCase
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
         $this->expectException(UnexpectedValueException::class);
-        $subject->loadWith(function (AnyEntity $e) { return true; });
+        $subject->loadWith(fn (AnyEntity $e) => true);
     }
 
     public function testItsFindWithReturnsNullIfNoEntity()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'boo']);
         $this->assertNull(
-            $subject->findWith(function (AnyEntity $e) { return $e->getProp1() === 'baz'; })
+            $subject->findWith(fn (AnyEntity $e) => $e->getProp1() === 'baz')
         );
     }
 
     public function testItsFindWithReturnsEntity()
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
-        $e = $subject->findWith(function (AnyEntity $e) { return $e->getProp1() === 'boo'; });
+        $e = $subject->findWith(fn (AnyEntity $e) => $e->getProp1() === 'boo');
         $this->assertSame($subject->getEntities()[1], $e);
     }
 
@@ -110,7 +110,7 @@ class AbstractArrayRepositoryTest extends TestCase
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
         $this->expectException(UnexpectedValueException::class);
-        $subject->findWith(function (AnyEntity $e) { return true; });
+        $subject->findWith(fn (AnyEntity $e) => true);
     }
 
     #[TestWith([[], []])]
@@ -121,8 +121,8 @@ class AbstractArrayRepositoryTest extends TestCase
         $this->assertSame(
             $expect,
             array_map(
-                function (AnyEntity $e) { return $e->getProp2(); },
-                $subject->listWith(function (AnyEntity $e) { return $e->getProp1() === 'ok'; })
+                fn (AnyEntity $e) => $e->getProp2(),
+                $subject->listWith(fn (AnyEntity $e) => $e->getProp1() === 'ok')
             )
         );
     }
@@ -158,7 +158,7 @@ class AbstractArrayRepositoryTest extends TestCase
     {
         try {
             $callable();
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException) {
             // Ignore it this is correct
             return;
         }

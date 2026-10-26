@@ -15,7 +15,6 @@ use InvalidArgumentException;
 use function array_filter;
 use function array_keys;
 use function array_values;
-use function get_class;
 use function property_exists;
 
 class ObjectPropertyPopulator
@@ -43,9 +42,9 @@ class ObjectPropertyPopulator
      */
     public static function assignHash($object, array $properties)
     {
-        if ($undefined = static::listUndefinedProperties($object, array_keys($properties))) {
+        if ($undefined = self::listUndefinedProperties($object, array_keys($properties))) {
             throw new InvalidArgumentException(
-                'Undefined properties on '.get_class($object).' : '.JSON::encode($undefined, false)
+                'Undefined properties on '.$object::class.' : '.JSON::encode($undefined, false)
             );
         }
 
@@ -69,9 +68,7 @@ class ObjectPropertyPopulator
         return array_values(
             array_filter(
                 $property_names,
-                function ($property_name) use ($object) {
-                    return !property_exists($object, $property_name);
-                }
+                fn ($property_name) => !property_exists($object, $property_name)
             )
         );
     }

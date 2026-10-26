@@ -34,16 +34,6 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
     protected $db;
 
     /**
-     * @var string
-     */
-    protected $hash_salt;
-
-    /**
-     * @var int
-     */
-    protected $lock_timeout;
-
-    /**
      * @var int
      */
     protected $session_lifetime;
@@ -72,11 +62,9 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
      * @param string $hash_salt
      * @param int    $lock_timeout seconds to wait for MySQL lock
      */
-    public function __construct(PDO $db, $hash_salt, $lock_timeout = 20)
+    public function __construct(PDO $db, protected $hash_salt, protected $lock_timeout = 20)
     {
         $this->db = $db;
-        $this->hash_salt = $hash_salt;
-        $this->lock_timeout = $lock_timeout;
         $this->session_lifetime = \ini_get('session.gc_maxlifetime');
         $this->client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
         $this->client_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -179,7 +167,7 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
 
     public function validateId($session_id): bool
     {
-        if (!(is_string($session_id) && preg_match($this->getValidSessionIdRegex(), $session_id))) {
+        if (!is_string($session_id) || !preg_match($this->getValidSessionIdRegex(), $session_id)) {
             // It cannot be a valid SID if it doesn't match the format that we generate
             // It's likely a credential stuffing bot - ignore it
             return false;

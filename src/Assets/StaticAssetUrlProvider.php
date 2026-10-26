@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Assets;
 
 use InvalidArgumentException;
@@ -63,7 +65,7 @@ class StaticAssetUrlProvider
         string $asset_base_url_file,
     ) {
         if (!in_array($mode, [static::MODE_LOCAL, static::MODE_REMOTE])) {
-            throw new InvalidArgumentException('Invalid asset mode `'.$mode.'` for '.__CLASS__);
+            throw new InvalidArgumentException('Invalid asset mode `'.$mode.'` for '.self::class);
         }
         $this->mode = $mode;
         $this->local_asset_path = rtrim($local_asset_path, '/');
@@ -81,7 +83,7 @@ class StaticAssetUrlProvider
 
         $url = require $asset_base_url_file;
 
-        if (empty($url) or !is_string($url)) {
+        if (empty($url) || !is_string($url)) {
             throw new RuntimeException('Invalid content in asset base url file '.$asset_base_url_file);
         }
 

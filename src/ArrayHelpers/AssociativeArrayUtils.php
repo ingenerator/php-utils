@@ -47,7 +47,7 @@ class AssociativeArrayUtils
         foreach ($merge_patches as $patch) {
             if (AssociativeArrayUtils::isAssociative($patch)) {
                 foreach ($patch as $key => $value) {
-                    if (is_array($value) and is_array($merge_base[$key] ?? null)) {
+                    if (is_array($value) && is_array($merge_base[$key] ?? null)) {
                         $merge_base[$key] = AssociativeArrayUtils::deepMerge($merge_base[$key], $value);
                     } else {
                         $merge_base[$key] = $value;
@@ -133,9 +133,7 @@ class AssociativeArrayUtils
                 $key = (int) $key;
             }
 
-            if (!isset($array[$key])) {
-                $array[$key] = [];
-            }
+            $array[$key] ??= [];
 
             $array = &$array[$key];
         }
@@ -158,7 +156,7 @@ class AssociativeArrayUtils
     {
         $result = [];
         foreach ($pop_keys as $key) {
-            if (isset($source[$key]) or array_key_exists($key, $source)) {
+            if (isset($source[$key]) || array_key_exists($key, $source)) {
                 $result[$key] = $source[$key];
                 unset($source[$key]);
             }

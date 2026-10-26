@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Filesystem;
 
 use ErrorException;
@@ -35,7 +37,7 @@ class TemporaryDirectoryManager
                 throw new ErrorException('Could not make '.$path.': reason unknown');
             }
         } catch (ErrorException $e) {
-            throw new RuntimeException('Could not make temporary directory: '.$e->getMessage());
+            throw new RuntimeException('Could not make temporary directory: '.$e->getMessage(), $e->getCode(), $e);
         }
 
         $this->directories[$path] = true;

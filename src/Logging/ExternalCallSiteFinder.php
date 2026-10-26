@@ -71,7 +71,7 @@ class ExternalCallSiteFinder
 
         $called_from = array_pop($internal_calls);
 
-        if (!($called_from and $next_call)) {
+        if (!$called_from || !$next_call) {
             // Edge case - WTF??
             // Should be impossible, but these traces are not always straightforward so better to include something
             // for future debugging of why we didn't get the expected calls. It could be the client did not pass a deep

@@ -91,7 +91,7 @@ class CryptoBoxKeypair
         try {
             $this->public_key = new CryptoBoxPublicKey(sodium_crypto_box_publickey($this->keypair), $this->keypair_id);
         } catch (SodiumException $e) {
-            throw new InvalidArgumentException('Invalid keypair: '.$e->getMessage());
+            throw new InvalidArgumentException('Invalid keypair: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 

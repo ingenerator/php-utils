@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Logging;
 
 use RuntimeException;
@@ -16,7 +18,7 @@ class LoggingFailureException extends RuntimeException
             sprintf(
                 'Could not write to log at `%s` - [%s] %s',
                 $log_destination,
-                get_class($failure),
+                $failure::class,
                 $failure->getMessage()
             ),
             0,

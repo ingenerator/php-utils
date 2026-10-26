@@ -17,7 +17,6 @@ use function array_merge;
 use function fclose;
 use function fopen;
 use function fputcsv;
-use function fputs;
 use function get_resource_type;
 use function is_resource;
 use function is_string;
@@ -55,7 +54,7 @@ class CSVWriter
      */
     public function open($file, array $options = [])
     {
-        if (is_resource($file) and (get_resource_type($file) === 'stream')) {
+        if (is_resource($file) && get_resource_type($file) === 'stream') {
             $this->resource = $file;
             $this->owns_resource = false;
         } elseif (is_string($file)) {
@@ -80,7 +79,7 @@ class CSVWriter
 
         if ($this->expect_schema === null) {
             if ($this->options['write_utf8_bom']) {
-                fputs($this->resource, static::UTF8_BOM);
+                fwrite($this->resource, static::UTF8_BOM);
             }
             $this->expect_schema = $row_schema;
             $this->writeHeaders($this->expect_schema);

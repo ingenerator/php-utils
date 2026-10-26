@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\DateTime;
 
 use DateInterval;
@@ -28,7 +30,7 @@ class DateIntervalUtils
     {
         $components = array_filter((array) $interval);
 
-        $supported_components = array_intersect_key(static::SUPPORTED_HUMAN_COMPONENTS, $components);
+        $supported_components = array_intersect_key(self::SUPPORTED_HUMAN_COMPONENTS, $components);
 
         if (count($supported_components) !== count($components)) {
             $key_list = implode(', ', array_diff(array_keys($components), array_keys($supported_components)));

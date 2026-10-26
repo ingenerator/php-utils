@@ -22,11 +22,9 @@ class DefaultLogMetadata
      */
     public static function deviceIdentityLazy(): callable
     {
-        return function () {
-            return [
-                'context' => ['did' => DeviceIdentifier::get()],
-            ];
-        };
+        return fn () => [
+            'context' => ['did' => DeviceIdentifier::get()],
+        ];
     }
 
     /**
@@ -62,7 +60,7 @@ class DefaultLogMetadata
         // If that doesn't work then just use the request ID as the trace ID - it won't match anything
         // in stackdriver but will still tie the logs for the request together.
         $trace_hdr_parts = explode('/', $server['HTTP_X_CLOUD_TRACE_CONTEXT'] ?? $request_id);
-        if ($gcp_project and (count($trace_hdr_parts) === 2)) {
+        if ($gcp_project && count($trace_hdr_parts) === 2) {
             $trace_id = 'projects/'.$gcp_project.'/traces/'.$trace_hdr_parts[0];
         } else {
             $trace_id = array_shift($trace_hdr_parts);
@@ -97,7 +95,7 @@ class DefaultLogMetadata
                 // The file was included but did not return anything
                 $version = '#ERROR#';
             }
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             $version = '#ERROR#';
         }
 

@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class Doctrine2TransactionWrapper implements TransactionWrapper
 {
-    private EntityManagerInterface $em;
+    private readonly EntityManagerInterface $em;
 
     public function __construct(EntityManagerInterface $em)
     {

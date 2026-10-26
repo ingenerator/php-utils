@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Sitemap;
 
 use DOMDocument;
@@ -18,7 +20,7 @@ class SitemapParser
 {
     public static function parse(string $sitemap): array
     {
-        $doc = static::validateSitemapXML($sitemap);
+        $doc = self::validateSitemapXML($sitemap);
 
         $xml = simplexml_import_dom($doc);
         $urls = [];
@@ -45,7 +47,7 @@ class SitemapParser
             $doc->loadXML($sitemap);
             $valid = $doc->schemaValidate(__DIR__.'/sitemap.xsd');
             if (!$valid) {
-                $errors = array_map(fn ($e) => static::formatError($e), libxml_get_errors());
+                $errors = array_map(self::formatError(...), libxml_get_errors());
                 throw new InvalidArgumentException("Invalid sitemap XML:\n".implode("\n", $errors));
             }
         } finally {

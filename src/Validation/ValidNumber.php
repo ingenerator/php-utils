@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -40,11 +42,9 @@ class ValidNumber
      */
     public static function rule($rulename)
     {
-        switch ($rulename) {
-            case 'minimum':
-                return static::class.'::'.$rulename;
-            default:
-                throw new InvalidArgumentException('Unknown rule '.__CLASS__.'::'.$rulename);
-        }
+        return match ($rulename) {
+            'minimum' => static::class.'::'.$rulename,
+            default => throw new InvalidArgumentException('Unknown rule '.self::class.'::'.$rulename),
+        };
     }
 }

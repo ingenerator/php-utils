@@ -16,7 +16,7 @@ class MockMutexWrapperTest extends TestCase
             $this->newSubject()->withLock(
                 'anything',
                 1,
-                function () { return 'callable-result'; }
+                fn () => 'callable-result'
             )
         );
     }

@@ -13,7 +13,6 @@ use Throwable;
 use function array_pad;
 use function debug_backtrace;
 use function file_put_contents;
-use function get_class;
 use function http_response_code;
 use function is_callable;
 use function json_encode;
@@ -184,25 +183,21 @@ class StackdriverApplicationLogger extends AbstractLogger
             $context_overrides
         );
 
-        if (!isset($log_entry[self::PROP_SOURCE_LOCATION])) {
-            // Find source location here rather than in the initial array merge to avoid having to make this backtrace
-            // call if it's already been provided / overridden by the caller.
-            $log_entry[self::PROP_SOURCE_LOCATION] = $this->call_site_finder->findExternalCall(
-                debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
-                [static::class]
-            );
-        }
+        // Find source location here rather than in the initial array merge to avoid having to make this backtrace
+        // call if it's already been provided / overridden by the caller.
+        $log_entry[self::PROP_SOURCE_LOCATION] ??= $this->call_site_finder->findExternalCall(
+            debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
+            [static::class]
+        );
 
-        if (!empty($context)) {
+        if ($context !== []) {
             $log_entry['custom_context'] = $context;
         }
 
         if (($log_entry[self::PROP_EXCEPTION] ?? null) instanceof Throwable) {
             // Convert exceptions to a nested data format with previous chain and log-safe trace
             $log_entry[self::PROP_EXCEPTION] = $this->formatException($log_entry[self::PROP_EXCEPTION]);
-            if (!isset($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR])) {
-                $log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] = true;
-            }
+            $log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] ??= true;
         }
 
         if ($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] ?? false) {
@@ -246,7 +241,7 @@ class StackdriverApplicationLogger extends AbstractLogger
             $e = $err['throwable'];
             /** @var Throwable $e */
             $this->alert(
-                sprintf('Invalid log metadata source#%s [%s] %s', $err['idx'], get_class($e), $e->getMessage()),
+                sprintf('Invalid log metadata source#%s [%s] %s', $err['idx'], $e::class, $e->getMessage()),
                 ['exception' => $e]
             );
         }
@@ -257,7 +252,7 @@ class StackdriverApplicationLogger extends AbstractLogger
     protected function formatException(Throwable $e): array
     {
         $result = [
-            'class' => get_class($e),
+            'class' => $e::class,
             'msg' => $e->getMessage(),
             'code' => $e->getCode(),
             'file' => $e->getFile(),
@@ -265,7 +260,7 @@ class StackdriverApplicationLogger extends AbstractLogger
             'trace' => $this->getExceptionTraceAsStringWithoutArgs($e->getTrace()),
         ];
 
-        if ($previous = $e->getPrevious()) {
+        if (($previous = $e->getPrevious()) instanceof Throwable) {
             $result['previous'] = $this->formatException($previous);
         }
 
@@ -316,7 +311,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         // If this was logged from an exception, add the exception info in Error Reporting's required format but with
         // our safe trace string.
         $exception = $log_entry[self::PROP_EXCEPTION] ?? null;
-        if (is_array($exception) and isset($exception['class'])) {
+        if (is_array($exception) && isset($exception['class'])) {
             $log_entry['stack_trace'] = sprintf(
                 "PHP Warning: %s: %s in %s:%s\nStack trace:\n%s",
                 $exception['class'],
@@ -420,20 +415,12 @@ class StackdriverApplicationLogger extends AbstractLogger
             '403' => LogLevel::WARNING,
             '{na}' => LogLevel::WARNING,
         ];
-        if (isset($map[$code])) {
-            return $map[$code];
-        }
 
-        switch (substr($code, 0, 1)) {
-            case '2':
-            case '3':
-                return LogLevel::INFO;
-            case '4':
-                return LogLevel::NOTICE;
-            case '5':
-            default:
-                return LogLevel::ERROR;
-        }
+        return $map[$code] ?? match (substr($code, 0, 1)) {
+            '2', '3' => LogLevel::INFO,
+            '4' => LogLevel::NOTICE,
+            default => LogLevel::ERROR,
+        };
     }
 
     protected function calculateRequestLatency(?float $request_start_time)

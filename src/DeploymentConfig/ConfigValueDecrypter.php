@@ -23,10 +23,11 @@ class ConfigValueDecrypter
 
     public function decrypt($value)
     {
-        if (is_string($value) and preg_match('/^#SECRET-?(?P<keypair>.*)#(?P<ciphertext>.+)$/', $value, $matches)) {
+        if (is_string($value) && preg_match('/^#SECRET-?(?P<keypair>.*)#(?P<ciphertext>.+)$/', $value, $matches)) {
             return $this->tryDecrypt($matches['ciphertext'], $this->getKeypair($matches['keypair'] ?: 'default'));
-        } elseif (is_array($value)) {
-            return array_map([$this, 'decrypt'], $value);
+        }
+        if (is_array($value)) {
+            return array_map($this->decrypt(...), $value);
         }
 
         return $value;
@@ -34,9 +35,7 @@ class ConfigValueDecrypter
 
     protected function getKeypair(string $name): string
     {
-        if (!isset($this->keypairs[$name])) {
-            $this->keypairs[$name] = $this->loadAndValidateKeypair($name);
-        }
+        $this->keypairs[$name] ??= $this->loadAndValidateKeypair($name);
 
         return $this->keypairs[$name];
     }
@@ -72,7 +71,7 @@ class ConfigValueDecrypter
 
         try {
             sodium_crypto_box_publickey($keypair);
-        } catch (SodiumException $e) {
+        } catch (SodiumException) {
             throw InvalidConfigException::corruptKeypair($keypair_file, 'invalid keypair value');
         }
 

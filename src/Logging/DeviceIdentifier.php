@@ -119,10 +119,10 @@ class DeviceIdentifier
     {
         $current_value = $this->getValue();
 
-        if (($current_value === '-unset-') or ($current_value === '-invalid-')) {
+        if ($current_value === '-unset-' || $current_value === '-invalid-') {
             // Do the init
             $this->assignNewIdAndSetCookies();
-        } elseif ($this->cookies->has('did') and $this->cookies->has('didf')) {
+        } elseif ($this->cookies->has('did') && $this->cookies->has('didf')) {
             // Delete the spare cookie
             $this->cookies->delete('didf');
         }

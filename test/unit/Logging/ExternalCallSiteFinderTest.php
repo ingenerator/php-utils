@@ -38,7 +38,7 @@ class ExternalCallSiteFinderTest extends TestCase
             [
                 'file' => __FILE__,
                 'line' => $call_line,
-                'function' => __CLASS__.'->'.__FUNCTION__,
+                'function' => self::class.'->'.__FUNCTION__,
             ],
             $result
         );
@@ -54,7 +54,7 @@ class ExternalCallSiteFinderTest extends TestCase
             [
                 'file' => __FILE__,
                 'line' => $call_line,
-                'function' => __CLASS__.'->'.__FUNCTION__,
+                'function' => self::class.'->'.__FUNCTION__,
             ],
             $result
         );
@@ -70,7 +70,7 @@ class ExternalCallSiteFinderTest extends TestCase
             [
                 'file' => __FILE__,
                 'line' => $call_line,
-                'function' => __CLASS__.'->'.__FUNCTION__,
+                'function' => self::class.'->'.__FUNCTION__,
             ],
             $result
         );
@@ -86,7 +86,7 @@ class ExternalCallSiteFinderTest extends TestCase
             [
                 'file' => __FILE__,
                 'line' => $call_line,
-                'function' => __CLASS__.'->'.__FUNCTION__,
+                'function' => self::class.'->'.__FUNCTION__,
             ],
             $result
         );
@@ -96,12 +96,12 @@ class ExternalCallSiteFinderTest extends TestCase
     {
         return [
             [
-                <<<'PHP'
-                // Raw file include
-                use test\unit\Ingenerator\PHPUtils\Logging\TestCallSiteAsserter;
-                /* @var TestCallSiteAsserter $asserter */ 
-                return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'require']);
-PHP,
+                <<<'PHP_WRAP'
+                                // Raw file include
+                                use test\unit\Ingenerator\PHPUtils\Logging\TestCallSiteAsserter;
+                                /* @var TestCallSiteAsserter $asserter */ 
+                                return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'require']);
+                PHP_WRAP,
             ],
             [
                 <<<'PHP'
@@ -123,24 +123,24 @@ PHP,
 PHP,
             ],
             [
-                <<<'PHP'
-                // Anonymous func
-                use test\unit\Ingenerator\PHPUtils\Logging\ExternalCallSiteFinderTest;
-                return (function ($asserter) {
-                    if (PHP_VERSION_ID < 80400) {
-                        $expected_func_name = '{closure}';
-                    } else {
-                        $expected_func_name = sprintf("%s->{closure:%s:%d}",
-                            ExternalCallSiteFinderTest::class,
-                            __FILE__,
-                            // it's the line with the 'function' keyword
-                            (__LINE__-8)
-                        );
-                    }
-                    return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => $expected_func_name]);
-                    
-                })($asserter);
-PHP,
+                <<<'PHP_WRAP'
+                                // Anonymous func
+                                use test\unit\Ingenerator\PHPUtils\Logging\ExternalCallSiteFinderTest;
+                                return (function ($asserter) {
+                                    if (PHP_VERSION_ID < 80400) {
+                                        $expected_func_name = '{closure}';
+                                    } else {
+                                        $expected_func_name = sprintf("%s->{closure:%s:%d}",
+                                            ExternalCallSiteFinderTest::class,
+                                            __FILE__,
+                                            // it's the line with the 'function' keyword
+                                            (__LINE__-8)
+                                        );
+                                    }
+                                    return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => $expected_func_name]);
+                                    
+                                })($asserter);
+                PHP_WRAP,
             ],
             [
                 <<<'PHP'
@@ -210,7 +210,7 @@ PHP,
         file_put_contents($temp, "<?php\n".$code);
         try {
             // Include the code block in anonymous scope so the call is not related to this method
-            $func = function (TestCallSiteAsserter $asserter) use ($temp) { return require $temp; };
+            $func = (fn (TestCallSiteAsserter $asserter) => require $temp);
             $func->bindTo(null, null);
             $result = $func(new TestCallSiteAsserter($this->newSubject()));
         } finally {
@@ -272,14 +272,8 @@ class TestCallSiteProxy
 
 class TestCallSiteAsserter
 {
-    /**
-     * @var ExternalCallSiteFinder
-     */
-    private $finder;
-
-    public function __construct(ExternalCallSiteFinder $finder)
+    public function __construct(private readonly ExternalCallSiteFinder $finder)
     {
-        $this->finder = $finder;
     }
 
     public function test(array $expected)

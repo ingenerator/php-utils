@@ -62,7 +62,7 @@ class DateTimeImmutableFactory
     {
         $format = 'Y-m-d H:i:s';
         $date = DateTimeImmutable::createFromFormat('!'.$format, $input);
-        if ($date and $date->format($format) === $input) {
+        if ($date && $date->format($format) === $input) {
             return $date;
         }
         throw new InvalidArgumentException($input.' is not in the format Y-m-d H:i:s');

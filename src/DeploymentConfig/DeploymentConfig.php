@@ -53,9 +53,7 @@ class DeploymentConfig
      */
     protected function __construct(?array $env_vars = null)
     {
-        if ($env_vars === null) {
-            $env_vars = $_SERVER;
-        }
+        $env_vars ??= $_SERVER;
         if (isset($env_vars['INGENERATOR_ENV'])) {
             $this->environment = $env_vars['INGENERATOR_ENV'];
         } else {

@@ -23,7 +23,7 @@ class DateString
      */
     public static function format(?DateTimeImmutable $date, $format, $empty_value = '')
     {
-        if (!$date) {
+        if (!$date instanceof DateTimeImmutable) {
             return $empty_value;
         }
 

@@ -24,16 +24,14 @@ if (PHP_MAJOR_VERSION < 8) {
         {
             if ($fetch_style === null) {
                 return $this->result;
-            } elseif ($fetch_style === PDO::FETCH_COLUMN) {
+            }
+            if ($fetch_style === PDO::FETCH_COLUMN) {
                 return array_map(
-                    function ($row) use ($fetch_argument) {
-                        return $row[$fetch_argument];
-                    },
+                    fn ($row) => $row[$fetch_argument],
                     $this->result
                 );
-            } else {
-                throw new UnexpectedValueException('Not mocked '.$fetch_style);
             }
+            throw new UnexpectedValueException('Not mocked '.$fetch_style);
         }
     }
 } else {
@@ -50,7 +48,8 @@ if (PHP_MAJOR_VERSION < 8) {
         {
             if ($fetch_style === null) {
                 return $this->result;
-            } elseif ($fetch_style === PDO::FETCH_COLUMN) {
+            }
+            if ($fetch_style === PDO::FETCH_COLUMN) {
                 return array_map(fn ($row) => $row[$fetch_argument[0]], $this->result);
             }
             throw new UnexpectedValueException('Not mocked '.$fetch_style);

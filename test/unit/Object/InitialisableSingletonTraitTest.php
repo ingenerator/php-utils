@@ -9,8 +9,6 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-use function get_class;
-
 class InitialisableSingletonTraitTest extends TestCase
 {
     public function testItThrowsIfNotInitialised()
@@ -27,9 +25,9 @@ class InitialisableSingletonTraitTest extends TestCase
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $class::initialise(function () use ($class) { return new $class(); });
+        $class::initialise(fn () => new $class());
         $this->expectException(LogicException::class);
-        $class::initialise(function () use ($class) { return new $class(); });
+        $class::initialise(fn () => new $class());
     }
 
     public function testItIndicatesIfInitialisedOrNot()
@@ -39,7 +37,7 @@ class InitialisableSingletonTraitTest extends TestCase
         };
         $this->assertSame(false, $class::isInitialised(), 'Not initialised before init');
 
-        $class::initialise(function () use ($class) { return new $class(); });
+        $class::initialise(fn () => new $class());
         $this->assertSame(true, $class::isInitialised(), 'Initialised after init');
     }
 
@@ -48,8 +46,8 @@ class InitialisableSingletonTraitTest extends TestCase
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $class::initialise(function () use ($class) { return new $class(); });
-        $this->assertInstanceOf(get_class($class), $class::instance());
+        $class::initialise(fn () => new $class());
+        $this->assertInstanceOf($class::class, $class::instance());
         $this->assertSame($class::instance(), $class::instance());
     }
 
@@ -59,7 +57,7 @@ class InitialisableSingletonTraitTest extends TestCase
             use InitialisableSingletonTrait;
         };
         $this->expectException(InvalidArgumentException::class);
-        $class::initialise(function () { return new stdClass(); });
+        $class::initialise(fn () => new stdClass());
     }
 
     public function testItThrowsIfInitialiserReturnsNothing()
@@ -73,7 +71,7 @@ class InitialisableSingletonTraitTest extends TestCase
 
     public function testItIsNotAffectedByMultipleClassesUsingTheTrait()
     {
-        CustomSingletonOne::initialise(function () { return new CustomSingletonOne(); });
+        CustomSingletonOne::initialise(fn () => new CustomSingletonOne());
         $this->assertSame(
             ['one' => true, 'two' => false],
             ['one' => CustomSingletonOne::isInitialised(), 'two' => CustomSingletonTwo::isInitialised()],
@@ -81,7 +79,7 @@ class InitialisableSingletonTraitTest extends TestCase
         );
 
         $inst1 = CustomSingletonOne::instance();
-        CustomSingletonTwo::initialise(function () { return new CustomSingletonTwo(); });
+        CustomSingletonTwo::initialise(fn () => new CustomSingletonTwo());
         $this->assertSame(
             ['one' => true, 'two' => true],
             ['one' => CustomSingletonOne::isInitialised(), 'two' => CustomSingletonTwo::isInitialised()],
@@ -102,9 +100,7 @@ class InitialisableSingletonTraitTest extends TestCase
         };
 
         $child::initialise(
-            function () use ($child) {
-                return new $child();
-            }
+            fn () => new $child()
         );
 
         $this->assertSame(
@@ -124,7 +120,7 @@ class InitialisableSingletonTraitTest extends TestCase
             CustomParentSingleton::instance(),
             'Parent and child singleton are same instance'
         );
-        $this->assertInstanceOf(get_class($child), $child::instance(), 'Singleton is of the child class');
+        $this->assertInstanceOf($child::class, $child::instance(), 'Singleton is of the child class');
     }
 }
 

@@ -26,7 +26,7 @@ class ConsistentStringScrambler
         // Break the string into words (and return null if there is no content / only whitespace)
         $words = array_filter(preg_split('/\s+/', $input ?? ''));
 
-        if (empty($words)) {
+        if ($words === []) {
             return null;
         }
 

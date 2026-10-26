@@ -41,7 +41,7 @@ class DeploymentConfigTest extends TestCase
 
     public function testItsEnvironmentComesFromEnvironmentVariable()
     {
-        $old_env = isset($_SERVER['INGENERATOR_ENV']) ? $_SERVER['INGENERATOR_ENV'] : '~~unset~~';
+        $old_env = $_SERVER['INGENERATOR_ENV'] ?? '~~unset~~';
         try {
             $_SERVER['INGENERATOR_ENV'] = DeploymentConfig::CI;
             $this->assertSame(
@@ -109,7 +109,7 @@ class DeploymentConfigTest extends TestCase
         $expect,
     ) {
         $subject = $this->newSubjectWithEnv($env);
-        $result = call_user_func_array([$subject, 'isEnvironment'], $args);
+        $result = call_user_func_array($subject->isEnvironment(...), $args);
         $this->assertSame($expect, $result);
     }
 
@@ -121,7 +121,7 @@ class DeploymentConfigTest extends TestCase
     ) {
         $expect_not = !$expect_is;
         $subject = $this->newSubjectWithEnv($env);
-        $result = call_user_func_array([$subject, 'notEnvironment'], $args);
+        $result = call_user_func_array($subject->notEnvironment(...), $args);
         $this->assertSame($expect_not, $result);
     }
 
@@ -296,9 +296,7 @@ class DeploymentConfigTest extends TestCase
     private function newSubject(array $env_vars): DeploymentConfig
     {
         $creator = Closure::bind(
-            function () use ($env_vars) {
-                return new DeploymentConfig($env_vars);
-            },
+            fn () => new DeploymentConfig($env_vars),
             null,
             DeploymentConfig::class
         );
@@ -312,7 +310,7 @@ class DeploymentConfigTest extends TestCase
     private function newSubjectWithNoArgs(): DeploymentConfig
     {
         $creator = Closure::bind(
-            function () { return new DeploymentConfig(); },
+            fn () => new DeploymentConfig(),
             null,
             DeploymentConfig::class
         );

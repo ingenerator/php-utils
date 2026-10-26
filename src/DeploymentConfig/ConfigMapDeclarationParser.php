@@ -26,7 +26,7 @@ class ConfigMapDeclarationParser
     {
         $result = [];
         foreach ($declarations as $declaration) {
-            list($environments, $value) = $this->validateDeclaration($declaration);
+            [$environments, $value] = $this->validateDeclaration($declaration);
             foreach ($environments as $env) {
                 if (array_key_exists($env, $result)) {
                     throw InvalidConfigException::duplicateEnvironmentMap($env);

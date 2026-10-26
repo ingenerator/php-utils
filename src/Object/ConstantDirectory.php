@@ -16,11 +16,6 @@ use function strncmp;
 class ConstantDirectory
 {
     /**
-     * @var string
-     */
-    protected $class_name;
-
-    /**
      * @var array
      */
     protected $constants;
@@ -28,9 +23,8 @@ class ConstantDirectory
     /**
      * @param string $class_name
      */
-    protected function __construct($class_name)
+    protected function __construct(protected $class_name)
     {
-        $this->class_name = $class_name;
     }
 
     /**

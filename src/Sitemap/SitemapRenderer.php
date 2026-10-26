@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Sitemap;
 
 use DateTimeImmutable;
@@ -26,7 +28,7 @@ class SitemapRenderer
         }
 
         $xml = '<loc>'.htmlspecialchars($url, ENT_XML1 | ENT_QUOTES, 'UTF-8').'</loc>';
-        if ($lastmod !== null) {
+        if ($lastmod instanceof DateTimeImmutable) {
             $xml .= '<lastmod>'.$lastmod->format('Y-m-d').'</lastmod>';
         }
         if ($changefreq !== null) {

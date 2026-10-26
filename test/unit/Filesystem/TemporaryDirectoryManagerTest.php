@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Filesystem;
 
 use Ingenerator\PHPUtils\Filesystem\TemporaryDirectoryManager;
@@ -84,7 +86,7 @@ class TemporaryDirectoryManagerTest extends TestCase
 
         $this->assertSame(
             [false, false, false],
-            array_map('is_dir', $paths),
+            array_map(is_dir(...), $paths),
             'Should clean up paths'
         );
     }

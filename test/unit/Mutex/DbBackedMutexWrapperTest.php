@@ -5,13 +5,14 @@ namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 use Ingenerator\PHPUtils\Mutex\DbBackedMutexWrapper;
 use Ingenerator\PHPUtils\Mutex\MutexTimedOutException;
 use Ingenerator\PHPUtils\Mutex\MutexWrapper;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 class DbBackedMutexWrapperTest extends TestCase
 {
     /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
+     * @var MockObject
      */
     private $pdo;
 
@@ -67,7 +68,7 @@ class DbBackedMutexWrapperTest extends TestCase
             $subject->withLock(
                 'somelock',
                 2,
-                function () { return 'a value'; }
+                fn () => 'a value'
             )
         );
         $this->pdo->assertAllQueriesRan();

@@ -12,7 +12,6 @@ use Closure;
 use DomainException;
 use stdClass;
 
-use function get_class;
 use function get_object_vars;
 use function is_object;
 
@@ -36,7 +35,7 @@ class ObjectPropertyRipper
      */
     public static function rip($object, array $properties)
     {
-        $ripper = static::getRipper(get_class($object));
+        $ripper = static::getRipper($object::class);
 
         return $ripper($object, $properties);
     }
@@ -65,7 +64,7 @@ class ObjectPropertyRipper
         $array_vals = (array) $object;
         if (count($array_vals) !== count($props)) {
             throw new DomainException(
-                'Cannot rip all variables from '.get_class($object).' - does it have inherited private props?'
+                'Cannot rip all variables from '.$object::class.' - does it have inherited private props?'
             );
         }
 

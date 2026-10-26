@@ -108,7 +108,7 @@ class ConfigMapDeclarationParserTest extends TestCase
             ['some' => 'unexpected', 'hash' => 'value'],
         ];
 
-        return array_map(function (array $declarations) { return [$declarations]; }, $invalid);
+        return array_map(fn (array $declarations) => [$declarations], $invalid);
     }
 
     #[DataProvider('provider_invalid_declarations')]

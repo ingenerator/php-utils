@@ -79,11 +79,9 @@ class StrictDate
     {
         if ($value === null) {
             return true;
-        } elseif ($value instanceof DateTimeImmutable) {
-            return true;
         }
 
-        return false;
+        return $value instanceof DateTimeImmutable;
     }
 
     /**
@@ -110,7 +108,7 @@ class StrictDate
     {
         $dt = DateTimeImmutable::createFromFormat($format, (string) $value);
 
-        return $dt and ($dt->format($format) === $value);
+        return $dt && $dt->format($format) === $value;
     }
 
     /**
@@ -122,16 +120,14 @@ class StrictDate
      */
     public static function rule($rulename)
     {
-        switch ($rulename) {
-            case 'date_after':
-            case 'date_on_or_after':
-            case 'date_immutable':
-            case 'datetime_immutable':
-            case 'iso_date':
-            case 'iso_datetime':
-                return static::class.'::'.$rulename;
-            default:
-                throw new InvalidArgumentException('Unknown rule '.__CLASS__.'::'.$rulename);
-        }
+        return match ($rulename) {
+            'date_after',
+            'date_on_or_after',
+            'date_immutable',
+            'datetime_immutable',
+            'iso_date',
+            'iso_datetime' => static::class.'::'.$rulename,
+            default => throw new InvalidArgumentException('Unknown rule '.self::class.'::'.$rulename),
+        };
     }
 }
