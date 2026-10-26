@@ -257,6 +257,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         $this->meta_args = [
             ['sources' => ['first_ok']],
+            /* @phpstan-ignore argument.type (intentional, to make it have an error) */
             fn (): DateTimeImmutable => new DateTimeImmutable(new stdClass()),
             ['sources' => ['third_ok']],
             function (): never { throw new InvalidArgumentException('Broken'); },

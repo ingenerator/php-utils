@@ -48,13 +48,15 @@ final class StaticAssetUrlProviderTest extends TestCase
     #[TestWith(['/assets/my-file.css'])]
     public function testInLocalModeGetUrlReturnsAbsoluteUrlWithMtimeSuffix($rel_path): void
     {
+        $dir = $this->vfs->getChild('docroot');
+        $this->assertInstanceOf(vfsStreamDirectory::class, $dir);
         vfsStream::create(
             [
                 'assets' => [
                     'my-file.css' => 'some-content',
                 ],
             ],
-            $this->vfs->getChild('docroot')
+            $dir
         );
         $this->vfs->getChild('docroot/assets/my-file.css')->lastModified(123456);
         $this->assertSame(

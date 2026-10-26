@@ -126,9 +126,9 @@ class DateTimeImmutableFactory
     public static function zeroMicros(DateTimeImmutable $time = new DateTimeImmutable()): DateTimeImmutable
     {
         return $time->setTime(
-            hour: $time->format('H'),
-            minute: $time->format('i'),
-            second: $time->format('s'),
+            hour: (int) $time->format('H'),
+            minute: (int) $time->format('i'),
+            second: (int) $time->format('s'),
             microsecond: 0
         );
     }
