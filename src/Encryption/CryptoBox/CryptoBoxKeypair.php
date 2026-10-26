@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\Encryption\CryptoBox;
 
-use Ingenerator\TrustIDIngress\ToExtract\SensitiveParameter;
 use InvalidArgumentException;
+use SensitiveParameter;
 use SodiumException;
 
 use function preg_match;
@@ -32,7 +32,7 @@ final class CryptoBoxKeypair
      * Create an instance from a string that was previously exported from this library.
      */
     public static function fromString(
-        #[\SensitiveParameter]
+        #[SensitiveParameter]
         string $exported,
     ): static {
         if (!preg_match('/(?P<keypair_id>[a-z0-9-]+)\.(?P<keypair_b64>[a-zA-Z0-9_-]+)$/', $exported, $matches)) {
@@ -98,9 +98,7 @@ final class CryptoBoxKeypair
     public function __destruct()
     {
         // Ensure that our local copy of the private key is securely removed from memory
-        if (isset($this->keypair)) {
-            sodium_memzero($this->keypair);
-        }
+        sodium_memzero($this->keypair);
     }
 
     public function getPublicKey(): CryptoBoxPublicKey
