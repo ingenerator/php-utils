@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @author    Craig Gosman <craig@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Session;
-
 
 use Closure;
 use Ingenerator\PHPUtils\Session\MysqlSession;
@@ -19,7 +20,7 @@ class MysqlSessionTest extends TestCase
 {
     private array $old_ini_vars = [];
 
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable()
     {
         $this->assertInstanceOf(MysqlSession::class, $this->newSubject());
     }
@@ -67,7 +68,7 @@ class MysqlSessionTest extends TestCase
     }
 
     #[DataProvider('provider_validate_invalid_sid')]
-    public function test_it_rejects_invalid_session_ids_without_checking_database(array $config, string $sid): void
+    public function testItRejectsInvalidSessionIdsWithoutCheckingDatabase(array $config, string $sid): void
     {
         $this->configurePhpIniVars($config);
         $subject = $this->newSubject(pdo: $this->mockPDOExpectingNoCalls());
@@ -101,7 +102,7 @@ class MysqlSessionTest extends TestCase
     }
 
     #[DataProvider('provider_validate_own_sid')]
-    public function test_sid_that_it_creates_is_valid(array $config, string $expected_pattern): void
+    public function testSidThatItCreatesIsValid(array $config, string $expected_pattern): void
     {
         $this->configurePhpIniVars($config);
 
@@ -122,12 +123,14 @@ class MysqlSessionTest extends TestCase
                 // Just needs to return 1 to show that the lock is acquired. Note that validateSid does not release the
                 // lock if it successfully loads a session (it'll be released on session_write_close or end of request)
                 $result->expects($this->once())->method('fetchColumn')->willReturn('1');
+
                 return $result;
             }
 
             if (str_starts_with($query, 'SELECT `session_data`')) {
                 // Just needs to return some data, even empty
                 $result->expects($this->once())->method('fetchAll')->willReturn([['session_data' => serialize([])]]);
+
                 return $result;
             }
 
@@ -162,9 +165,8 @@ class MysqlSessionTest extends TestCase
     }
 
     protected function newSubject(
-        ?PDO $pdo = null
-    )
-    {
+        ?PDO $pdo = null,
+    ) {
         return new MysqlSession(
             $pdo ?? $this->mockPDOExpectingNoCalls(),
             'insecure-salt',
@@ -175,6 +177,7 @@ class MysqlSessionTest extends TestCase
     {
         $pdo = $this->createMock(PDO::class);
         $pdo->expects($this->never())->method($this->anything());
+
         return $pdo;
     }
 
@@ -189,7 +192,7 @@ class MysqlSessionTest extends TestCase
     {
         $pdo = $this->createMock(PDO::class);
         $pdo->expects($this->any())->method('prepare')->willReturnCallback($callback);
+
         return $pdo;
     }
-
 }

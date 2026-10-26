@@ -1,14 +1,15 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Cookie;
+
+use DateTimeImmutable;
 
 use function array_merge;
 use function headers_sent;
 use function setcookie;
 
 /**
- * Provides an injectable wrapper for setting and accessing cookies from other classes
+ * Provides an injectable wrapper for setting and accessing cookies from other classes.
  *
  * This includes:
  *  - Actually setting cookies, with sane defaults
@@ -20,33 +21,26 @@ use function setcookie;
  *
  * See also ArrayCookieWrapperStub for a simulated implementation that doesn't actually attempt to
  * set cookies, for use in unit tests.
- *
  */
 class CookieWrapper
 {
-
     /**
      * @var mixed[]
      */
     protected $cookies = [];
 
     /**
-     * @var boolean
+     * @var bool
      */
     protected $has_ssl_available;
 
-    public function __construct(bool $has_ssl_available = TRUE)
+    public function __construct(bool $has_ssl_available = true)
     {
-        $this->cookies           = $_COOKIE;
+        $this->cookies = $_COOKIE;
         $this->has_ssl_available = $has_ssl_available;
     }
 
-    /**
-     * @param string $name
-     * @param string $value
-     * @param array  $options
-     */
-    public function set(string $name, ?string $value = NULL, array $options = []): void
+    public function set(string $name, ?string $value = null, array $options = []): void
     {
         if ($this->headers_sent($file, $line)) {
             throw new HeadersSentException($name, $file, $line);
@@ -55,22 +49,26 @@ class CookieWrapper
         $default_options = [
             'domain' => '',
             'expires' => 0,
-            'httponly'=> TRUE,
+            'httponly' => true,
             'path' => '/',
             'secure' => $this->has_ssl_available,
         ];
         $options = array_merge($default_options, $options);
 
         // convert expires DateTime to timestamp
-        if ($options['expires'] instanceof \DateTimeImmutable) {
+        if ($options['expires'] instanceof DateTimeImmutable) {
             $options['expires'] = $options['expires']->getTimestamp();
         }
 
         // downgrade secure cookies if SSL is not available
-        if (!$this->has_ssl_available) { $options['secure'] = FALSE;}
+        if (!$this->has_ssl_available) {
+            $options['secure'] = false;
+        }
 
         // remove samesite option if SSL is not available
-        if (!$this->has_ssl_available) { unset($options['samesite']);}
+        if (!$this->has_ssl_available) {
+            unset($options['samesite']);
+        }
 
         $this->set_cookie($name, $value, $options);
 
@@ -79,7 +77,7 @@ class CookieWrapper
 
     public function get(string $name): ?string
     {
-        return $this->cookies[$name] ?? NULL;
+        return $this->cookies[$name] ?? null;
     }
 
     public function has(string $name): bool
@@ -93,15 +91,18 @@ class CookieWrapper
             $name,
             '',
             [
-                'expires'  => 1,
-                'secure'   => FALSE,
-                'httponly' => FALSE
+                'expires' => 1,
+                'secure' => false,
+                'httponly' => false,
             ]
         );
         unset($this->cookies[$name]);
     }
 
-    protected function set_cookie($name, $value, $options) { setcookie($name, $value, $options); }
+    protected function set_cookie($name, $value, $options)
+    {
+        setcookie($name, $value, $options);
+    }
 
     protected function headers_sent(&$file, &$line): bool
     {

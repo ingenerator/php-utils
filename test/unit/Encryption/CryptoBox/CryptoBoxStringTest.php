@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
@@ -8,6 +9,7 @@ use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+
 use function random_bytes;
 
 class CryptoBoxStringTest extends TestCase
@@ -27,13 +29,13 @@ class CryptoBoxStringTest extends TestCase
     }
 
     #[DataProvider('provider_invalid_string_format')]
-    public function test_it_throws_invalid_argument_if_attempting_to_create_from_invalid_string($keypair_string)
+    public function testItThrowsInvalidArgumentIfAttemptingToCreateFromInvalidString($keypair_string)
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxString::fromString($keypair_string);
     }
 
-    public function test_it_can_be_converted_to_string_encoding_and_recreated()
+    public function testItCanBeConvertedToStringEncodingAndRecreated()
     {
         $expected = new CryptoBoxString(ciphertext: random_bytes(21), keypair_id: 'b');
         $exported = (string) $expected;
@@ -46,12 +48,11 @@ class CryptoBoxStringTest extends TestCase
         );
     }
 
-    public function test_it_can_provide_just_the_ciphertext_as_base64()
+    public function testItCanProvideJustTheCiphertextAsBase64()
     {
         $original = random_bytes(23);
         $subject = new CryptoBoxString(ciphertext: $original, keypair_id: 'alpha');
 
         $this->assertSame($original, Base64Url::decode($subject->getCiphertextB64()));
     }
-
 }

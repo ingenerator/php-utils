@@ -1,25 +1,19 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\DeploymentConfig;
 
-
-use Ingenerator\PHPUtils\DeploymentConfig\ConfigMapDeclarationParser;
-use Ingenerator\PHPUtils\DeploymentConfig\ConfigValueDecrypter;
-use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
-use Ingenerator\PHPUtils\DeploymentConfig\MissingConfigException;
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
 
 class DeploymentConfig
 {
-    const ANY        = '*';
-    const STANDALONE = 'standalone';
-    const DEV        = 'dev';
-    const CI         = 'ci';
-    const PRODUCTION = 'production';
-    const QA         = 'qa';
-    const LOADTEST   = 'loadtest';
+    public const ANY = '*';
+    public const STANDALONE = 'standalone';
+    public const DEV = 'dev';
+    public const CI = 'ci';
+    public const PRODUCTION = 'production';
+    public const QA = 'qa';
+    public const LOADTEST = 'loadtest';
 
     /**
      * @var string
@@ -47,20 +41,19 @@ class DeploymentConfig
     public static function instance()
     {
         static $instance;
-        if ( ! $instance) {
-            $instance = new static;
+        if (!$instance) {
+            $instance = new static();
         }
 
         return $instance;
     }
 
     /**
-     *
-     * @param array|NULL $env_vars - if missing will default to reading from $_SERVER
+     * @param array|null $env_vars - if missing will default to reading from $_SERVER
      */
-    protected function __construct(?array $env_vars = NULL)
+    protected function __construct(?array $env_vars = null)
     {
-        if ($env_vars === NULL) {
+        if ($env_vars === null) {
             $env_vars = $_SERVER;
         }
         if (isset($env_vars['INGENERATOR_ENV'])) {
@@ -68,7 +61,7 @@ class DeploymentConfig
         } else {
             $this->environment = static::PRODUCTION;
         }
-        $this->map_parser      = new ConfigMapDeclarationParser;
+        $this->map_parser = new ConfigMapDeclarationParser();
         $this->value_decrypter = new ConfigValueDecrypter($this->config_dir.'/app-config-keys');
     }
 
@@ -87,7 +80,7 @@ class DeploymentConfig
      */
     public function isEnvironment($environment)
     {
-        return in_array($this->environment, func_get_args(), TRUE);
+        return in_array($this->environment, func_get_args(), true);
     }
 
     /**
@@ -97,7 +90,7 @@ class DeploymentConfig
      */
     public function notEnvironment($environment)
     {
-        return ! in_array($this->environment, func_get_args(), TRUE);
+        return !in_array($this->environment, func_get_args(), true);
     }
 
     /**
@@ -114,28 +107,25 @@ class DeploymentConfig
     public function read($path)
     {
         if ($this->environment === static::STANDALONE) {
-            return NULL;
+            return null;
         }
 
         $cfg_path = $this->config_dir.'/'.$path;
         if (file_exists($cfg_path)) {
             return $this->value_decrypter->decrypt(file_get_contents($cfg_path));
-        } else {
-            throw MissingConfigException::missingFile($path, $cfg_path, $this->environment);
         }
+        throw MissingConfigException::missingFile($path, $cfg_path, $this->environment);
     }
 
     /**
-     * Use this when the value of a config / secret is type-sensitive (integer / boolean / supports null value)
+     * Use this when the value of a config / secret is type-sensitive (integer / boolean / supports null value).
      *
      * @param string $string
-     *
-     * @return mixed
      */
     public function readJSON($string)
     {
         $value = $this->read($string);
-        if ($value === NULL) {
+        if ($value === null) {
             return $value;
         }
 
@@ -154,7 +144,7 @@ class DeploymentConfig
         } elseif (array_key_exists(static::ANY, $map)) {
             $value = $map[static::ANY];
         } elseif ($this->environment === static::STANDALONE) {
-            return NULL;
+            return null;
         } else {
             throw MissingConfigException::missingMapValue($this->environment);
         }

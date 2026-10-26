@@ -15,32 +15,31 @@ use PHPUnit\Framework\TestCase;
 
 class DeploymentConfigTest extends TestCase
 {
-
     /**
      * @var ConfigValueDecrypter
      */
     protected $decrypter;
 
-    public function test_its_static_instance_is_singleton()
+    public function testItsStaticInstanceIsSingleton()
     {
         $i = DeploymentConfig::instance();
         $this->assertInstanceOf(DeploymentConfig::class, $i);
         $this->assertSame($i, DeploymentConfig::instance());
     }
 
-    public function test_its_environment_defaults_to_production_if_not_set()
+    public function testItsEnvironmentDefaultsToProductionIfNotSet()
     {
         $subject = $this->newSubject([]);
         $this->assertSame(DeploymentConfig::PRODUCTION, $subject->getEnvironment());
     }
 
-    public function test_its_environment_comes_from_injected_array_if_provided()
+    public function testItsEnvironmentComesFromInjectedArrayIfProvided()
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::DEV);
         $this->assertSame(DeploymentConfig::DEV, $subject->getEnvironment());
     }
 
-    public function test_its_environment_comes_from_environment_variable()
+    public function testItsEnvironmentComesFromEnvironmentVariable()
     {
         $old_env = isset($_SERVER['INGENERATOR_ENV']) ? $_SERVER['INGENERATOR_ENV'] : '~~unset~~';
         try {
@@ -51,7 +50,7 @@ class DeploymentConfigTest extends TestCase
             );
         } finally {
             if ($old_env === '~~unset~~') {
-                unset ($_SERVER['INGENERATOR_ENV']);
+                unset($_SERVER['INGENERATOR_ENV']);
             } else {
                 $_SERVER['INGENERATOR_ENV'] = $old_env;
             }
@@ -65,19 +64,19 @@ class DeploymentConfigTest extends TestCase
             [
                 DeploymentConfig::PRODUCTION,
                 [DeploymentConfig::CI],
-                FALSE,
+                false,
             ],
             [
                 DeploymentConfig::PRODUCTION,
                 [DeploymentConfig::PRODUCTION],
-                TRUE,
+                true,
             ],
 
             // Match any of the requested ones
             [
                 DeploymentConfig::DEV,
                 [DeploymentConfig::CI, DeploymentConfig::DEV],
-                TRUE,
+                true,
             ],
             [
                 DeploymentConfig::DEV,
@@ -85,44 +84,44 @@ class DeploymentConfigTest extends TestCase
                     DeploymentConfig::DEV,
                     DeploymentConfig::CI,
                 ],
-                TRUE,
+                true,
             ],
             [
                 DeploymentConfig::DEV,
                 [DeploymentConfig::PRODUCTION, DeploymentConfig::CI],
-                FALSE,
+                false,
             ],
 
             // Randomness
             [
                 'junk-env',
                 [DeploymentConfig::PRODUCTION, DeploymentConfig::DEV],
-                FALSE,
+                false,
             ],
-            [DeploymentConfig::DEV, ['junk-env'], FALSE],
+            [DeploymentConfig::DEV, ['junk-env'], false],
         ];
     }
 
     #[DataProvider('provider_is_current_env')]
-    public function test_its_is_environment_returns_whether_current_environment_one_of_those_listed(
+    public function testItsIsEnvironmentReturnsWhetherCurrentEnvironmentOneOfThoseListed(
         $env,
         $args,
-        $expect
+        $expect,
     ) {
         $subject = $this->newSubjectWithEnv($env);
-        $result  = call_user_func_array([$subject, 'isEnvironment'], $args);
+        $result = call_user_func_array([$subject, 'isEnvironment'], $args);
         $this->assertSame($expect, $result);
     }
 
     #[DataProvider('provider_is_current_env')]
-    public function test_its_not_environment_returns_whether_current_environment_none_of_those_listed(
+    public function testItsNotEnvironmentReturnsWhetherCurrentEnvironmentNoneOfThoseListed(
         $env,
         $args,
-        $expect_is
+        $expect_is,
     ) {
-        $expect_not = ! $expect_is;
-        $subject    = $this->newSubjectWithEnv($env);
-        $result     = call_user_func_array([$subject, 'notEnvironment'], $args);
+        $expect_not = !$expect_is;
+        $subject = $this->newSubjectWithEnv($env);
+        $result = call_user_func_array([$subject, 'notEnvironment'], $args);
         $this->assertSame($expect_not, $result);
     }
 
@@ -132,7 +131,7 @@ class DeploymentConfigTest extends TestCase
     #[TestWith(['ci', null])]
     #[TestWith(['imagined', 'who-knows-what-i-am'])]
     #[TestWith(['standalone', 'i-am-standalone'])]
-    public function test_its_map_returns_value_or_default_for_the_current_env($env, $expect)
+    public function testItsMapReturnsValueOrDefaultForTheCurrentEnv($env, $expect)
     {
         $subject = $this->newSubjectWithEnv($env);
         $this->assertSame(
@@ -140,7 +139,7 @@ class DeploymentConfigTest extends TestCase
             $subject->map(
                 ['dev', 'i-am-dev'],
                 [['prod', 'qa'], 'i-am-prod-ish'],
-                ['ci', NULL],
+                ['ci', null],
                 ['standalone', 'i-am-standalone'],
                 [DeploymentConfig::ANY, 'who-knows-what-i-am']
             )
@@ -150,7 +149,7 @@ class DeploymentConfigTest extends TestCase
     #[TestWith(['dev'])]
     #[TestWith(['standalone'])]
     #[TestWith(['ci'])]
-    public function test_its_map_returns_any_for_env_that_is_not_defined($env)
+    public function testItsMapReturnsAnyForEnvThatIsNotDefined($env)
     {
         $subject = $this->newSubjectWithEnv($env);
         $this->assertSame(
@@ -161,18 +160,18 @@ class DeploymentConfigTest extends TestCase
         );
     }
 
-    public function test_its_map_throws_if_no_value_defined_for_environment()
+    public function testItsMapThrowsIfNoValueDefinedForEnvironment()
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::QA);
         $this->expectException(MissingConfigException::class);
         $subject->map([DeploymentConfig::PRODUCTION, 'prod']);
     }
 
-    public function test_its_map_returns_null_for_standalone_if_nothing_defined()
+    public function testItsMapReturnsNullForStandaloneIfNothingDefined()
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
         $this->assertSame(
-            NULL,
+            null,
             $subject->map(
                 [DeploymentConfig::DEV, 'I am dev'],
                 [DeploymentConfig::PRODUCTION, 'I am production']
@@ -180,10 +179,10 @@ class DeploymentConfigTest extends TestCase
         );
     }
 
-    public function test_its_map_decrypts_values()
+    public function testItsMapDecryptsValues()
     {
-        $this->decrypter = new PaddedConfigDecryptStub;
-        $subject         = $this->newSubjectWithEnv(DeploymentConfig::CI);
+        $this->decrypter = new PaddedConfigDecryptStub();
+        $subject = $this->newSubjectWithEnv(DeploymentConfig::CI);
         $this->assertSame(
             'Iamdecrypted',
             $subject->map(
@@ -192,15 +191,15 @@ class DeploymentConfigTest extends TestCase
         );
     }
 
-    public function test_its_read_always_returns_null_in_standalone()
+    public function testItsReadAlwaysReturnsNullInStandalone()
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
-        $this->assertSame(NULL, $subject->read('secrets/any/old/secret'));
+        $this->assertSame(null, $subject->read('secrets/any/old/secret'));
     }
 
-    public function test_its_read_returns_file_content_if_present_outside_standalone()
+    public function testItsReadReturnsFileContentIfPresentOutsideStandalone()
     {
-        $path    = $this->givenConfigDirWithFile('secrets/integrations/via/password', 'mypassword');
+        $path = $this->givenConfigDirWithFile('secrets/integrations/via/password', 'mypassword');
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -208,23 +207,23 @@ class DeploymentConfigTest extends TestCase
         $this->assertSame('mypassword', $subject->read('secrets/integrations/via/password'));
     }
 
-    public function test_its_read_supports_runtime_decryption()
+    public function testItsReadSupportsRuntimeDecryption()
     {
-        $this->decrypter = new PaddedConfigDecryptStub;
-        $path            = $this->givenConfigDirWithFile(
+        $this->decrypter = new PaddedConfigDecryptStub();
+        $path = $this->givenConfigDirWithFile(
             'secrets/integrations/via/password',
             '#SECRET#I w a s e n c r y p t e d'
         );
-        $subject         = $this->newSubjectWithEnvAndConfigDir(
+        $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
         );
         $this->assertSame('Iwasencrypted', $subject->read('secrets/integrations/via/password'));
     }
 
-    public function test_its_read_throws_if_file_not_present_outside_standalone()
+    public function testItsReadThrowsIfFileNotPresentOutsideStandalone()
     {
-        $path    = $this->givenEmptyConfigDir();
+        $path = $this->givenEmptyConfigDir();
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -233,10 +232,10 @@ class DeploymentConfigTest extends TestCase
         $subject->read('secrets/integrations/via/password');
     }
 
-    public function test_its_read_json_always_returns_null_in_standalone()
+    public function testItsReadJsonAlwaysReturnsNullInStandalone()
     {
         $subject = $this->newSubjectWithEnv(DeploymentConfig::STANDALONE);
-        $this->assertSame(NULL, $subject->readJSON('secrets/any/old/secret'));
+        $this->assertSame(null, $subject->readJSON('secrets/any/old/secret'));
     }
 
     #[TestWith([true, true])]
@@ -246,9 +245,9 @@ class DeploymentConfigTest extends TestCase
     #[TestWith(['string', 'string'])]
     #[TestWith([1234, 1234])]
     #[TestWith([1234.5, 1234.5])]
-    public function test_its_read_json_returns_json_decoded_file_content_if_present_outside_standalone($json, $expect)
+    public function testItsReadJsonReturnsJsonDecodedFileContentIfPresentOutsideStandalone($json, $expect)
     {
-        $path    = $this->givenConfigDirWithFile('config/some_scalar', json_encode($json));
+        $path = $this->givenConfigDirWithFile('config/some_scalar', json_encode($json));
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -256,9 +255,9 @@ class DeploymentConfigTest extends TestCase
         $this->assertSame($expect, $subject->readJSON('config/some_scalar'));
     }
 
-    public function test_its_read_json_throws_if_file_not_present_outside_standalone()
+    public function testItsReadJsonThrowsIfFileNotPresentOutsideStandalone()
     {
-        $path    = $this->givenEmptyConfigDir();
+        $path = $this->givenEmptyConfigDir();
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -267,9 +266,9 @@ class DeploymentConfigTest extends TestCase
         $subject->readJSON('secrets/integrations/via/password');
     }
 
-    public function test_its_read_json_throws_if_file_json_invalid_outside_standalone()
+    public function testItsReadJsonThrowsIfFileJsonInvalidOutsideStandalone()
     {
-        $path    = $this->givenConfigDirWithFile('secrets/database/persistent', 'oh_i_dunno');
+        $path = $this->givenConfigDirWithFile('secrets/database/persistent', 'oh_i_dunno');
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
             $path
@@ -278,14 +277,14 @@ class DeploymentConfigTest extends TestCase
         $subject->readJSON('secrets/database/persistent');
     }
 
-    public function test_its_read_json_supports_runtime_decryption()
+    public function testItsReadJsonSupportsRuntimeDecryption()
     {
-        $this->decrypter = new PaddedConfigDecryptStub;
-        $path            = $this->givenConfigDirWithFile(
+        $this->decrypter = new PaddedConfigDecryptStub();
+        $path = $this->givenConfigDirWithFile(
             'secrets/integrations/via/lots',
             '#SECRET#{"f u l l": "fileencrypted"}'
         );
-        $subject         = $this->newSubjectWithEnvAndConfigDir(DeploymentConfig::DEV, $path);
+        $subject = $this->newSubjectWithEnvAndConfigDir(DeploymentConfig::DEV, $path);
         $this->assertSame(['full' => 'fileencrypted'], $subject->readJSON('secrets/integrations/via/lots'));
     }
 
@@ -300,7 +299,7 @@ class DeploymentConfigTest extends TestCase
             function () use ($env_vars) {
                 return new DeploymentConfig($env_vars);
             },
-            NULL,
+            null,
             DeploymentConfig::class
         );
 
@@ -313,8 +312,8 @@ class DeploymentConfigTest extends TestCase
     private function newSubjectWithNoArgs(): DeploymentConfig
     {
         $creator = Closure::bind(
-            function () { return new DeploymentConfig; },
-            NULL,
+            function () { return new DeploymentConfig(); },
+            null,
             DeploymentConfig::class
         );
 
@@ -323,13 +322,13 @@ class DeploymentConfigTest extends TestCase
 
     private function givenConfigDirWithFile(string $path, $content): string
     {
-        $vfs     = vfsStream::setup('var');
+        $vfs = vfsStream::setup('var');
         $cfg_dir = vfsStream::newDirectory('config')
             ->at($vfs);
 
-        $parts    = explode('/', $path);
+        $parts = explode('/', $path);
         $filename = array_pop($parts);
-        $parent   = $cfg_dir;
+        $parent = $cfg_dir;
         foreach ($parts as $path_part) {
             $parent = vfsStream::newDirectory($path_part)->at($parent);
         }
@@ -343,7 +342,7 @@ class DeploymentConfigTest extends TestCase
 
     private function givenEmptyConfigDir(): string
     {
-        $vfs     = vfsStream::setup('var');
+        $vfs = vfsStream::setup('var');
         $cfg_dir = vfsStream::newDirectory('config')
             ->at($vfs);
 
@@ -361,15 +360,15 @@ class DeploymentConfigTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->decrypter = new PaddedConfigDecryptStub;
+        $this->decrypter = new PaddedConfigDecryptStub();
     }
-
 }
-
 
 class PaddedConfigDecryptStub extends ConfigValueDecrypter
 {
-    public function __construct() { }
+    public function __construct()
+    {
+    }
 
     protected function tryDecrypt(string $ciphertext, string $keypair): string
     {
@@ -380,6 +379,4 @@ class PaddedConfigDecryptStub extends ConfigValueDecrypter
     {
         return 'fake-key';
     }
-
-
 }

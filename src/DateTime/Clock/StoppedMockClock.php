@@ -1,12 +1,15 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\DateTime\Clock;
 
-use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use DateInterval;
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use PHPUnit\Framework\Assert;
 
@@ -23,9 +26,9 @@ class StoppedMockClock extends RealtimeClock
     protected $sleeps;
 
     /**
-     * Use descriptive static constructors for a new instance
+     * Use descriptive static constructors for a new instance.
      */
-    protected function __construct(\DateTimeImmutable $start_time)
+    protected function __construct(DateTimeImmutable $start_time)
     {
         $this->current_microtime = (float) $start_time->format('U.u');
     }
@@ -45,7 +48,7 @@ class StoppedMockClock extends RealtimeClock
      */
     public static function atNow()
     {
-        return new static(new \DateTimeImmutable);
+        return new static(new DateTimeImmutable());
     }
 
     /**
@@ -55,8 +58,8 @@ class StoppedMockClock extends RealtimeClock
      */
     public static function at($time)
     {
-        if ( ! $time instanceof \DateTimeImmutable) {
-            $time = new \DateTimeImmutable($time);
+        if (!$time instanceof DateTimeImmutable) {
+            $time = new DateTimeImmutable($time);
         }
 
         return new static($time);
@@ -69,8 +72,8 @@ class StoppedMockClock extends RealtimeClock
      */
     public static function atTimeAgo($interval_spec)
     {
-        $now = new \DateTimeImmutable;
-        $ago = $now->sub(new \DateInterval($interval_spec));
+        $now = new DateTimeImmutable();
+        $ago = $now->sub(new DateInterval($interval_spec));
 
         return new static($ago);
     }
@@ -85,9 +88,9 @@ class StoppedMockClock extends RealtimeClock
         return $this->current_microtime;
     }
 
-    public function tick(\DateInterval $period)
+    public function tick(DateInterval $period)
     {
-        $now                     = $this->getDateTime()->add($period);
+        $now = $this->getDateTime()->add($period);
         $this->current_microtime = (float) $now->getTimestamp();
     }
 
@@ -114,5 +117,4 @@ class StoppedMockClock extends RealtimeClock
     {
         Assert::assertNull($this->sleeps, $msg);
     }
-
 }

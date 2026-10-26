@@ -1,16 +1,11 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\DeploymentConfig;
-
-
-use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 
 class ConfigMapDeclarationParser
 {
-
     /**
-     * Takes a shorthand config map declaration and turns it into a simple hash of all the enviroments
+     * Takes a shorthand config map declaration and turns it into a simple hash of all the enviroments.
      *
      * e.g. given this set of declarations:
      *
@@ -26,10 +21,6 @@ class ConfigMapDeclarationParser
      * ]
      *
      * This can then be used as a simple lookup table in the deployment config class
-     *
-     * @param array $declarations
-     *
-     * @return array
      */
     public function parse(array $declarations): array
     {
@@ -49,7 +40,7 @@ class ConfigMapDeclarationParser
 
     protected function validateDeclaration($declaration): array
     {
-        if ( ! is_array($declaration)) {
+        if (!is_array($declaration)) {
             throw InvalidConfigException::invalidMapDeclaration('not an array');
         }
 

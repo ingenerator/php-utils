@@ -1,23 +1,20 @@
 <?php
 
-
 namespace test\unit\Ingenerator\PHPUtils\Assets;
 
-
+use Ingenerator\PHPUtils\Assets\StaticAssetUrlProvider;
 use InvalidArgumentException;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use Ingenerator\PHPUtils\Assets\StaticAssetUrlProvider;
 use RuntimeException;
 
 class StaticAssetUrlProviderTest extends TestCase
 {
-
     protected $options = [
-        'mode'                => StaticAssetUrlProvider::MODE_LOCAL,
-        'local_asset_path'    => __DIR__,
+        'mode' => StaticAssetUrlProvider::MODE_LOCAL,
+        'local_asset_path' => __DIR__,
         'asset_base_url_file' => __FILE__,
     ];
 
@@ -26,19 +23,19 @@ class StaticAssetUrlProviderTest extends TestCase
      */
     protected $vfs;
 
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable()
     {
         $this->assertInstanceOf(StaticAssetUrlProvider::class, $this->newSubject());
     }
 
-    public function test_it_throws_in_invalid_mode()
+    public function testItThrowsInInvalidMode()
     {
         $this->options['mode'] = 'some-junk';
         $this->expectException(InvalidArgumentException::class);
         $this->newSubject();
     }
 
-    public function test_in_local_mode_get_url_throws_if_file_does_not_exist()
+    public function testInLocalModeGetUrlThrowsIfFileDoesNotExist()
     {
         $subject = $this->newSubject();
         $this->expectException(RuntimeException::class);
@@ -47,7 +44,7 @@ class StaticAssetUrlProviderTest extends TestCase
 
     #[TestWith(['assets/my-file.css'])]
     #[TestWith(['/assets/my-file.css'])]
-    public function test_in_local_mode_get_url_returns_absolute_url_with_mtime_suffix($rel_path)
+    public function testInLocalModeGetUrlReturnsAbsoluteUrlWithMtimeSuffix($rel_path)
     {
         vfsStream::create(
             [
@@ -64,10 +61,10 @@ class StaticAssetUrlProviderTest extends TestCase
         );
     }
 
-    public function test_in_remote_mode_get_url_throws_if_asset_base_url_file_does_not_exist()
+    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotExist()
     {
         $this->options['asset_base_url_file'] = $this->vfs->url().'/no-such-file.php';
-        $this->options['mode']                = StaticAssetUrlProvider::MODE_REMOTE;
+        $this->options['mode'] = StaticAssetUrlProvider::MODE_REMOTE;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('no-such-file.php');
         $this->newSubject();
@@ -77,7 +74,7 @@ class StaticAssetUrlProviderTest extends TestCase
     #[TestWith(['some content that is not php'])]
     #[TestWith(['<?php $a = 1;'])]
     #[TestWith(["<?php return '';"])]
-    public function test_in_remote_mode_get_url_throws_if_asset_base_url_file_does_not_return_string($file_content)
+    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotReturnString($file_content)
     {
         vfsStream::create(
             ['asset-base-url.php' => $file_content],
@@ -85,7 +82,7 @@ class StaticAssetUrlProviderTest extends TestCase
         );
 
         $this->options['asset_base_url_file'] = $this->vfs->getChild('asset-base-url.php')->url();
-        $this->options['mode']                = StaticAssetUrlProvider::MODE_REMOTE;
+        $this->options['mode'] = StaticAssetUrlProvider::MODE_REMOTE;
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid content in asset base url');
         $this->newSubject();
@@ -93,7 +90,7 @@ class StaticAssetUrlProviderTest extends TestCase
 
     #[TestWith(['assets/my-file.css'])]
     #[TestWith(['/assets/my-file.css'])]
-    public function test_it_remote_mode_get_url_returns_url_prefixed_with_base_url($rel_path)
+    public function testItRemoteModeGetUrlReturnsUrlPrefixedWithBaseUrl($rel_path)
     {
         vfsStream::create(
             ['asset-base-url.php' => '<?php return "https://i.am.the.walrus/branch/sha";'],
@@ -101,7 +98,7 @@ class StaticAssetUrlProviderTest extends TestCase
         );
 
         $this->options['asset_base_url_file'] = $this->vfs->getChild('asset-base-url.php')->url();
-        $this->options['mode']                = StaticAssetUrlProvider::MODE_REMOTE;
+        $this->options['mode'] = StaticAssetUrlProvider::MODE_REMOTE;
 
         $this->assertSame(
             'https://i.am.the.walrus/branch/sha/assets/my-file.css',
@@ -112,8 +109,8 @@ class StaticAssetUrlProviderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->vfs                            = vfsStream::setup('vfs', NULL, ['docroot' => []]);
-        $this->options['local_asset_path']    = $this->vfs->getChild('docroot')->url();
+        $this->vfs = vfsStream::setup('vfs', null, ['docroot' => []]);
+        $this->options['local_asset_path'] = $this->vfs->getChild('docroot')->url();
         $this->options['asset_base_url_file'] = $this->vfs->url().'/asset-base-url.php';
     }
 
@@ -125,5 +122,4 @@ class StaticAssetUrlProviderTest extends TestCase
             $this->options['asset_base_url_file']
         );
     }
-
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Cookie;
-
 
 class ArrayCookieWrapperStub extends CookieWrapper
 {
@@ -13,12 +11,12 @@ class ArrayCookieWrapperStub extends CookieWrapper
         $this->cookies = $cookies;
     }
 
-    public function set(string $name, ?string $value = NULL, array $options = []): void
+    public function set(string $name, ?string $value = null, array $options = []): void
     {
         parent::set($name, $value, $options);
         $this->set_cookie_calls[$name][] = ['value' => $value, 'opts' => $options];
     }
-    
+
     protected function set_cookie($name, $value, $options): void
     {
         // No-op
@@ -26,12 +24,11 @@ class ArrayCookieWrapperStub extends CookieWrapper
 
     protected function headers_sent(&$file, &$line): bool
     {
-        return FALSE;
+        return false;
     }
 
     public function inspectSetCookies(): array
     {
         return $this->set_cookie_calls;
     }
-
 }

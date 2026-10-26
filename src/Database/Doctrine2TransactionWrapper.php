@@ -17,5 +17,4 @@ class Doctrine2TransactionWrapper implements TransactionWrapper
     {
         return $this->em->transactional($func);
     }
-
 }

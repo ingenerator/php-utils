@@ -2,7 +2,8 @@
 
 namespace Ingenerator\PHPUtils\StringEncoding;
 
-class InvalidJSONException extends \InvalidArgumentException
-{
+use InvalidArgumentException;
 
+class InvalidJSONException extends InvalidArgumentException
+{
 }

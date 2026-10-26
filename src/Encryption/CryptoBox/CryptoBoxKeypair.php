@@ -1,10 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\Encryption\CryptoBox;
 
 use Ingenerator\TrustIDIngress\ToExtract\SensitiveParameter;
+use InvalidArgumentException;
 use SodiumException;
+
 use function preg_match;
 use function sodium_base642bin;
 use function sodium_bin2base64;
@@ -12,10 +15,11 @@ use function sodium_crypto_box_keypair;
 use function sodium_crypto_box_publickey;
 use function sodium_crypto_box_seal_open;
 use function sodium_memzero;
+
 use const SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING;
 
 /**
- * Models a secret keypair used to decrypt values with sodium_crypto_box_seal_open
+ * Models a secret keypair used to decrypt values with sodium_crypto_box_seal_open.
  *
  * Wrapping the keypair in an object allows this instance to be passed around without making copies
  * of the keypair in memory.
@@ -25,18 +29,14 @@ class CryptoBoxKeypair
     private CryptoBoxPublicKey $public_key;
 
     /**
-     * Create an instance from a string that was previously exported from this library
-     *
-     * @param string $exported
-     *
-     * @return static
+     * Create an instance from a string that was previously exported from this library.
      */
     public static function fromString(
         #[\SensitiveParameter]
-        string $exported
+        string $exported,
     ): static {
-        if ( ! preg_match('/(?P<keypair_id>[a-z0-9-]+)\.(?P<keypair_b64>[a-zA-Z0-9_-]+)$/', $exported, $matches)) {
-            throw new \InvalidArgumentException('Invalid keypair string format');
+        if (!preg_match('/(?P<keypair_id>[a-z0-9-]+)\.(?P<keypair_b64>[a-zA-Z0-9_-]+)$/', $exported, $matches)) {
+            throw new InvalidArgumentException('Invalid keypair string format');
         }
 
         try {
@@ -55,19 +55,15 @@ class CryptoBoxKeypair
         }
     }
 
-
     /**
-     * Randomly generate a new keypair
+     * Randomly generate a new keypair.
      *
-     * @param string $keypair_id
-     *
-     * @return static
      * @throws SodiumException
      */
     public static function generate(string $keypair_id): static
     {
-        if ( ! preg_match('/^(?P<keypair_id>[a-z0-9-]+)$/', $keypair_id)) {
-            throw new \InvalidArgumentException('keypair_id must consist of a-z0-9 only');
+        if (!preg_match('/^(?P<keypair_id>[a-z0-9-]+)$/', $keypair_id)) {
+            throw new InvalidArgumentException('keypair_id must consist of a-z0-9 only');
         }
 
         $keypair = sodium_crypto_box_keypair();
@@ -79,7 +75,6 @@ class CryptoBoxKeypair
         } finally {
             sodium_memzero($keypair);
         }
-
     }
 
     /**
@@ -90,13 +85,13 @@ class CryptoBoxKeypair
         // $keypair can't be readonly because we need to zero the memory on destruct
         #[SensitiveParameter]
         private string $keypair,
-        public readonly string $keypair_id
+        public readonly string $keypair_id,
     ) {
         // Creating the public key now is the easiest way to validate that the incoming keypair string is actually valid
         try {
             $this->public_key = new CryptoBoxPublicKey(sodium_crypto_box_publickey($this->keypair), $this->keypair_id);
         } catch (SodiumException $e) {
-            throw new \InvalidArgumentException('Invalid keypair: '.$e->getMessage());
+            throw new InvalidArgumentException('Invalid keypair: '.$e->getMessage());
         }
     }
 
@@ -114,11 +109,8 @@ class CryptoBoxKeypair
     }
 
     /**
-     * Decrypt a value that was previously encrypted with the public key
+     * Decrypt a value that was previously encrypted with the public key.
      *
-     * @param CryptoBoxString $encrypted
-     *
-     * @return string
      * @throws DecryptionFailedException if the keypair ID is incorrect, the ciphertext has been tampered with, or value was not encrypted for this keypair
      */
     public function decrypt(CryptoBoxString $encrypted): string
@@ -136,7 +128,6 @@ class CryptoBoxKeypair
             }
 
             return $result;
-
         } catch (SodiumException $e) {
             throw new DecryptionFailedException('Failed to decrypt: '.$e->getMessage(), 0, $e);
         }
@@ -147,13 +138,10 @@ class CryptoBoxKeypair
      *
      * Note, intentionally not using `Stringable` for this because exporting the private keypair should be an explicit
      * action, not something that happens accidentally on a typecast / debug printout etc.
-     *
-     * @return string
      */
     public function exportToString(): string
     {
         // Use constant-time base64 decoding to avoid timing attacks
         return $this->keypair_id.'.'.sodium_bin2base64($this->keypair, SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING);
     }
-
 }

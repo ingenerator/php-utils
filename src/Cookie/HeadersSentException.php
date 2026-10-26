@@ -2,10 +2,12 @@
 
 namespace Ingenerator\PHPUtils\Cookie;
 
+use LogicException;
+
 /**
- * Thrown if trying to set a cookie after headers have been sent
+ * Thrown if trying to set a cookie after headers have been sent.
  */
-class HeadersSentException extends \LogicException
+class HeadersSentException extends LogicException
 {
     public function __construct(string $cookie_name, string $output_file, string $output_line)
     {
@@ -13,5 +15,4 @@ class HeadersSentException extends \LogicException
             "Cannot assign cookie $cookie_name - headers have been sent by output at $output_file:$output_line"
         );
     }
-
 }

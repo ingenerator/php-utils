@@ -4,12 +4,16 @@ namespace test\unit\Ingenerator\PHPUtils\Object;
 
 use Ingenerator\PHPUtils\Object\InitialisableSingletonTrait;
 use Ingenerator\PHPUtils\Object\SingletonNotInitialisedException;
+use InvalidArgumentException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
+
+use function get_class;
 
 class InitialisableSingletonTraitTest extends TestCase
 {
-
-    public function test_it_throws_if_not_initialised()
+    public function testItThrowsIfNotInitialised()
     {
         $class = new class {
             use InitialisableSingletonTrait;
@@ -18,69 +22,68 @@ class InitialisableSingletonTraitTest extends TestCase
         $class::instance();
     }
 
-    public function test_it_throws_on_attempt_to_reinitialise()
+    public function testItThrowsOnAttemptToReinitialise()
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $class::initialise(function () use ($class) { return new $class; });
-        $this->expectException(\LogicException::class);
-        $class::initialise(function () use ($class) { return new $class; });
+        $class::initialise(function () use ($class) { return new $class(); });
+        $this->expectException(LogicException::class);
+        $class::initialise(function () use ($class) { return new $class(); });
     }
 
-    public function test_it_indicates_if_initialised_or_not()
+    public function testItIndicatesIfInitialisedOrNot()
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $this->assertSame(FALSE, $class::isInitialised(), 'Not initialised before init');
+        $this->assertSame(false, $class::isInitialised(), 'Not initialised before init');
 
-        $class::initialise(function () use ($class) { return new $class; });
-        $this->assertSame(TRUE, $class::isInitialised(), 'Initialised after init');
+        $class::initialise(function () use ($class) { return new $class(); });
+        $this->assertSame(true, $class::isInitialised(), 'Initialised after init');
     }
 
-
-    public function test_it_can_initialise_and_returns_singleton_from_then_on()
+    public function testItCanInitialiseAndReturnsSingletonFromThenOn()
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $class::initialise(function () use ($class) { return new $class; });
-        $this->assertInstanceOf(\get_class($class), $class::instance());
+        $class::initialise(function () use ($class) { return new $class(); });
+        $this->assertInstanceOf(get_class($class), $class::instance());
         $this->assertSame($class::instance(), $class::instance());
     }
 
-    public function test_it_throws_if_initialiser_does_not_return_instance_of_class()
+    public function testItThrowsIfInitialiserDoesNotReturnInstanceOfClass()
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $this->expectException(\InvalidArgumentException::class);
-        $class::initialise(function () use ($class) { return new \stdClass; });
+        $this->expectException(InvalidArgumentException::class);
+        $class::initialise(function () { return new stdClass(); });
     }
 
-    public function test_it_throws_if_initialiser_returns_nothing()
+    public function testItThrowsIfInitialiserReturnsNothing()
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $this->expectException(\InvalidArgumentException::class);
-        $class::initialise(function () use ($class) { });
+        $this->expectException(InvalidArgumentException::class);
+        $class::initialise(function () { });
     }
 
-    public function test_it_is_not_affected_by_multiple_classes_using_the_trait()
+    public function testItIsNotAffectedByMultipleClassesUsingTheTrait()
     {
-        CustomSingletonOne::initialise(function () { return new CustomSingletonOne; });
+        CustomSingletonOne::initialise(function () { return new CustomSingletonOne(); });
         $this->assertSame(
-            ['one' => TRUE, 'two' => FALSE],
+            ['one' => true, 'two' => false],
             ['one' => CustomSingletonOne::isInitialised(), 'two' => CustomSingletonTwo::isInitialised()],
             'Expect correct initial inits'
         );
 
         $inst1 = CustomSingletonOne::instance();
-        CustomSingletonTwo::initialise(function () { return new CustomSingletonTwo; });
+        CustomSingletonTwo::initialise(function () { return new CustomSingletonTwo(); });
         $this->assertSame(
-            ['one' => TRUE, 'two' => TRUE,],
+            ['one' => true, 'two' => true],
             ['one' => CustomSingletonOne::isInitialised(), 'two' => CustomSingletonTwo::isInitialised()],
             'Expect correct inits after init both'
         );
@@ -93,24 +96,24 @@ class InitialisableSingletonTraitTest extends TestCase
         );
     }
 
-    public function test_it_can_be_extended()
+    public function testItCanBeExtended()
     {
         $child = new class extends CustomParentSingleton {
         };
 
         $child::initialise(
             function () use ($child) {
-                return new $child;
+                return new $child();
             }
         );
 
         $this->assertSame(
             [
-                'child'  => TRUE,
-                'parent' => TRUE,
+                'child' => true,
+                'parent' => true,
             ],
             [
-                'child'  => $child::isInitialised(),
+                'child' => $child::isInitialised(),
                 'parent' => CustomParentSingleton::isInitialised(),
             ],
             'Initialised after init'
@@ -121,11 +124,9 @@ class InitialisableSingletonTraitTest extends TestCase
             CustomParentSingleton::instance(),
             'Parent and child singleton are same instance'
         );
-        $this->assertInstanceOf(\get_class($child), $child::instance(), 'Singleton is of the child class');
+        $this->assertInstanceOf(get_class($child), $child::instance(), 'Singleton is of the child class');
     }
-
 }
-
 
 class CustomSingletonOne
 {

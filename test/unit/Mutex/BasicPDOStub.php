@@ -5,6 +5,7 @@ namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Assert;
+
 use const PHP_MAJOR_VERSION;
 
 if (PHP_MAJOR_VERSION < 8) {
@@ -14,13 +15,15 @@ if (PHP_MAJOR_VERSION < 8) {
 
         public static function withQueryStack(array $stack)
         {
-            $i              = new static;
+            $i = new static();
             $i->query_stack = $stack;
 
             return $i;
         }
 
-        public function __construct() { }
+        public function __construct()
+        {
+        }
 
         public function quote($string, $type = PDO::PARAM_STR)
         {
@@ -30,8 +33,8 @@ if (PHP_MAJOR_VERSION < 8) {
         public function query(
             $statement,
             $mode = PDO::ATTR_DEFAULT_FETCH_MODE,
-            $arg3 = NULL,
-            array $ctorargs = []
+            $arg3 = null,
+            array $ctorargs = [],
         ) {
             Assert::assertNotEmpty($this->query_stack, 'No expectation defined for query '.$statement);
             $next_query = array_shift($this->query_stack);
@@ -52,13 +55,15 @@ if (PHP_MAJOR_VERSION < 8) {
 
         public static function withQueryStack(array $stack)
         {
-            $i              = new static;
+            $i = new static();
             $i->query_stack = $stack;
 
             return $i;
         }
 
-        public function __construct() { }
+        public function __construct()
+        {
+        }
 
         public function quote($string, $type = PDO::PARAM_STR): string|false
         {

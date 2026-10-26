@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\Encryption\CryptoBox;
 
-class DecryptionFailedException extends \RuntimeException
+use RuntimeException;
+
+class DecryptionFailedException extends RuntimeException
 {
-
-
 }

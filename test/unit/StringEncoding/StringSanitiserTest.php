@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 class StringSanitiserTest extends TestCase
 {
-
     public static function provider_printable_utf8(): array
     {
         return [
@@ -22,45 +21,45 @@ class StringSanitiserTest extends TestCase
                 "I am valid\r\nmultiline fróm Windows",
             ],
             'valid UTF8' => [
-                "Hello from Denmark with æøå",
+                'Hello from Denmark with æøå',
             ],
             'ascii with BEL control characters' => [
                 "Ring the \x07",
-                "Ring the �",
+                'Ring the �',
             ],
             'ascii with leading NUL control characters' => [
                 "\x00nully null",
-                "�nully null",
+                '�nully null',
             ],
             'ascii with trailing NUL control characters' => [
                 "nully null\x00",
-                "nully null�",
+                'nully null�',
             ],
             'ascii with internal NUL control characters' => [
                 "nully \x00 null",
-                "nully � null",
+                'nully � null',
             ],
             'utf8 truncated at first escape' => [
                 "Some partial\xD0",
-                "Some partial�",
+                'Some partial�',
             ],
             'utf8 with invalid trailing bytes' => [
                 "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html\xa3\xa9",
-                "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html��",
+                'Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html��',
             ],
             'utf8 with invalid included bytes' => [
                 "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff",
-                "Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff",
+                'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
             ],
             'utf8 with invalid leading bytes' => [
                 "\xa3\xa9Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff",
-                "��Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff",
+                '��Mozilla/5.0 (compatible; Baiduspider/2.0; and more stuff',
             ],
         ];
     }
 
     #[DataProvider('provider_printable_utf8')]
-    public function test_it_sanitises_to_printable_valid_utf8_string(string $input, ?string $expect = null)
+    public function testItSanitisesToPrintableValidUtf8String(string $input, ?string $expect = null)
     {
         $this->assertSame(
             $expect ?? $input,
@@ -74,14 +73,14 @@ class StringSanitiserTest extends TestCase
             'with invalid input, still truncates after cleaning' => [
                 "Mozilla/5.0 \x08 and more \xa3\xa9 nonsense",
                 [
-                    23 => "Mozilla/5.0 � and more ",
-                    24 => "Mozilla/5.0 � and more �",
-                    25 => "Mozilla/5.0 � and more ��",
-                    255 => "Mozilla/5.0 � and more �� nonsense",
+                    23 => 'Mozilla/5.0 � and more ',
+                    24 => 'Mozilla/5.0 � and more �',
+                    25 => 'Mozilla/5.0 � and more ��',
+                    255 => 'Mozilla/5.0 � and more �� nonsense',
                 ],
             ],
             'with valid input, truncates as multibyte' => [
-                "Hello from Denmark with æøå and stuff",
+                'Hello from Denmark with æøå and stuff',
                 [
                     24 => 'Hello from Denmark with ',
                     25 => 'Hello from Denmark with æ',
@@ -95,7 +94,7 @@ class StringSanitiserTest extends TestCase
     }
 
     #[DataProvider('provider_printable_utf8_max_length')]
-    public function test_it_can_constrain_printable_utf8_to_a_max_length(string $input, array $expected)
+    public function testItCanConstrainPrintableUtf8ToAMaxLength(string $input, array $expected)
     {
         $actual = [];
         foreach (array_keys($expected) as $max_length) {
@@ -104,7 +103,7 @@ class StringSanitiserTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
-    public function test_it_does_not_affect_global_substitute_character_state()
+    public function testItDoesNotAffectGlobalSubstituteCharacterState()
     {
         $old_encoding = mb_substitute_character();
         mb_substitute_character(0x3013);
@@ -118,5 +117,4 @@ class StringSanitiserTest extends TestCase
             mb_substitute_character($old_encoding);
         }
     }
-
 }

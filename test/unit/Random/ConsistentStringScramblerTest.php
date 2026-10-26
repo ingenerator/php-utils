@@ -6,23 +6,22 @@ use Ingenerator\PHPUtils\Random\ConsistentStringScrambler;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use function mt_rand;
 
+use function mt_rand;
 
 class ConsistentStringScramblerTest extends TestCase
 {
-
-    public function test_it_is_initialisable(): void
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(ConsistentStringScrambler::class, $this->newSubject());
     }
 
-    public function test_it_returns_null_for_null_string(): void
+    public function testItReturnsNullForNullString(): void
     {
-        $this->assertNull($this->newSubject()->shuffleWords(NULL, 'anything'));
+        $this->assertNull($this->newSubject()->shuffleWords(null, 'anything'));
     }
 
-    public function test_it_returns_null_for_empty_string(): void
+    public function testItReturnsNullForEmptyString(): void
     {
         $this->assertNull($this->newSubject()->shuffleWords('', 'anything'));
     }
@@ -33,15 +32,15 @@ class ConsistentStringScramblerTest extends TestCase
     #[TestWith(['
 Foo
 '])]
-    public function test_it_returns_same_output_for_single_word_string_even_with_extra_whitespace(
-        $input
+    public function testItReturnsSameOutputForSingleWordStringEvenWithExtraWhitespace(
+        $input,
     ): void {
         $this->assertSame('Foo', $this->newSubject()->shuffleWords($input, 'any'));
     }
 
-    public function test_it_always_produces_same_shuffled_words_for_same_hash_input(): void
+    public function testItAlwaysProducesSameShuffledWordsForSameHashInput(): void
     {
-        $input  = 'I am the eggman, I am the walrus';
+        $input = 'I am the eggman, I am the walrus';
         $result = $this->newSubject()->shuffleWords($input, 'my-hash');
 
         $this->assertSame(
@@ -57,7 +56,7 @@ Foo
         );
     }
 
-    public function test_it_produces_different_shuffled_words_for_different_hash_input(): void
+    public function testItProducesDifferentShuffledWordsForDifferentHashInput(): void
     {
         $input = 'I am the eggman, I am the walrus';
         $first = $this->newSubject()->shuffleWords($input, 'my-hash');
@@ -73,12 +72,12 @@ Foo
 spake Zarathustra  ', 'spake Zarathustra Thus!'])]
     #[TestWith([' 51 Niddry St
 ', 'Niddry St 51'])]
-    public function test_it_strips_repeated_and_enclosing_whitespace_in_incoming_string($input, $expect): void
+    public function testItStripsRepeatedAndEnclosingWhitespaceInIncomingString($input, $expect): void
     {
         $this->assertSame($expect, $this->newSubject()->shuffleWords($input, 'any-hash'));
     }
 
-    public function test_it_does_not_cause_subsequent_random_numbers_to_be_predictable(): void
+    public function testItDoesNotCauseSubsequentRandomNumbersToBePredictable(): void
     {
         // Seeding the PRNG inside the class will of course affect randomness generated subsequently
         // anywhere in the code, we need to make sure it's randomy again before returning to avoid
@@ -114,7 +113,7 @@ spake Zarathustra  ', 'spake Zarathustra Thus!'])]
         );
     }
 
-    public function test_it_throws_with_empty_hash_input(): void
+    public function testItThrowsWithEmptyHashInput(): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidArgumentException::class);
@@ -123,7 +122,6 @@ spake Zarathustra  ', 'spake Zarathustra Thus!'])]
 
     private function newSubject(): ConsistentStringScrambler
     {
-        return new ConsistentStringScrambler;
+        return new ConsistentStringScrambler();
     }
-
 }

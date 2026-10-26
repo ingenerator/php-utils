@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\CSV;
-
 
 use ErrorException;
 use Ingenerator\PHPUtils\CSV\CSVWriter;
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+
 use function fclose;
 use function fgetcsv;
 use function file_get_contents;
@@ -30,27 +32,26 @@ use function unlink;
 
 class CSVWriterTest extends TestCase
 {
-
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable()
     {
         $this->assertInstanceOf(CSVWriter::class, $this->newSubject());
     }
 
-    public function test_it_throws_if_file_cannot_be_opened()
+    public function testItThrowsIfFileCannotBeOpened()
     {
         $subject = $this->newSubject();
         $this->expectException(ErrorException::class);
         $subject->open('/invalid_csv_file');
     }
 
-    public function test_it_throws_if_writing_before_opening_file()
+    public function testItThrowsIfWritingBeforeOpeningFile()
     {
         $subject = $this->newSubject();
         $this->expectException(LogicException::class);
         $subject->write(['any' => 'junk']);
     }
 
-    public function test_it_throws_if_writing_after_closing_file()
+    public function testItThrowsIfWritingAfterClosingFile()
     {
         $subj = $this->newSubject();
         $subj->open('php://temp');
@@ -59,7 +60,7 @@ class CSVWriterTest extends TestCase
         $subj->write(['any' => 'content']);
     }
 
-    public function test_open_accepts_and_allows_writing_to_existing_stream_resource()
+    public function testOpenAcceptsAndAllowsWritingToExistingStreamResource()
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -73,7 +74,7 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    public function test_it_throws_if_writing_to_externally_closed_resource()
+    public function testItThrowsIfWritingToExternallyClosedResource()
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -87,7 +88,7 @@ class CSVWriterTest extends TestCase
         $subj->write(['some' => 'csv']);
     }
 
-    public function test_it_can_open_and_write_to_filename()
+    public function testItCanOpenAndWriteToFilename()
     {
         $name = tempnam(sys_get_temp_dir(), 'csv-test.csv');
         try {
@@ -102,7 +103,7 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    public function test_it_writes_column_headers_before_first_row()
+    public function testItWritesColumnHeadersBeforeFirstRow()
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -111,14 +112,14 @@ class CSVWriterTest extends TestCase
         $this->assertCSVContent(
             [
                 ['our', 'is'],
-                ['data', 'here']
+                ['data', 'here'],
             ],
             $file
         );
         fclose($file);
     }
 
-    public function test_it_does_not_write_column_headers_before_subsequent_rows()
+    public function testItDoesNotWriteColumnHeadersBeforeSubsequentRows()
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -129,7 +130,7 @@ class CSVWriterTest extends TestCase
             [
                 ['our', 'is'],
                 ['data', 'here'],
-                ['second', 'there']
+                ['second', 'there'],
             ],
             $file
         );
@@ -172,7 +173,7 @@ class CSVWriterTest extends TestCase
     }
 
     #[DataProvider('providerQuotedHeaders')]
-    public function test_it_optionally_writes_column_headers_without_quotes(array $row, array $options, string $expect): void
+    public function testItOptionallyWritesColumnHeadersWithoutQuotes(array $row, array $options, string $expect): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -183,7 +184,7 @@ class CSVWriterTest extends TestCase
         fclose($file);
     }
 
-    public function test_it_throws_if_column_headers_contain_comma_when_unquoted(): void
+    public function testItThrowsIfColumnHeadersContainCommaWhenUnquoted(): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -225,7 +226,7 @@ class CSVWriterTest extends TestCase
     }
 
     #[DataProvider('providerLineEndings')]
-    public function test_its_line_endings_can_be_configured(array $options, string $expect): void
+    public function testItsLineEndingsCanBeConfigured(array $options, string $expect): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -238,7 +239,7 @@ class CSVWriterTest extends TestCase
 
     #[TestWith([true])]
     #[TestWith([false])]
-    public function test_it_optionally_writes_byte_order_mark_at_start_of_file($write_bom)
+    public function testItOptionallyWritesByteOrderMarkAtStartOfFile($write_bom)
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -253,7 +254,7 @@ class CSVWriterTest extends TestCase
 
     #[TestWith([['is' => 'jumbled', 'our' => 'up']])]
     #[TestWith([['our' => 'things', 'went' => 'bad']])]
-    public function test_it_throws_if_subsequent_row_headers_do_not_match($second_row)
+    public function testItThrowsIfSubsequentRowHeadersDoNotMatch($second_row)
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -267,7 +268,7 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    public function test_it_does_not_close_externally_provided_stream()
+    public function testItDoesNotCloseExternallyProvidedStream()
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -295,5 +296,4 @@ class CSVWriterTest extends TestCase
     {
         return new CSVWriter();
     }
-
 }

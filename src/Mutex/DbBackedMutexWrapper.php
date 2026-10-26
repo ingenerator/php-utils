@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Mutex;
-
 
 use PDO;
 
@@ -18,9 +16,6 @@ class DbBackedMutexWrapper implements MutexWrapper
         $this->db = $db;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function withLock(string $name, int $timeout_seconds, callable $exclusive_code)
     {
         try {
@@ -36,7 +31,7 @@ class DbBackedMutexWrapper implements MutexWrapper
     {
         // Note: These are borrowed from and could be used for our MysqlSession class
         $name_param = $this->db->quote($name);
-        $result     = $this->db
+        $result = $this->db
             ->query("SELECT GET_LOCK($name_param, $timeout_seconds)")
             ->fetchAll(PDO::FETCH_COLUMN, 0);
 
@@ -53,5 +48,4 @@ class DbBackedMutexWrapper implements MutexWrapper
         $name_param = $this->db->quote($name);
         $this->db->query("SELECT RELEASE_LOCK($name_param)")->fetchAll();
     }
-
 }

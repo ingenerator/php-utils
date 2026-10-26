@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Database;
-
 
 class NullTransactionWrapper implements TransactionWrapper
 {
@@ -10,5 +8,4 @@ class NullTransactionWrapper implements TransactionWrapper
     {
         return $func();
     }
-
 }

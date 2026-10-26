@@ -1,12 +1,11 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\DeploymentConfig;
 
+use RuntimeException;
 
-class MissingConfigException extends \RuntimeException
+class MissingConfigException extends RuntimeException
 {
-
     public static function missingFile($path, $real_path, $env)
     {
         return new static("Config `$path` is not present in `$real_path` and is required for `$env` environment");
@@ -16,5 +15,4 @@ class MissingConfigException extends \RuntimeException
     {
         return new static("No config map entry for `$env`, nor one for `*`");
     }
-
 }

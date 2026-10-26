@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
-
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -14,11 +15,10 @@ use PHPUnit\Framework\TestCase;
 
 class AssociativeArrayUtilsTest extends TestCase
 {
-
     #[TestWith([['one', 'two', 'three'], false])]
     #[TestWith([[1 => 'mixed indices', 5 => 'also mixed'], true])]
     #[TestWith([['one' => 'o clock', 'two' => 'o clock', 'three' => 'o clock'], true])]
-    public function test_is_associative(array $array, $expected)
+    public function testIsAssociative(array $array, $expected)
     {
         $this->assertSame(
             $expected,
@@ -45,7 +45,7 @@ class AssociativeArrayUtilsTest extends TestCase
                 [
                     'foo.bar.baz' => 'bil',
                     'foo.bar.ben' => 'bob',
-                    'food'        => 'burger',
+                    'food' => 'burger',
                 ],
                 ['foo' => ['bar' => ['baz' => 'bil', 'ben' => 'bob']], 'food' => 'burger'],
             ],
@@ -53,7 +53,7 @@ class AssociativeArrayUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_paths_to_nested')]
-    public function test_it_converts_pathed_hash_to_nested_arrays($input, $expect)
+    public function testItConvertsPathedHashToNestedArrays($input, $expect)
     {
         $this->assertSame($expect, AssociativeArrayUtils::pathsToNested($input));
     }
@@ -82,24 +82,22 @@ class AssociativeArrayUtilsTest extends TestCase
                 ['popped' => ['b' => 'bell', 'c' => 'cookie', 'a' => 'apple'], 'source' => []],
             ],
             [
-                ['a' => 'apple', 'b' => NULL, 'c' => 'cookie'],
+                ['a' => 'apple', 'b' => null, 'c' => 'cookie'],
                 ['b', 'c'],
-                ['popped' => ['b' => NULL, 'c' => 'cookie'], 'source' => ['a' => 'apple']],
+                ['popped' => ['b' => null, 'c' => 'cookie'], 'source' => ['a' => 'apple']],
             ],
         ];
     }
 
     #[DataProvider('provider_pop_keys')]
-    public function test_it_can_pop_keys_from_a_source_array($source, $pop_keys, $expect)
+    public function testItCanPopKeysFromASourceArray($source, $pop_keys, $expect)
     {
         $result = AssociativeArrayUtils::popKeys($source, $pop_keys);
         $this->assertSame($expect, ['popped' => $result, 'source' => $source]);
     }
 
     /**
-     * Provides test data for test_path()
-     *
-     * @return array
+     * Provides test data for test_path().
      */
     public static function provider_set_path(): array
     {
@@ -123,13 +121,12 @@ class AssociativeArrayUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_set_path')]
-    public function test_set_path($expected, $array, ...$args)
+    public function testSetPath($expected, $array, ...$args)
     {
         AssociativeArrayUtils::setPath($array, ...$args);
 
         $this->assertSame($expected, $array);
     }
-
 
     public static function provider_merge(): array
     {
@@ -252,17 +249,17 @@ class AssociativeArrayUtilsTest extends TestCase
             ],
             // Multiple input arrays
             [
-                ['a' => 'third', 'b' => [4, 6, 8], 'c' => ['a' => TRUE, 'b' => TRUE, 'c' => TRUE, 'd' => 'last']],
-                ['a' => 'first', 'b' => [4], 'c' => ['a' => TRUE]],
-                ['a' => 'second', 'b' => [6], 'c' => ['b' => TRUE]],
-                ['a' => 'third', 'b' => [8], 'c' => ['c' => TRUE]],
+                ['a' => 'third', 'b' => [4, 6, 8], 'c' => ['a' => true, 'b' => true, 'c' => true, 'd' => 'last']],
+                ['a' => 'first', 'b' => [4], 'c' => ['a' => true]],
+                ['a' => 'second', 'b' => [6], 'c' => ['b' => true]],
+                ['a' => 'third', 'b' => [8], 'c' => ['c' => true]],
                 ['c' => ['d' => 'last']],
             ],
         ];
     }
 
     #[DataProvider('provider_merge')]
-    public function test_deep_merge($expected, ...$args)
+    public function testDeepMerge($expected, ...$args)
     {
         $this->assertSame(
             $expected,

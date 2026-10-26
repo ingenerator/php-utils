@@ -1,14 +1,13 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Object;
 
+use Closure;
 
 class ScopeChangingCaller
 {
-
     /**
-     * Shorthand to call a function in the scope of another class
+     * Shorthand to call a function in the scope of another class.
      *
      * Use e.g. to create instances with private/protected constructors for testing:
      *
@@ -24,16 +23,10 @@ class ScopeChangingCaller
      *       ACachedThing::class,
      *       function () { ACachedThing::$cache = NULL; }
      *   );
-     *
-     * @param string   $class
-     * @param callable $func
-     * @param mixed    ...$args
-     *
-     * @return mixed
      */
     public static function call(string $class, callable $func, ...$args)
     {
-        $func = \Closure::bind($func, NULL, $class);
+        $func = Closure::bind($func, null, $class);
 
         return $func(...$args);
     }

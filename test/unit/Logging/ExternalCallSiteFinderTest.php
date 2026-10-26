@@ -1,11 +1,11 @@
 <?php
 
-
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use Ingenerator\PHPUtils\Logging\ExternalCallSiteFinder;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+
 use function debug_backtrace;
 use function file_put_contents;
 use function sys_get_temp_dir;
@@ -14,13 +14,12 @@ use function unlink;
 
 class ExternalCallSiteFinderTest extends TestCase
 {
-
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable()
     {
         $this->assertInstanceOf(ExternalCallSiteFinder::class, $this->newSubject());
     }
 
-    public function test_it_reports_unknown_location_if_stack_not_deep_enough()
+    public function testItReportsUnknownLocationIfStackNotDeepEnough()
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
         $this->assertSame(
@@ -29,64 +28,64 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public function test_it_reports_correct_location_for_direct_call_to_external_method()
+    public function testItReportsCorrectLocationForDirectCallToExternalMethod()
     {
-        $caller    = new TestCallsiteCaller;
-        $result    = $caller->singleExternal($this->newSubject());
+        $caller = new TestCallsiteCaller();
+        $result = $caller->singleExternal($this->newSubject());
         $call_line = __LINE__ - 1;
 
         $this->assertSame(
             [
-                'file'     => __FILE__,
-                'line'     => $call_line,
+                'file' => __FILE__,
+                'line' => $call_line,
                 'function' => __CLASS__.'->'.__FUNCTION__,
             ],
             $result
         );
     }
 
-    public function test_it_ignores_internal_calls_within_single_specified_class()
+    public function testItIgnoresInternalCallsWithinSingleSpecifiedClass()
     {
-        $caller    = new TestCallsiteCaller;
-        $result    = $caller->throughInternalMethod($this->newSubject());
+        $caller = new TestCallsiteCaller();
+        $result = $caller->throughInternalMethod($this->newSubject());
         $call_line = __LINE__ - 1;
 
         $this->assertSame(
             [
-                'file'     => __FILE__,
-                'line'     => $call_line,
+                'file' => __FILE__,
+                'line' => $call_line,
                 'function' => __CLASS__.'->'.__FUNCTION__,
             ],
             $result
         );
     }
 
-    public function test_it_ignores_internal_calls_within_parent_class()
+    public function testItIgnoresInternalCallsWithinParentClass()
     {
-        $caller    = new TestCallsiteCaller;
-        $result    = $caller->throughParentMethod($this->newSubject());
+        $caller = new TestCallsiteCaller();
+        $result = $caller->throughParentMethod($this->newSubject());
         $call_line = __LINE__ - 1;
 
         $this->assertSame(
             [
-                'file'     => __FILE__,
-                'line'     => $call_line,
+                'file' => __FILE__,
+                'line' => $call_line,
                 'function' => __CLASS__.'->'.__FUNCTION__,
             ],
             $result
         );
     }
 
-    public function test_it_ignores_calls_through_expected_external_callers()
+    public function testItIgnoresCallsThroughExpectedExternalCallers()
     {
-        $caller    = new TestCallSiteProxy;
-        $result    = $caller->throughExpectedDependency($this->newSubject());
+        $caller = new TestCallSiteProxy();
+        $result = $caller->throughExpectedDependency($this->newSubject());
         $call_line = __LINE__ - 1;
 
         $this->assertSame(
             [
-                'file'     => __FILE__,
-                'line'     => $call_line,
+                'file' => __FILE__,
+                'line' => $call_line,
                 'function' => __CLASS__.'->'.__FUNCTION__,
             ],
             $result
@@ -102,8 +101,7 @@ class ExternalCallSiteFinderTest extends TestCase
                 use test\unit\Ingenerator\PHPUtils\Logging\TestCallSiteAsserter;
                 /* @var TestCallSiteAsserter $asserter */ 
                 return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'require']);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -112,8 +110,7 @@ PHP
                     return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'log_ab8123723123']);
                 }
                 return log_ab8123723123($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -123,8 +120,7 @@ PHP
                     return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => 'whoops\i\did\it\again\log_ab8123723123']);
                 }
                 return log_ab8123723123($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -144,8 +140,7 @@ PHP
                     return $asserter->test(['file' => __FILE__, 'line' => __LINE__, 'function' => $expected_func_name]);
                     
                 })($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -156,8 +151,7 @@ PHP
                   }
                 }
                 return Lgt812372321312312321Static::log($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -168,8 +162,7 @@ PHP
                   }
                 }
                 return (new Lgt812372321312312321Inst)->log($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -180,8 +173,7 @@ PHP
                   }
                 };
                 return $class::log($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -192,8 +184,7 @@ PHP
                   }
                 };
                 return $class->log($asserter);
-PHP
-                ,
+PHP,
             ],
             [
                 <<<'PHP'
@@ -207,21 +198,20 @@ PHP
                   }
                 };
                 return $class->log($asserter);
-PHP
-                ,
+PHP,
             ],
         ];
     }
 
     #[DataProvider('provider_source_location_call_sites')]
-    public function test_it_can_handle_all_possible_call_sites($code)
+    public function testItCanHandleAllPossibleCallSites($code)
     {
         $temp = tempnam(sys_get_temp_dir(), 'logger_test');
         file_put_contents($temp, "<?php\n".$code);
         try {
             // Include the code block in anonymous scope so the call is not related to this method
             $func = function (TestCallSiteAsserter $asserter) use ($temp) { return require $temp; };
-            $func->bindTo(NULL, NULL);
+            $func->bindTo(null, null);
             $result = $func(new TestCallSiteAsserter($this->newSubject()));
         } finally {
             unlink($temp);
@@ -232,11 +222,9 @@ PHP
 
     protected function newSubject()
     {
-        return new ExternalCallSiteFinder;
+        return new ExternalCallSiteFinder();
     }
-
 }
-
 
 class TestCallsiteCaller extends TestCallSiteCallerParent
 {
@@ -260,27 +248,23 @@ class TestCallsiteCaller extends TestCallSiteCallerParent
             ]
         );
     }
-
 }
 
 abstract class TestCallSiteCallerParent
 {
-
     abstract public function singleExternal(ExternalCallSiteFinder $finder);
 
     public function throughParentMethod(ExternalCallSiteFinder $finder)
     {
         return $this->singleExternal($finder);
     }
-
 }
 
 class TestCallSiteProxy
 {
-
     public function throughExpectedDependency(ExternalCallSiteFinder $finder)
     {
-        $caller = new TestCallsiteCaller;
+        $caller = new TestCallsiteCaller();
 
         return $caller->fromManager($finder);
     }
@@ -293,7 +277,10 @@ class TestCallSiteAsserter
      */
     private $finder;
 
-    public function __construct(ExternalCallSiteFinder $finder) { $this->finder = $finder; }
+    public function __construct(ExternalCallSiteFinder $finder)
+    {
+        $this->finder = $finder;
+    }
 
     public function test(array $expected)
     {
@@ -304,7 +291,7 @@ class TestCallSiteAsserter
 
         return [
             'expected' => $expected,
-            'actual'   => $actual,
+            'actual' => $actual,
         ];
     }
 }

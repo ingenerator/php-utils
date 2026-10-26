@@ -1,21 +1,37 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\Repository;
 
+use Closure;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
-use PHPUnit\Framework\Assert;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use InvalidArgumentException;
+use PHPUnit\Framework\Assert;
+use UnexpectedValueException;
+
+use function array_pop;
+use function call_user_func;
+use function count;
+use function func_get_args;
+use function get_class;
+use function get_object_vars;
+use function in_array;
+use function is_object;
+use function spl_object_id;
+use function sprintf;
 
 /**
  * Base class for an array-based memory repository for use in unit tests. Provides helpers to allow
  * easy and quick creation of array-backed implementations of a project-specific repository interface.
- *
- * @package Ingenerator\PHPUtils\Repository
  */
 abstract class AbstractArrayRepository
 {
@@ -35,7 +51,7 @@ abstract class AbstractArrayRepository
     }
 
     /**
-     * Create a repo with the provided entities. Pass entities, or arrays of properties to stub
+     * Create a repo with the provided entities. Pass entities, or arrays of properties to stub.
      *
      * @param array|object $entity,...
      *
@@ -43,11 +59,11 @@ abstract class AbstractArrayRepository
      */
     public static function with($entity)
     {
-        return static::withList(\func_get_args());
+        return static::withList(func_get_args());
     }
 
     /**
-     * Same as ::with, but takes an array rather than a list of method parameters
+     * Same as ::with, but takes an array rather than a list of method parameters.
      *
      * @param array[] $entity_data
      *
@@ -56,9 +72,9 @@ abstract class AbstractArrayRepository
     public static function withList(array $entity_data)
     {
         $entity_class = static::getEntityBaseClass();
-        $entities     = [];
+        $entities = [];
         foreach ($entity_data as $entity) {
-            if ( ! $entity instanceof $entity_class) {
+            if (!$entity instanceof $entity_class) {
                 $entity = static::stubEntity($entity);
             }
             $entities[] = $entity;
@@ -73,15 +89,14 @@ abstract class AbstractArrayRepository
     abstract protected static function getEntityBaseClass();
 
     /**
-     * @param array $data
-     *
      * @return object
      */
     protected static function stubEntity(array $data)
     {
         $class = static::getEntityBaseClass();
-        $e     = new $class;
+        $e = new $class();
         ObjectPropertyPopulator::assignHash($e, $data);
+
         return $e;
     }
 
@@ -94,7 +109,7 @@ abstract class AbstractArrayRepository
     }
 
     /**
-     * Ronseal
+     * Ronseal.
      *
      * (Does what it says on the tin)
      */
@@ -108,7 +123,7 @@ abstract class AbstractArrayRepository
     }
 
     /**
-     * This, and only this, entity should have been saved
+     * This, and only this, entity should have been saved.
      *
      * @param object $entity
      */
@@ -122,7 +137,7 @@ abstract class AbstractArrayRepository
     }
 
     /**
-     * Build a save-log record to allow the class to identify what's been saved for assertions
+     * Build a save-log record to allow the class to identify what's been saved for assertions.
      *
      * @param object $entity
      *
@@ -130,16 +145,16 @@ abstract class AbstractArrayRepository
      */
     protected function formatSaveLog($entity)
     {
-        return \sprintf(
+        return sprintf(
             "%s (object %s) with data:\n%s\n",
-            \get_class($entity),
-            \spl_object_id($entity),
+            get_class($entity),
+            spl_object_id($entity),
             JSON::encode($this->entityToArray($entity))
         );
     }
 
     /**
-     * Creates a simple array representation of a set of entities that can be formatted as JSON
+     * Creates a simple array representation of a set of entities that can be formatted as JSON.
      *
      * Used to capture a snapshot of entity state at the time it's saved to allow later comparison
      *
@@ -148,41 +163,40 @@ abstract class AbstractArrayRepository
      *
      * @return array
      */
-    protected function entityToArray($entity, & $seen_objects = [])
+    protected function entityToArray($entity, &$seen_objects = [])
     {
-        $entity_hash = \spl_object_id($entity);
+        $entity_hash = spl_object_id($entity);
         if (isset($seen_objects[$entity_hash])) {
             return '**RECURSION**';
-        } else {
-            $seen_objects[$entity_hash] = TRUE;
         }
+        $seen_objects[$entity_hash] = true;
 
-        $all_props    = \Closure::bind(
+        $all_props = Closure::bind(
             function ($e) {
-                return \get_object_vars($e);
+                return get_object_vars($e);
             },
-            NULL,
+            null,
             $entity
         );
         $obj_identity = function ($a) {
-            return \get_class($a).'#'.\spl_object_id($a);
+            return get_class($a).'#'.spl_object_id($a);
         };
-        $result       = [];
+        $result = [];
         foreach ($all_props($entity) as $key => $var) {
-            if ( ! \is_object($var)) {
+            if (!is_object($var)) {
                 $result[$key] = $var;
             } elseif ($var instanceof Collection) {
                 $result[$key] = [];
                 foreach ($var as $collection_item) {
                     $result[$key][] = [
-                        $obj_identity($var) => $this->entityToArray($collection_item, $seen_objects)
+                        $obj_identity($var) => $this->entityToArray($collection_item, $seen_objects),
                     ];
                 }
-            } elseif ($var instanceof \DateTimeInterface) {
-                $result[$key][\get_class($var)] = $var->format(\DateTime::ISO8601);
+            } elseif ($var instanceof DateTimeInterface) {
+                $result[$key][get_class($var)] = $var->format(DateTime::ISO8601);
             } else {
                 $result[$key] = [
-                    $obj_identity($var) => $this->entityToArray($var, $seen_objects)
+                    $obj_identity($var) => $this->entityToArray($var, $seen_objects),
                 ];
             }
         }
@@ -191,7 +205,7 @@ abstract class AbstractArrayRepository
     }
 
     /**
-     * Count entities by a group value returned by the callback
+     * Count entities by a group value returned by the callback.
      *
      *     public function countByColour() {
      *       return $this->countWith(
@@ -207,14 +221,15 @@ abstract class AbstractArrayRepository
     {
         $counts = [];
         foreach ($this->entities as $entity) {
-            $group          = \call_user_func($callable, $entity);
+            $group = call_user_func($callable, $entity);
             $counts[$group] = isset($counts[$group]) ? ++$counts[$group] : 1;
         }
+
         return $counts;
     }
 
     /**
-     * Find a single entity matching the callback (throws if non-unique or nothing matching)
+     * Find a single entity matching the callback (throws if non-unique or nothing matching).
      *
      *     public function load($id) {
      *       return $this->loadWith(function (MyEntity $e) use ($id) { return $e->getId() === $id; });
@@ -226,34 +241,32 @@ abstract class AbstractArrayRepository
      */
     protected function loadWith($callable)
     {
-        if ( ! $entity = $this->findWith($callable)) {
-            throw new \InvalidArgumentException('No entity matching criteria');
+        if (!$entity = $this->findWith($callable)) {
+            throw new InvalidArgumentException('No entity matching criteria');
         }
 
         return $entity;
     }
 
     /**
-     * Find a single entity matching the callback, or null (throws if non-unique)
-     *
-     * @param $callable
+     * Find a single entity matching the callback, or null (throws if non-unique).
      *
      * @return object
      */
     protected function findWith($callable)
     {
         $entities = $this->listWith($callable);
-        if (\count($entities) > 1) {
-            throw new \UnexpectedValueException(
+        if (count($entities) > 1) {
+            throw new UnexpectedValueException(
                 'Found multiple entities : expected unique condition.'
             );
         }
 
-        return \array_pop($entities);
+        return array_pop($entities);
     }
 
     /**
-     * Find all entities that the callable matches (like array_filter)
+     * Find all entities that the callable matches (like array_filter).
      *
      * @param callable $callable
      *
@@ -263,7 +276,7 @@ abstract class AbstractArrayRepository
     {
         $entities = [];
         foreach ($this->entities as $entity) {
-            if (\call_user_func($callable, $entity)) {
+            if (call_user_func($callable, $entity)) {
                 $entities[] = $entity;
             }
         }
@@ -282,9 +295,8 @@ abstract class AbstractArrayRepository
     protected function saveEntity($entity)
     {
         $this->save_log .= $this->formatSaveLog($entity);
-        if ( ! \in_array($entity, $this->entities, TRUE)) {
+        if (!in_array($entity, $this->entities, true)) {
             $this->entities[] = $entity;
         }
     }
-
 }

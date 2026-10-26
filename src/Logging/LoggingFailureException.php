@@ -1,17 +1,15 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Logging;
 
-
+use RuntimeException;
 use Throwable;
 
 /**
- * Thrown if the logger cannot write to the destination stream
+ * Thrown if the logger cannot write to the destination stream.
  */
-class LoggingFailureException extends \RuntimeException
+class LoggingFailureException extends RuntimeException
 {
-
     public function __construct(?string $log_destination, Throwable $failure)
     {
         return parent::__construct(

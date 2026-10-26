@@ -1,17 +1,15 @@
 <?php
 
-
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
-
+use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Ingenerator\PHPUtils\StringEncoding\Base64Url;
+
 use function random_bytes;
 
 class Base64UrlTest extends TestCase
 {
-
     public static function provider_encode_decode()
     {
         return [
@@ -22,18 +20,16 @@ class Base64UrlTest extends TestCase
     }
 
     #[DataProvider('provider_encode_decode')]
-    public function test_it_can_encode_and_decode_a_value($original)
+    public function testItCanEncodeAndDecodeAValue($original)
     {
         $this->assertSame($original, Base64Url::decode(Base64Url::encode($original)));
     }
 
     #[DataProvider('provider_encode_decode')]
-    public function test_its_encoded_output_is_always_url_safe($value)
+    public function testItsEncodedOutputIsAlwaysUrlSafe($value)
     {
         $encoded = Base64Url::encode($value);
         $this->assertIsString($encoded);
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\-\_]+$/', $encoded);
     }
-
 }
-

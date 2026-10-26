@@ -1,15 +1,20 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\Validation;
 
+use InvalidArgumentException;
 
 class ValidNumber
 {
-    protected function __construct() { }
+    protected function __construct()
+    {
+    }
 
     /**
      * @param string    $number
@@ -19,15 +24,15 @@ class ValidNumber
      */
     public static function minimum($number, $min)
     {
-        if ( ! is_numeric($number)) {
-            return FALSE;
+        if (!is_numeric($number)) {
+            return false;
         }
 
-        return ($number >= $min);
+        return $number >= $min;
     }
 
     /**
-     * Shorthand way to specify the fully qualified validator callback
+     * Shorthand way to specify the fully qualified validator callback.
      *
      * @param string $rulename
      *
@@ -39,8 +44,7 @@ class ValidNumber
             case 'minimum':
                 return static::class.'::'.$rulename;
             default:
-                throw new \InvalidArgumentException('Unknown rule '.__CLASS__.'::'.$rulename);
+                throw new InvalidArgumentException('Unknown rule '.__CLASS__.'::'.$rulename);
         }
     }
-
 }

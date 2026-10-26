@@ -1,11 +1,11 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Mutex;
 
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use RuntimeException;
 
-class MutexTimedOutException extends \RuntimeException
+class MutexTimedOutException extends RuntimeException
 {
     public function __construct(string $name, string $timeout, $result)
     {

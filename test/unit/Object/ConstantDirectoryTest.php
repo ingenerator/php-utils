@@ -1,6 +1,8 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
@@ -11,22 +13,22 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 class ConstantDirectoryTest extends TestCase
 {
+    public const TEST_ONE = 'any';
+    public const TEST_TWO = 'two';
+    public const TESTTHREE = 'three';
+    public const ANYTHING = 'another';
 
-    const TEST_ONE = 'any';
-    const TEST_TWO = 'two';
-    const TESTTHREE = 'three';
-    const ANYTHING = 'another';
-
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable()
     {
         $this->assertInstanceOf(ConstantDirectory::class, $this->newSubject());
     }
 
-    public function test_it_returns_empty_array_with_no_constants()
+    public function testItReturnsEmptyArrayWithNoConstants()
     {
         $this->assertSame(
             [],
@@ -34,21 +36,20 @@ class ConstantDirectoryTest extends TestCase
         );
     }
 
-    public function test_it_returns_list_of_all_constants()
+    public function testItReturnsListOfAllConstants()
     {
         $this->assertSame(
             [
-                'TEST_ONE'  => 'any',
-                'TEST_TWO'  => 'two',
+                'TEST_ONE' => 'any',
+                'TEST_TWO' => 'two',
                 'TESTTHREE' => 'three',
-                'ANYTHING'  => 'another',
+                'ANYTHING' => 'another',
             ],
             $this->newSubject(self::class)->listConstants()
         );
-
     }
 
-    public function test_it_returns_list_of_constants_with_prefix()
+    public function testItReturnsListOfConstantsWithPrefix()
     {
         $this->assertSame(
             [
@@ -59,15 +60,12 @@ class ConstantDirectoryTest extends TestCase
         );
     }
 
-
     protected function newSubject($class = self::class)
     {
         return ConstantDirectory::forClass($class);
     }
-
 }
 
 class NoConstantsClass
 {
 }
-

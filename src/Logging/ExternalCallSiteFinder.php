@@ -1,8 +1,9 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Logging;
 
+use function array_pop;
+use function array_shift;
 
 /**
  * Finds the last external call to a particular [set of] internal classes.
@@ -14,7 +15,6 @@ namespace Ingenerator\PHPUtils\Logging;
  */
 class ExternalCallSiteFinder
 {
-
     /**
      * Returns a `sourceLocation` formatted array with the file, line and function making the external call.
      *
@@ -47,12 +47,6 @@ class ExternalCallSiteFinder
      *        );
      *      }
      *    }
-     *
-     *
-     * @param array $trace
-     * @param array $ignore_classes
-     *
-     * @return array
      */
     public function findExternalCall(array $trace, array $ignore_classes): array
     {
@@ -67,7 +61,7 @@ class ExternalCallSiteFinder
         //
         // So we need to collect all the frames that refer to this class so we can find the last one.
         $internal_calls = [];
-        while ($next_call = \array_shift($trace)) {
+        while ($next_call = array_shift($trace)) {
             if ($this->isIgnoredClass($next_call['class'] ?? '{unknown class}', $ignore_classes)) {
                 $internal_calls[] = $next_call;
             } else {
@@ -75,9 +69,9 @@ class ExternalCallSiteFinder
             }
         }
 
-        $called_from = \array_pop($internal_calls);
+        $called_from = array_pop($internal_calls);
 
-        if ( ! ($called_from and $next_call)) {
+        if (!($called_from and $next_call)) {
             // Edge case - WTF??
             // Should be impossible, but these traces are not always straightforward so better to include something
             // for future debugging of why we didn't get the expected calls. It could be the client did not pass a deep
@@ -85,7 +79,7 @@ class ExternalCallSiteFinder
             return ['_unexpected_trace_' => $orig_trace];
         }
 
-        if ( ! isset($next_call['function'])) {
+        if (!isset($next_call['function'])) {
             // Also unlikely / not produced in testing
             $func = '{unknown}';
         } elseif ($next_call['function'] === '{closure}') {
@@ -102,8 +96,8 @@ class ExternalCallSiteFinder
         }
 
         return [
-            'file'     => $called_from['file'],
-            'line'     => $called_from['line'],
+            'file' => $called_from['file'],
+            'line' => $called_from['line'],
             'function' => $func,
         ];
     }
@@ -111,12 +105,11 @@ class ExternalCallSiteFinder
     protected function isIgnoredClass(string $class, array $ignore_classes): bool
     {
         foreach ($ignore_classes as $ignored_class) {
-            if (is_a($ignored_class, $class, TRUE)) {
-
-                return TRUE;
+            if (is_a($ignored_class, $class, true)) {
+                return true;
             }
         }
 
-        return FALSE;
+        return false;
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\DeploymentConfig;
 
+use RuntimeException;
 
-class InvalidConfigException extends \RuntimeException
+class InvalidConfigException extends RuntimeException
 {
     /**
      * @param string $path

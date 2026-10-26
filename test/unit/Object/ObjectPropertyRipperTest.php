@@ -1,51 +1,52 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Object;
 
-
+use DomainException;
 use Ingenerator\PHPUtils\Object\ObjectPropertyRipper;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
 class ObjectPropertyRipperTest extends TestCase
 {
-
-    public function test_it_rips_properties()
+    public function testItRipsProperties()
     {
         $this->assertEquals(
             ['something_private' => 'precious', 'something_protected' => 'water'],
             ObjectPropertyRipper::rip(
-                new TestRippingClass,
+                new TestRippingClass(),
                 ['something_private', 'something_protected']
             )
         );
     }
 
-    public function test_it_rips_one_property()
+    public function testItRipsOneProperty()
     {
         $this->assertEquals(
             'precious',
-            ObjectPropertyRipper::ripOne(new TestRippingClass, 'something_private')
+            ObjectPropertyRipper::ripOne(new TestRippingClass(), 'something_private')
         );
     }
 
-    public function test_it_rips_all_properties()
+    public function testItRipsAllProperties()
     {
         $this->assertEquals(
             [
-                'something_private'   => 'precious',
+                'something_private' => 'precious',
                 'something_protected' => 'water',
-                'something_else'      => 'else',
+                'something_else' => 'else',
             ],
-            ObjectPropertyRipper::ripAll(new TestRippingClass)
+            ObjectPropertyRipper::ripAll(new TestRippingClass())
         );
     }
 
-    public function test_it_can_rip_from_stdclass()
+    public function testItCanRipFromStdclass()
     {
         $c = new stdClass();
         $c->data = 'something';
@@ -63,7 +64,7 @@ class ObjectPropertyRipperTest extends TestCase
         $this->assertSame(['other' => 1], ObjectPropertyRipper::rip($c, ['other']));
     }
 
-    public function test_it_can_rip_from_class_that_inherits_from_stdclass()
+    public function testItCanRipFromClassThatInheritsFromStdclass()
     {
         // This is an edge case and should be fairly unlikely IRL, but it is valid.
 
@@ -86,19 +87,18 @@ class ObjectPropertyRipperTest extends TestCase
         $this->assertSame(['hidden' => 'whatever', 'other' => 1], ObjectPropertyRipper::rip($c, ['hidden', 'other']));
     }
 
-    public function test_it_throws_if_ripping_all_from_an_object_with_private_parent_properties()
+    public function testItThrowsIfRippingAllFromAnObjectWithPrivateParentProperties()
     {
-        $this->expectException(\DomainException::class);
-        ObjectPropertyRipper::ripAll(new ExtensionRippingClass);
+        $this->expectException(DomainException::class);
+        ObjectPropertyRipper::ripAll(new ExtensionRippingClass());
     }
-
 }
 
 class TestRippingClass
 {
-    private   $something_private   = 'precious';
+    private $something_private = 'precious';
     protected $something_protected = 'water';
-    protected $something_else      = 'else';
+    protected $something_else = 'else';
 }
 
 class ExtensionRippingClass extends TestRippingClass

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
@@ -7,11 +8,11 @@ use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxKeypair;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxKeypairSet;
 use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 class CryptoBoxKeypairSetTest extends TestCase
 {
-
-    public function test_it_can_return_known_keypair_by_id()
+    public function testItCanReturnKnownKeypairById()
     {
         $subject = new CryptoBoxKeypairSet(
             CryptoBoxKeypair::generate('key-a'),
@@ -25,15 +26,15 @@ class CryptoBoxKeypairSetTest extends TestCase
         );
     }
 
-    public function test_it_throws_on_construction_with_duplicate_key_ids()
+    public function testItThrowsOnConstructionWithDuplicateKeyIds()
     {
         $a1 = CryptoBoxKeypair::generate('key-a');
         $a2 = CryptoBoxKeypair::generate('key-a');
-        $this->expectException(\UnexpectedValueException::class);
+        $this->expectException(UnexpectedValueException::class);
         new CryptoBoxKeypairSet($a1, $a2);
     }
 
-    public function test_it_throws_on_request_for_undefined_key()
+    public function testItThrowsOnRequestForUndefinedKey()
     {
         $subject = new CryptoBoxKeypairSet(
             CryptoBoxKeypair::generate('one'),
@@ -45,7 +46,7 @@ class CryptoBoxKeypairSetTest extends TestCase
         $subject->getKeypair('four');
     }
 
-    public function test_it_provides_shortcut_to_decrypt_a_value_with_known_key()
+    public function testItProvidesShortcutToDecryptAValueWithKnownKey()
     {
         $subject = new CryptoBoxKeypairSet(
             CryptoBoxKeypair::generate('a'),
@@ -59,7 +60,7 @@ class CryptoBoxKeypairSetTest extends TestCase
         // Actual failure cases for decrypt are tested on the keypair itself
     }
 
-    public function test_it_can_be_constructed_from_strings()
+    public function testItCanBeConstructedFromStrings()
     {
         $kp1 = CryptoBoxKeypair::generate('one');
         $kp2 = CryptoBoxKeypair::generate('two');
@@ -75,5 +76,4 @@ class CryptoBoxKeypairSetTest extends TestCase
         $this->assertEquals($kp2, $subject->getKeypair('two'));
         $this->assertEquals($kp3, $subject->getKeypair('three'));
     }
-
 }

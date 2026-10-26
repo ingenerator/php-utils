@@ -1,53 +1,54 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Object;
 
-
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+
+use function get_object_vars;
 
 class ObjectPropertyPopulatorTest extends TestCase
 {
-
-    public function test_it_assigns_single_property()
+    public function testItAssignsSingleProperty()
     {
-        $class = new TestPopulatingClass;
+        $class = new TestPopulatingClass();
         ObjectPropertyPopulator::assign($class, 'something_private', 'food');
         $this->assertSame('food', $class->toArray()['something_private']);
     }
 
-    public function test_it_assigns_array_of_properties()
+    public function testItAssignsArrayOfProperties()
     {
-        $class = new TestPopulatingClass;
+        $class = new TestPopulatingClass();
         ObjectPropertyPopulator::assignHash(
             $class,
             [
-                'something_private'   => 'bed',
-                'something_protected' => 'gold'
+                'something_private' => 'bed',
+                'something_protected' => 'gold',
             ]
         );
         $this->assertEquals(
             [
-                'something_private'   => 'bed',
+                'something_private' => 'bed',
                 'something_protected' => 'gold',
-                'already_init'        => 'Foo'
+                'already_init' => 'Foo',
             ],
             $class->toArray()
         );
     }
 
-    public function test_it_throws_if_assigning_unknown_property()
+    public function testItThrowsIfAssigningUnknownProperty()
     {
-        $this->expectException(\InvalidArgumentException::class);
-        ObjectPropertyPopulator::assignHash(new TestPopulatingClass, ['junk' => 'rubbish']);
+        $this->expectException(InvalidArgumentException::class);
+        ObjectPropertyPopulator::assignHash(new TestPopulatingClass(), ['junk' => 'rubbish']);
     }
-
 }
-
 
 class TestPopulatingClass
 {
@@ -57,6 +58,6 @@ class TestPopulatingClass
 
     public function toArray()
     {
-        return \get_object_vars($this);
+        return get_object_vars($this);
     }
 }

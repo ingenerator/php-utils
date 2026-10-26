@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\ArrayHelpers;
@@ -7,7 +8,9 @@ use ArrayAccess;
 use ArrayIterator;
 use Countable;
 use IteratorAggregate;
+use OutOfBoundsException;
 use Traversable;
+
 use function array_key_exists;
 
 /**
@@ -21,8 +24,6 @@ use function array_key_exists;
  */
 class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
 {
-
-
     /**
      * @param array<string,mixed> $items initial items to put in the map
      */
@@ -37,8 +38,8 @@ class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
 
     public function offsetGet(mixed $offset): mixed
     {
-        if ( ! array_key_exists($offset, $this->items)) {
-            throw new \OutOfBoundsException('No item with key '.$offset);
+        if (!array_key_exists($offset, $this->items)) {
+            throw new OutOfBoundsException('No item with key '.$offset);
         }
 
         return $this->items[$offset];
@@ -67,5 +68,4 @@ class UniqueMap implements ArrayAccess, IteratorAggregate, Countable
     {
         return count($this->items);
     }
-
 }

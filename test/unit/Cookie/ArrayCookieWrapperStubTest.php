@@ -1,8 +1,6 @@
 <?php
 
-
 namespace test\unit\Ingenerator\PHPUtils\Cookie;
-
 
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
@@ -14,10 +12,10 @@ class ArrayCookieWrapperStubTest extends TestCase
     #[TestWith(['my', true, 'cookie'])]
     #[TestWith(['has', true, 'values'])]
     #[TestWith(['anything', false, null])]
-    public function test_it_has_cookies_from_constructor_ignoring_superglobal(
+    public function testItHasCookiesFromConstructorIgnoringSuperglobal(
         $name,
         $expect_has,
-        $expect_val
+        $expect_val,
     ) {
         $old_cookie = $_COOKIE;
         try {
@@ -25,11 +23,11 @@ class ArrayCookieWrapperStubTest extends TestCase
             $subject = $this->newSubject(['my' => 'cookie', 'has' => 'values']);
             $this->assertSame(
                 [
-                    'has'   => $expect_has,
+                    'has' => $expect_has,
                     'value' => $expect_val,
                 ],
                 [
-                    'has'   => $subject->has($name),
+                    'has' => $subject->has($name),
                     'value' => $subject->get($name),
                 ]
             );
@@ -38,18 +36,18 @@ class ArrayCookieWrapperStubTest extends TestCase
         }
     }
 
-    public function test_it_can_simulate_set_cookie_and_capture_args()
+    public function testItCanSimulateSetCookieAndCaptureArgs()
     {
-        $exp     = new DateTimeImmutable('tomorrow');
+        $exp = new DateTimeImmutable('tomorrow');
         $subject = $this->newSubject();
         $subject->set('any', 'thing', ['expires' => $exp]);
         $this->assertSame(
             [
-                'has'   => TRUE,
+                'has' => true,
                 'value' => 'thing',
             ],
             [
-                'has'   => $subject->has('any'),
+                'has' => $subject->has('any'),
                 'value' => $subject->get('any'),
             ]
         );
@@ -63,5 +61,4 @@ class ArrayCookieWrapperStubTest extends TestCase
     {
         return new ArrayCookieWrapperStub($cookies);
     }
-
 }

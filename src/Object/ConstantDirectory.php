@@ -1,11 +1,17 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\Object;
 
+use ReflectionClass;
+
+use function strlen;
+use function strncmp;
 
 class ConstantDirectory
 {
@@ -44,10 +50,10 @@ class ConstantDirectory
      */
     public function filterConstants($prefix)
     {
-        $prefix_len = \strlen($prefix);
-        $consts     = [];
+        $prefix_len = strlen($prefix);
+        $consts = [];
         foreach ($this->listConstants() as $name => $value) {
-            if (\strncmp($name, $prefix, $prefix_len) === 0) {
+            if (strncmp($name, $prefix, $prefix_len) === 0) {
                 $consts[$name] = $value;
             }
         }
@@ -60,7 +66,7 @@ class ConstantDirectory
      */
     public function listConstants()
     {
-        if ($this->constants === NULL) {
+        if ($this->constants === null) {
             $this->constants = $this->loadConstants();
         }
 
@@ -73,7 +79,7 @@ class ConstantDirectory
     protected function loadConstants()
     {
         $consts = [];
-        $refl   = new \ReflectionClass($this->class_name);
+        $refl = new ReflectionClass($this->class_name);
         foreach ($refl->getConstants() as $name => $value) {
             $consts[$name] = $value;
         }

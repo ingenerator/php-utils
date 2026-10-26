@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\ArrayHelpers;
-
 
 use function array_key_exists;
 use function array_keys;
@@ -18,7 +19,6 @@ use function is_array;
 
 class AssociativeArrayUtils
 {
-
     /**
      * Recursively merge two or more arrays. Values in an associative array
      * overwrite previous values with the same key. Values in an indexed array
@@ -47,7 +47,7 @@ class AssociativeArrayUtils
         foreach ($merge_patches as $patch) {
             if (AssociativeArrayUtils::isAssociative($patch)) {
                 foreach ($patch as $key => $value) {
-                    if (is_array($value) and is_array($merge_base[$key] ?? NULL)) {
+                    if (is_array($value) and is_array($merge_base[$key] ?? null)) {
                         $merge_base[$key] = AssociativeArrayUtils::deepMerge($merge_base[$key], $value);
                     } else {
                         $merge_base[$key] = $value;
@@ -55,7 +55,7 @@ class AssociativeArrayUtils
                 }
             } else {
                 foreach ($patch as $value) {
-                    if ( ! in_array($value, $merge_base, TRUE)) {
+                    if (!in_array($value, $merge_base, true)) {
                         $merge_base[] = $value;
                     }
                 }
@@ -78,10 +78,7 @@ class AssociativeArrayUtils
      *
      * @param array $array array to check
      *
-     * @return  boolean
-     *
      * @author Kohana Team
-     *
      */
     public static function isAssociative(array $array): bool
     {
@@ -94,9 +91,7 @@ class AssociativeArrayUtils
     }
 
     /**
-     * Turns 'this.thing.here => bar' into ['this']['thing']['here'] = bar
-     *
-     * @param array $input
+     * Turns 'this.thing.here => bar' into ['this']['thing']['here'] = bar.
      *
      * @return array
      */
@@ -122,10 +117,9 @@ class AssociativeArrayUtils
      */
     public static function setPath(array &$array, $path, $value, string $delimiter = '.'): void
     {
-
         // The path has already been separated into keys
         $keys = $path;
-        if ( ! is_array($path)) {
+        if (!is_array($path)) {
             // Split the keys by delimiter
             $keys = explode($delimiter, $path);
         }
@@ -139,7 +133,7 @@ class AssociativeArrayUtils
                 $key = (int) $key;
             }
 
-            if ( ! isset($array[$key])) {
+            if (!isset($array[$key])) {
                 $array[$key] = [];
             }
 
@@ -151,7 +145,7 @@ class AssociativeArrayUtils
     }
 
     /**
-     * Splits a source array by key - modifies source to remove entries with requested keys, returning removed entries
+     * Splits a source array by key - modifies source to remove entries with requested keys, returning removed entries.
      *
      * e.g.
      *
@@ -159,11 +153,6 @@ class AssociativeArrayUtils
      *   $result = AssociativeArrayUtils::popKeys($array, ['things', 'might', 'undefined']);
      *   assert($array === ['mix' => 'of', 'useful' => 'separately']);
      *   assert($result === ['things' => 'that', 'might' => 'be']); // Note `undefined` not present in source or result
-     *
-     * @param array $source
-     * @param array $pop_keys
-     *
-     * @return array
      */
     public static function popKeys(array &$source, array $pop_keys): array
     {

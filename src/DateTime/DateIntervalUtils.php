@@ -3,6 +3,8 @@
 namespace Ingenerator\PHPUtils\DateTime;
 
 use DateInterval;
+use InvalidArgumentException;
+
 use function array_diff;
 use function array_filter;
 use function array_intersect_key;
@@ -30,18 +32,18 @@ class DateIntervalUtils
 
         if (count($supported_components) !== count($components)) {
             $key_list = implode(', ', array_diff(array_keys($components), array_keys($supported_components)));
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Cannot humanise a DateInterval with unsupported components: '.$key_list
             );
         }
 
         $parts = [];
         foreach ($supported_components as $key => $human_value) {
-            $qty     = $components[$key] ?? NULL;
+            $qty = $components[$key] ?? null;
             $parts[] = $qty.' '.$human_value.($qty > 1 ? 's' : '');
         }
 
-        $last_part   = array_pop($parts);
+        $last_part = array_pop($parts);
         $second_last = array_pop($parts);
 
         return implode(

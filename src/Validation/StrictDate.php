@@ -1,19 +1,22 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\Validation;
 
+use ArrayAccess;
+use DateTimeImmutable;
+use InvalidArgumentException;
 
 class StrictDate
 {
-
     /**
-     * Validate that value of one field is a date after the value of another
+     * Validate that value of one field is a date after the value of another.
      *
-     * @param \ArrayAccess $validation
      * @param string       $from_field
      * @param string       $to_field
      *
@@ -21,23 +24,22 @@ class StrictDate
      *
      * @return bool
      */
-    public static function date_after(\ArrayAccess $validation, $from_field, $to_field)
+    public static function date_after(ArrayAccess $validation, $from_field, $to_field)
     {
         $from = $validation[$from_field];
         $to = $validation[$to_field];
 
-        if (!$from instanceof \DateTimeImmutable || !$to instanceof \DateTimeImmutable) {
+        if (!$from instanceof DateTimeImmutable || !$to instanceof DateTimeImmutable) {
             // Return true if either value is empty or invalid, this will be picked up by other rules
-            return TRUE;
+            return true;
         }
 
-        return ($to > $from);
+        return $to > $from;
     }
 
     /**
-     * Validate that value of one field is a date on or after value of another (>= ignoring time)
+     * Validate that value of one field is a date on or after value of another (>= ignoring time).
      *
-     * @param \ArrayAccess $validation
      * @param string       $from_field
      * @param string       $to_field
      *
@@ -45,23 +47,21 @@ class StrictDate
      *
      * @return bool
      */
-    public static function date_on_or_after(\ArrayAccess $validation, $from_field, $to_field)
+    public static function date_on_or_after(ArrayAccess $validation, $from_field, $to_field)
     {
         $from = $validation[$from_field];
         $to = $validation[$to_field];
 
-        if (!$from instanceof \DateTimeImmutable || !$to instanceof \DateTimeImmutable) {
+        if (!$from instanceof DateTimeImmutable || !$to instanceof DateTimeImmutable) {
             // Return true if either value is empty or invalid, this will be picked up by other rules
-            return TRUE;
+            return true;
         }
 
-        return ($to->format('Y-m-d') >= $from->format('Y-m-d'));
+        return $to->format('Y-m-d') >= $from->format('Y-m-d');
     }
 
     /**
-     * Value is NULL or a valid DateTimeImmutable
-     *
-     * @param mixed $value
+     * Value is NULL or a valid DateTimeImmutable.
      *
      * @return bool
      */
@@ -71,21 +71,19 @@ class StrictDate
     }
 
     /**
-     * Value is NULL or a valid DateTimeImmutable
-     *
-     * @param mixed $value
+     * Value is NULL or a valid DateTimeImmutable.
      *
      * @return bool
      */
     public static function datetime_immutable($value)
     {
-        if ($value === NULL) {
-            return TRUE;
-        } elseif ($value instanceof \DateTimeImmutable) {
-            return TRUE;
-        } else {
-            return FALSE;
+        if ($value === null) {
+            return true;
+        } elseif ($value instanceof DateTimeImmutable) {
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -110,13 +108,13 @@ class StrictDate
 
     protected static function is_datetime_format($format, $value)
     {
-        $dt = \DateTimeImmutable::createFromFormat($format, (string) $value);
+        $dt = DateTimeImmutable::createFromFormat($format, (string) $value);
 
-        return ($dt AND ($dt->format($format) === $value));
+        return $dt and ($dt->format($format) === $value);
     }
 
     /**
-     * Shorthand way to specify the fully qualified validator callback
+     * Shorthand way to specify the fully qualified validator callback.
      *
      * @param string $rulename
      *
@@ -133,7 +131,7 @@ class StrictDate
             case 'iso_datetime':
                 return static::class.'::'.$rulename;
             default:
-                throw new \InvalidArgumentException('Unknown rule '.__CLASS__.'::'.$rulename);
+                throw new InvalidArgumentException('Unknown rule '.__CLASS__.'::'.$rulename);
         }
     }
 }

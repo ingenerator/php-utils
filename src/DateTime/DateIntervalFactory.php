@@ -6,7 +6,6 @@ use DateInterval;
 
 class DateIntervalFactory
 {
-
     public static function days(int $days): DateInterval
     {
         return new DateInterval('P'.$days.'D');

@@ -25,7 +25,8 @@
   "require-dev": {
     "mikey179/vfsstream": "^1.6.12",
     "phpunit/phpunit": "^11.5",
-    "ergebnis/phpunit-slow-test-detector": "^2.15"
+    "ergebnis/phpunit-slow-test-detector": "^2.15",
+    "php-cs-fixer/shim": "3.95.27"
   },
   "support": {
     "source": "https://github.com/ingenerator/php-utils",
@@ -43,5 +44,9 @@
   },
   "config": {
     "preferred-install": "dist"
+  },
+  "scripts": {
+    "cs": "php-cs-fixer fix --dry-run --verbose --diff",
+    "cs-fix": "php-cs-fixer fix"
   }
 }

@@ -2,24 +2,26 @@
 
 namespace Ingenerator\PHPUtils\Object;
 
+use InvalidArgumentException;
+use LogicException;
+
 /**
- * Provides the core implementation required to add singleton functionality to any object that needs to be initialised
- *
- * @package Ingenerator\PHPUtils\Object
+ * Provides the core implementation required to add singleton functionality to any object that needs to be initialised.
  */
-trait  InitialisableSingletonTrait
+trait InitialisableSingletonTrait
 {
     protected static $instance;
 
     /**
-     * Return the singleton instance
+     * Return the singleton instance.
      *
      * @return static
+     *
      * @throws SingletonNotInitialisedException if the class has not been initialised
      */
     public static function instance()
     {
-        if ( ! static::$instance) {
+        if (!static::$instance) {
             throw new SingletonNotInitialisedException('Cannot access '.static::class.' - class not initialised');
         }
 
@@ -27,25 +29,23 @@ trait  InitialisableSingletonTrait
     }
 
     /**
-     * Initialises the singleton
+     * Initialises the singleton.
      *
      * Takes a callable that creates the instance and configures it as required, then returns it for storage. This
      * allows for different constructor mechanisms / dependencies for different classes.
      *
-     * @param callable $initialiser
-     *
-     * @throws \LogicException if the singleton is already initialised
+     * @throws LogicException if the singleton is already initialised
      */
     public static function initialise(callable $initialiser): void
     {
         if (static::$instance) {
-            throw new \LogicException('Cannot re-initialise '.static::class);
+            throw new LogicException('Cannot re-initialise '.static::class);
         }
 
-        $instance     = $initialiser();
+        $instance = $initialiser();
         $expect_class = static::class;
-        if ( ! $instance instanceof $expect_class) {
-            throw new \InvalidArgumentException(
+        if (!$instance instanceof $expect_class) {
+            throw new InvalidArgumentException(
                 'Initialiser for '.static::class.' should return instance but did not get one'
             );
         }
@@ -54,13 +54,10 @@ trait  InitialisableSingletonTrait
     }
 
     /**
-     * Indicates if the singleton is initialised
-     *
-     * @return bool
+     * Indicates if the singleton is initialised.
      */
     public static function isInitialised(): bool
     {
         return (bool) static::$instance;
     }
-
 }

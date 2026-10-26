@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
@@ -7,13 +8,12 @@ use Ingenerator\PHPUtils\ArrayHelpers\DuplicateMapItemException;
 use Ingenerator\PHPUtils\ArrayHelpers\UniqueMap;
 use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
+
 use function iterator_to_array;
 
 class UniqueMapTest extends TestCase
 {
-
-
-    public function test_it_returns_entries_by_key()
+    public function testItReturnsEntriesByKey()
     {
         $bar = new class { };
         $subject = new UniqueMap(
@@ -28,14 +28,14 @@ class UniqueMapTest extends TestCase
         $this->assertSame(null, $subject['nully']);
     }
 
-    public function test_it_throws_on_access_to_undefined_key()
+    public function testItThrowsOnAccessToUndefinedKey()
     {
         $subject = new UniqueMap(['any' => 'item']);
         $this->expectException(OutOfBoundsException::class);
         $subject['other-item'];
     }
 
-    public function test_it_accepts_new_items()
+    public function testItAcceptsNewItems()
     {
         $new1 = new class { };
         $subject = new UniqueMap(['any' => 'item']);
@@ -48,7 +48,7 @@ class UniqueMapTest extends TestCase
         $this->assertSame(null, $subject['new3']);
     }
 
-    public function test_it_throws_on_attempt_to_overwrite_key()
+    public function testItThrowsOnAttemptToOverwriteKey()
     {
         $subject = new UniqueMap(['any' => 'item']);
 
@@ -61,7 +61,7 @@ class UniqueMapTest extends TestCase
         }
     }
 
-    public function test_it_reports_if_an_item_exists()
+    public function testItReportsIfAnItemExists()
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['other'] = 'thing';
@@ -76,7 +76,7 @@ class UniqueMapTest extends TestCase
         );
     }
 
-    public function test_it_allows_items_to_be_deleted_and_reinserted()
+    public function testItAllowsItemsToBeDeletedAndReinserted()
     {
         $subject = new UniqueMap(['any' => 'item']);
 
@@ -94,7 +94,7 @@ class UniqueMapTest extends TestCase
         $this->assertSame('new item', $subject['any']);
     }
 
-    public function test_it_is_iterable()
+    public function testItIsIterable()
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
@@ -107,7 +107,7 @@ class UniqueMapTest extends TestCase
         );
     }
 
-    public function test_it_is_countable()
+    public function testItIsCountable()
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
@@ -116,10 +116,9 @@ class UniqueMapTest extends TestCase
         $this->assertSame(3, count($subject));
     }
 
-    public function test_it_supports_conditional_read_like_an_array()
+    public function testItSupportsConditionalReadLikeAnArray()
     {
         $subject = new UniqueMap(['i-exist' => 'ok']);
         $this->assertSame('any-default', $subject['i do not'] ?? 'any-default');
     }
-
 }
