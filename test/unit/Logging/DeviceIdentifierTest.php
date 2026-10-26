@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 final class DeviceIdentifierTest extends TestCase
 {
-    protected ArrayCookieWrapperStub $cookies;
+    private ArrayCookieWrapperStub $cookies;
 
     #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA']])]
     #[TestWith([['didf' => 'OfLAtnofliaNqvkAjhhsFA']])]

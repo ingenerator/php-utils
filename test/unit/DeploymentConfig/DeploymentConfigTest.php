@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 final class DeploymentConfigTest extends TestCase
 {
-    protected ConfigValueDecrypter $decrypter;
+    private ConfigValueDecrypter $decrypter;
 
     public function testItsStaticInstanceIsSingleton(): void
     {

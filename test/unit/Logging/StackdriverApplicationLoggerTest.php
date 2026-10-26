@@ -40,11 +40,11 @@ use const PHP_MAJOR_VERSION;
 
 final class StackdriverApplicationLoggerTest extends TestCase
 {
-    protected $vfs;
+    private $vfs;
 
-    protected $log_stream;
+    private string $log_stream;
 
-    protected $meta_args = [];
+    private array $meta_args = [];
 
     public function testItIsInitialisable(): void
     {

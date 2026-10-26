@@ -12,9 +12,9 @@ use PHPUnit\Framework\TestCase;
 
 final class CookieWrapperTest extends TestCase
 {
-    protected $_old_cookie_var;
+    private array $_old_cookie_var;
 
-    protected $ssl_available = true;
+    private $ssl_available = true;
 
     #[TestWith(['my', true, 'cookie'])]
     #[TestWith(['has', true, 'values'])]

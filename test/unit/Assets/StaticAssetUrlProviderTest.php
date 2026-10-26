@@ -14,13 +14,16 @@ use RuntimeException;
 
 final class StaticAssetUrlProviderTest extends TestCase
 {
-    protected $options = [
+    /**
+     * @var array<string, string>
+     */
+    private array $options = [
         'mode' => StaticAssetUrlProvider::MODE_LOCAL,
         'local_asset_path' => __DIR__,
         'asset_base_url_file' => __FILE__,
     ];
 
-    protected vfsStreamDirectory $vfs;
+    private vfsStreamDirectory $vfs;
 
     public function testItIsInitialisable(): void
     {

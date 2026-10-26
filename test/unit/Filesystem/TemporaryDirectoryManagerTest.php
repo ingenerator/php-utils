@@ -25,7 +25,7 @@ final class TemporaryDirectoryManagerTest extends TestCase
     /**
      * Uses real files rather than vfsStream because of the recursive delete behaviour.
      */
-    protected string $base_dir;
+    private string $base_dir;
 
     public function testItIsInitialisable(): void
     {

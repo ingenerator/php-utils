@@ -17,7 +17,7 @@ use function uniqid;
 
 final class ConfigValueDecrypterTest extends TestCase
 {
-    protected $vfs;
+    private $vfs;
 
     public function testItIsInitialisable(): void
     {
