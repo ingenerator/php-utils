@@ -2,6 +2,8 @@
 
 namespace Ingenerator\PHPUtils\StringEncoding;
 
+use RuntimeException;
+
 class StringSanitiser
 {
     /**
@@ -23,6 +25,9 @@ class StringSanitiser
                 '�',
                 mb_convert_encoding($input, 'UTF-8', 'UTF-8')
             );
+            if ($cleaned === null) {
+                throw new RuntimeException('Failed to replace invalid UTF8 in string');
+            }
 
             if ($max_length !== null) {
                 return mb_substr($cleaned, 0, $max_length);
