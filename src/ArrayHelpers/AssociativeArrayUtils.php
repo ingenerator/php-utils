@@ -111,7 +111,7 @@ class AssociativeArrayUtils
      *
      * @author Kohana Team
      */
-    public static function setPath(array &$array, $path, $value, string $delimiter = '.'): void
+    public static function setPath(array &$array, string|array $path, mixed $value, string $delimiter = '.'): void
     {
         // The path has already been separated into keys
         $keys = $path;
