@@ -32,26 +32,26 @@ use function unlink;
 
 class CSVWriterTest extends TestCase
 {
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(CSVWriter::class, $this->newSubject());
     }
 
-    public function testItThrowsIfFileCannotBeOpened()
+    public function testItThrowsIfFileCannotBeOpened(): void
     {
         $subject = $this->newSubject();
         $this->expectException(ErrorException::class);
         $subject->open('/invalid_csv_file');
     }
 
-    public function testItThrowsIfWritingBeforeOpeningFile()
+    public function testItThrowsIfWritingBeforeOpeningFile(): void
     {
         $subject = $this->newSubject();
         $this->expectException(LogicException::class);
         $subject->write(['any' => 'junk']);
     }
 
-    public function testItThrowsIfWritingAfterClosingFile()
+    public function testItThrowsIfWritingAfterClosingFile(): void
     {
         $subj = $this->newSubject();
         $subj->open('php://temp');
@@ -60,7 +60,7 @@ class CSVWriterTest extends TestCase
         $subj->write(['any' => 'content']);
     }
 
-    public function testOpenAcceptsAndAllowsWritingToExistingStreamResource()
+    public function testOpenAcceptsAndAllowsWritingToExistingStreamResource(): void
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -74,7 +74,7 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    public function testItThrowsIfWritingToExternallyClosedResource()
+    public function testItThrowsIfWritingToExternallyClosedResource(): void
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -88,7 +88,7 @@ class CSVWriterTest extends TestCase
         $subj->write(['some' => 'csv']);
     }
 
-    public function testItCanOpenAndWriteToFilename()
+    public function testItCanOpenAndWriteToFilename(): void
     {
         $name = tempnam(sys_get_temp_dir(), 'csv-test.csv');
         try {
@@ -103,7 +103,7 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    public function testItWritesColumnHeadersBeforeFirstRow()
+    public function testItWritesColumnHeadersBeforeFirstRow(): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -119,7 +119,7 @@ class CSVWriterTest extends TestCase
         fclose($file);
     }
 
-    public function testItDoesNotWriteColumnHeadersBeforeSubsequentRows()
+    public function testItDoesNotWriteColumnHeadersBeforeSubsequentRows(): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -239,7 +239,7 @@ class CSVWriterTest extends TestCase
 
     #[TestWith([true])]
     #[TestWith([false])]
-    public function testItOptionallyWritesByteOrderMarkAtStartOfFile($write_bom)
+    public function testItOptionallyWritesByteOrderMarkAtStartOfFile($write_bom): void
     {
         $file = fopen('php://memory', 'w');
         $subj = $this->newSubject();
@@ -254,7 +254,7 @@ class CSVWriterTest extends TestCase
 
     #[TestWith([['is' => 'jumbled', 'our' => 'up']])]
     #[TestWith([['our' => 'things', 'went' => 'bad']])]
-    public function testItThrowsIfSubsequentRowHeadersDoNotMatch($second_row)
+    public function testItThrowsIfSubsequentRowHeadersDoNotMatch($second_row): void
     {
         $file = fopen('php://memory', 'w');
         try {
@@ -268,7 +268,7 @@ class CSVWriterTest extends TestCase
         }
     }
 
-    public function testItDoesNotCloseExternallyProvidedStream()
+    public function testItDoesNotCloseExternallyProvidedStream(): void
     {
         $file = fopen('php://memory', 'w');
         try {

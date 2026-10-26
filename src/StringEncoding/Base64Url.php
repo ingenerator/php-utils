@@ -20,7 +20,7 @@ class Base64Url
     /**
      * @return bool|string
      */
-    public static function decode(string $value)
+    public static function decode(string $value): string|false
     {
         $string = strtr($value, ['-' => '+', '_' => '/']);
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Sitemap;
 
 use Ingenerator\PHPUtils\Sitemap\SitemapParser;
@@ -41,7 +43,7 @@ class SitemapParserTest extends TestCase
     }
 
     #[DataProvider('provider_invalid')]
-    public function testItThrowsOnAttemptToParseInvalidXmlOrIfNotSchemaValid($input, $expect_msg): void
+    public function testItThrowsOnAttemptToParseInvalidXmlOrIfNotSchemaValid(string $input, string $expect_msg): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expect_msg);
@@ -149,7 +151,7 @@ class SitemapParserTest extends TestCase
     }
 
     #[DataProvider('provider_parse')]
-    public function testItParsesValidSitemapToMapOfUrlToProperties($xml, $expect): void
+    public function testItParsesValidSitemapToMapOfUrlToProperties(string $xml, array $expect): void
     {
         $this->assertSame($expect, SitemapParser::parse($xml));
     }

@@ -14,7 +14,7 @@ class InvalidConfigException extends RuntimeException
      *
      * @return InvalidConfigException
      */
-    public static function badJSON($path, $error)
+    public static function badJSON($path, $error): static
     {
         return new static(
             "Config `$path` contains invalid JSON ($error) - should it be a quoted string?"
@@ -36,7 +36,7 @@ class InvalidConfigException extends RuntimeException
         return new static('Duplicate environment mapping for '.$env);
     }
 
-    public static function invalidMapDeclaration(string $reason)
+    public static function invalidMapDeclaration(string $reason): static
     {
         return new static('Invalid config map declaration: '.$reason);
     }

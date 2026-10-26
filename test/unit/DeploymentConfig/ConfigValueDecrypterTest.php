@@ -16,7 +16,7 @@ class ConfigValueDecrypterTest extends TestCase
 {
     protected $vfs;
 
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(ConfigValueDecrypter::class, $this->newSubject());
     }
@@ -26,12 +26,12 @@ class ConfigValueDecrypterTest extends TestCase
     #[TestWith([1.29])]
     #[TestWith(['anything'])]
     #[TestWith([['any' => 'thing', 'other' => ['things' => 'here']]])]
-    public function testItReturnsUnchangedValueIfNotEncrypted($value)
+    public function testItReturnsUnchangedValueIfNotEncrypted($value): void
     {
         $this->assertSame($value, $this->newSubject()->decrypt($value));
     }
 
-    public static function provider_decrypt()
+    public static function provider_decrypt(): array
     {
         // A mix of pre-encrypted static values and runtime tests that encrypt / decrypt still works as expected
         $slightly = 'IbW8swma2gi59n7XQn64gN3EH00ymsZcQaF9/J0Bm1UIXSX92RRCr4idGuAOfz0K0KNQsjXoCAgy/f1YgdcrIQ==';
@@ -72,13 +72,13 @@ class ConfigValueDecrypterTest extends TestCase
     }
 
     #[DataProvider('provider_decrypt')]
-    public function testItReturnsValueDecryptedWithSpecifiedOrDefaultKey($value, $expect, $keypairs)
+    public function testItReturnsValueDecryptedWithSpecifiedOrDefaultKey(string $value, string $expect, array $keypairs): void
     {
         $this->vfs = vfsStream::create($keypairs);
         $this->assertSame($expect, $this->newSubject()->decrypt($value));
     }
 
-    public function testItRecursivelyDecryptsValuesInNestedArrays()
+    public function testItRecursivelyDecryptsValuesInNestedArrays(): void
     {
         $this->vfs = vfsStream::create(
             [
@@ -112,7 +112,7 @@ class ConfigValueDecrypterTest extends TestCase
         );
     }
 
-    public static function provider_corrupt_key()
+    public static function provider_corrupt_key(): array
     {
         return [
             ['I am not base64!!!'],
@@ -124,7 +124,7 @@ class ConfigValueDecrypterTest extends TestCase
     }
 
     #[DataProvider('provider_corrupt_key')]
-    public function testItThrowsIfRequiredDecryptionKeyIsMangled($key)
+    public function testItThrowsIfRequiredDecryptionKeyIsMangled(string $key): void
     {
         $this->vfs = vfsStream::create(['slightly.secret-config.key' => $key]);
         $subject = $this->newSubject();
@@ -135,7 +135,7 @@ class ConfigValueDecrypterTest extends TestCase
         );
     }
 
-    public function testItThrowsIfRequiredDecryptionKeyIsNotPresent()
+    public function testItThrowsIfRequiredDecryptionKeyIsNotPresent(): void
     {
         $kp = sodium_crypto_box_keypair();
         $this->vfs = vfsStream::create(['slightly.secret-config.key' => base64_encode($kp)]);
@@ -149,7 +149,7 @@ class ConfigValueDecrypterTest extends TestCase
         $subject->decrypt("#SECRET-$other_keypair_name#$valid_encrypted_val");
     }
 
-    public static function provider_failed_decrypt()
+    public static function provider_failed_decrypt(): array
     {
         $lost_key_pub = sodium_crypto_box_publickey(sodium_crypto_box_keypair());
 
@@ -170,7 +170,7 @@ class ConfigValueDecrypterTest extends TestCase
     }
 
     #[DataProvider('provider_failed_decrypt')]
-    public function testItThrowsIfDecryptionFails($value)
+    public function testItThrowsIfDecryptionFails(string $value): void
     {
         $this->vfs = vfsStream::create(
             ['slightly.secret-config.key' => 'IbW8swma2gi59n7XQn64gN3EH00ymsZcQaF9/J0Bm1UIXSX92RRCr4idGuAOfz0K0KNQsjXoCAgy/f1YgdcrIQ==']

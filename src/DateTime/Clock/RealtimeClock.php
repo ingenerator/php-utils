@@ -21,23 +21,17 @@ use function usleep;
  */
 class RealtimeClock
 {
-    /**
-     * @return DateTimeImmutable
-     */
-    public function getDateTime()
+    public function getDateTime(): DateTimeImmutable
     {
         return new DateTimeImmutable();
     }
 
-    /**
-     * @return float
-     */
-    public function getMicrotime()
+    public function getMicrotime(): float
     {
         return microtime(true);
     }
 
-    public function usleep($microseconds)
+    public function usleep($microseconds): void
     {
         usleep($microseconds);
     }

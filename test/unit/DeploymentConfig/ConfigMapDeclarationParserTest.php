@@ -10,12 +10,12 @@ use PHPUnit\Framework\TestCase;
 
 class ConfigMapDeclarationParserTest extends TestCase
 {
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(ConfigMapDeclarationParser::class, $this->newSubject());
     }
 
-    public function testItParsesSimpleValuePairsToSimpleHash()
+    public function testItParsesSimpleValuePairsToSimpleHash(): void
     {
         $this->assertSame(
             [
@@ -33,7 +33,7 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function testItParsesArraysOfEnvironmentsToSimpleHash()
+    public function testItParsesArraysOfEnvironmentsToSimpleHash(): void
     {
         $this->assertSame(
             [
@@ -53,7 +53,7 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function testItSupportsDeclarationsWithArrayValues()
+    public function testItSupportsDeclarationsWithArrayValues(): void
     {
         $this->assertSame(
             [
@@ -70,7 +70,7 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function testItThrowsIfAnEnvironmentMappedMoreThanOnce()
+    public function testItThrowsIfAnEnvironmentMappedMoreThanOnce(): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidConfigException::class);
@@ -83,7 +83,7 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public static function provider_invalid_declarations()
+    public static function provider_invalid_declarations(): array
     {
         // Compose like this because by the time you nest the different levels of data provider cases and argument arrays
         // it's hard to see what the actual test values are...
@@ -108,11 +108,11 @@ class ConfigMapDeclarationParserTest extends TestCase
             ['some' => 'unexpected', 'hash' => 'value'],
         ];
 
-        return array_map(fn (array $declarations) => [$declarations], $invalid);
+        return array_map(fn (array $declarations): array => [$declarations], $invalid);
     }
 
     #[DataProvider('provider_invalid_declarations')]
-    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues($declarations)
+    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues($declarations): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidConfigException::class);

@@ -9,29 +9,29 @@ use RuntimeException;
 
 class NullTransactionWrapperTest extends TestCase
 {
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $subject = $this->newSubject();
         $this->assertInstanceOf(NullTransactionWrapper::class, $subject);
         $this->assertInstanceOf(TransactionWrapper::class, $subject);
     }
 
-    public function testItRunsCodeAndReturnsResult()
+    public function testItRunsCodeAndReturnsResult(): void
     {
         $this->assertSame(
             [
                 'ran' => true,
                 'args' => [],
             ],
-            $this->newSubject()->run(fn (...$args) => ['ran' => true, 'args' => $args])
+            $this->newSubject()->run(fn (...$args): array => ['ran' => true, 'args' => $args])
         );
     }
 
-    public function testItBubblesExceptions()
+    public function testItBubblesExceptions(): void
     {
         $subject = $this->newSubject();
         $this->expectExceptionMessage('I broke');
-        $subject->run(function () { throw new RuntimeException('I broke'); });
+        $subject->run(function (): void { throw new RuntimeException('I broke'); });
     }
 
     private function newSubject(): NullTransactionWrapper

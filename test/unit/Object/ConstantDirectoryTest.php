@@ -23,12 +23,12 @@ class ConstantDirectoryTest extends TestCase
     public const TESTTHREE = 'three';
     public const ANYTHING = 'another';
 
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(ConstantDirectory::class, $this->newSubject());
     }
 
-    public function testItReturnsEmptyArrayWithNoConstants()
+    public function testItReturnsEmptyArrayWithNoConstants(): void
     {
         $this->assertSame(
             [],
@@ -36,7 +36,7 @@ class ConstantDirectoryTest extends TestCase
         );
     }
 
-    public function testItReturnsListOfAllConstants()
+    public function testItReturnsListOfAllConstants(): void
     {
         $this->assertSame(
             [
@@ -49,7 +49,7 @@ class ConstantDirectoryTest extends TestCase
         );
     }
 
-    public function testItReturnsListOfConstantsWithPrefix()
+    public function testItReturnsListOfConstantsWithPrefix(): void
     {
         $this->assertSame(
             [

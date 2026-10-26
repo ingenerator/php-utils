@@ -52,7 +52,7 @@ class CSVWriter
     /**
      * @param string $file
      */
-    public function open($file, array $options = [])
+    public function open($file, array $options = []): void
     {
         if (is_resource($file) && get_resource_type($file) === 'stream') {
             $this->resource = $file;
@@ -69,7 +69,7 @@ class CSVWriter
         $this->options = array_merge($this->options, $options);
     }
 
-    public function write(array $row)
+    public function write(array $row): void
     {
         if (!$this->isResourceOpen()) {
             throw new LogicException('Cannot write to a closed file');
@@ -90,12 +90,12 @@ class CSVWriter
         fputcsv($this->resource, $row, eol: $this->options['eol']);
     }
 
-    protected function isResourceOpen()
+    protected function isResourceOpen(): bool
     {
         return $this->resource && (get_resource_type($this->resource) === 'stream');
     }
 
-    public function close()
+    public function close(): void
     {
         if (!$this->resource) {
             throw new LogicException('Cannot close a file that has not been opened!');
@@ -115,7 +115,7 @@ class CSVWriter
         } else {
             array_walk(
                 $keys,
-                fn (string $str) => !str_contains($str, ',')
+                fn (string $str): true => !str_contains($str, ',')
                     ?: throw new RuntimeException(
                         "Column header `$str` cannot contain comma if headers are not quoted"
                     )

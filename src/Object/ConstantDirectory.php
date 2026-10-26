@@ -29,10 +29,8 @@ class ConstantDirectory
 
     /**
      * @param string $class
-     *
-     * @return static
      */
-    public static function forClass($class)
+    public static function forClass($class): static
     {
         return new static($class);
     }
@@ -42,7 +40,7 @@ class ConstantDirectory
      *
      * @return array keyed by the constant id
      */
-    public function filterConstants($prefix)
+    public function filterConstants($prefix): array
     {
         $prefix_len = strlen($prefix);
         $consts = [];
@@ -70,7 +68,7 @@ class ConstantDirectory
     /**
      * @return array keyed by the constant id
      */
-    protected function loadConstants()
+    protected function loadConstants(): array
     {
         $consts = [];
         $refl = new ReflectionClass($this->class_name);

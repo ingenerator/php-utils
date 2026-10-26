@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class DateTimeDiffTest extends TestCase
 {
-    public static function date_time_diff()
+    public static function date_time_diff(): array
     {
         return [
             [
@@ -68,8 +68,8 @@ class DateTimeDiffTest extends TestCase
     public function testItCalculatesDifferenceInMilliseconds(
         DateTimeInterface $date1,
         DateTimeInterface $date2,
-        $expected_result,
-    ) {
+        int $expected_result,
+    ): void {
         $this->assertEquals($expected_result, DateTimeDiff::microsBetween($date1, $date2));
     }
 }

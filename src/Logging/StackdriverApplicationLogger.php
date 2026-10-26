@@ -423,7 +423,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         };
     }
 
-    protected function calculateRequestLatency(?float $request_start_time)
+    protected function calculateRequestLatency(?float $request_start_time): ?string
     {
         if ($request_start_time === null) {
             return null;

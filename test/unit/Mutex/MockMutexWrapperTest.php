@@ -9,19 +9,19 @@ use RuntimeException;
 
 class MockMutexWrapperTest extends TestCase
 {
-    public function testItCallsCallableAndReturns()
+    public function testItCallsCallableAndReturns(): void
     {
         $this->assertSame(
             'callable-result',
             $this->newSubject()->withLock(
                 'anything',
                 1,
-                fn () => 'callable-result'
+                fn (): string => 'callable-result'
             )
         );
     }
 
-    public function testItThrowsIfConfiguredToThrow()
+    public function testItThrowsIfConfiguredToThrow(): void
     {
         $subject = $this->newSubject();
         $subject->willTimeoutEverything();
@@ -29,11 +29,11 @@ class MockMutexWrapperTest extends TestCase
         $subject->withLock(
             'anything',
             1,
-            function () { throw new RuntimeException('Callable should not have run'); }
+            function (): void { throw new RuntimeException('Callable should not have run'); }
         );
     }
 
-    protected function newSubject()
+    protected function newSubject(): MockMutexWrapper
     {
         return new MockMutexWrapper();
     }

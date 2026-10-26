@@ -21,10 +21,8 @@ class ValidNumber
     /**
      * @param string    $number
      * @param int|float $min
-     *
-     * @return bool
      */
-    public static function minimum($number, $min)
+    public static function minimum($number, $min): bool
     {
         if (!is_numeric($number)) {
             return false;
@@ -37,10 +35,8 @@ class ValidNumber
      * Shorthand way to specify the fully qualified validator callback.
      *
      * @param string $rulename
-     *
-     * @return string
      */
-    public static function rule($rulename)
+    public static function rule($rulename): string
     {
         return match ($rulename) {
             'minimum' => static::class.'::'.$rulename,

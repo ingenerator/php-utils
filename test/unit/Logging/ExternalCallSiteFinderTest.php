@@ -14,12 +14,12 @@ use function unlink;
 
 class ExternalCallSiteFinderTest extends TestCase
 {
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(ExternalCallSiteFinder::class, $this->newSubject());
     }
 
-    public function testItReportsUnknownLocationIfStackNotDeepEnough()
+    public function testItReportsUnknownLocationIfStackNotDeepEnough(): void
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
         $this->assertSame(
@@ -28,7 +28,7 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public function testItReportsCorrectLocationForDirectCallToExternalMethod()
+    public function testItReportsCorrectLocationForDirectCallToExternalMethod(): void
     {
         $caller = new TestCallsiteCaller();
         $result = $caller->singleExternal($this->newSubject());
@@ -44,7 +44,7 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public function testItIgnoresInternalCallsWithinSingleSpecifiedClass()
+    public function testItIgnoresInternalCallsWithinSingleSpecifiedClass(): void
     {
         $caller = new TestCallsiteCaller();
         $result = $caller->throughInternalMethod($this->newSubject());
@@ -60,7 +60,7 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public function testItIgnoresInternalCallsWithinParentClass()
+    public function testItIgnoresInternalCallsWithinParentClass(): void
     {
         $caller = new TestCallsiteCaller();
         $result = $caller->throughParentMethod($this->newSubject());
@@ -76,7 +76,7 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public function testItIgnoresCallsThroughExpectedExternalCallers()
+    public function testItIgnoresCallsThroughExpectedExternalCallers(): void
     {
         $caller = new TestCallSiteProxy();
         $result = $caller->throughExpectedDependency($this->newSubject());
@@ -92,7 +92,7 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
-    public static function provider_source_location_call_sites()
+    public static function provider_source_location_call_sites(): array
     {
         return [
             [
@@ -204,7 +204,7 @@ PHP,
     }
 
     #[DataProvider('provider_source_location_call_sites')]
-    public function testItCanHandleAllPossibleCallSites($code)
+    public function testItCanHandleAllPossibleCallSites(string $code): void
     {
         $temp = tempnam(sys_get_temp_dir(), 'logger_test');
         file_put_contents($temp, "<?php\n".$code);
@@ -220,7 +220,7 @@ PHP,
         $this->assertSame($result['expected'], $result['actual']);
     }
 
-    protected function newSubject()
+    protected function newSubject(): ExternalCallSiteFinder
     {
         return new ExternalCallSiteFinder();
     }
@@ -228,7 +228,7 @@ PHP,
 
 class TestCallsiteCaller extends TestCallSiteCallerParent
 {
-    public function singleExternal(ExternalCallSiteFinder $finder)
+    public function singleExternal(ExternalCallSiteFinder $finder): array
     {
         return $finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
     }
@@ -238,7 +238,7 @@ class TestCallsiteCaller extends TestCallSiteCallerParent
         return $this->singleExternal($finder);
     }
 
-    public function fromManager(ExternalCallSiteFinder $finder)
+    public function fromManager(ExternalCallSiteFinder $finder): array
     {
         return $finder->findExternalCall(
             debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
@@ -276,7 +276,7 @@ class TestCallSiteAsserter
     {
     }
 
-    public function test(array $expected)
+    public function test(array $expected): array
     {
         $actual = $this->finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
 

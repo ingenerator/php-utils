@@ -59,7 +59,7 @@ class StringSanitiserTest extends TestCase
     }
 
     #[DataProvider('provider_printable_utf8')]
-    public function testItSanitisesToPrintableValidUtf8String(string $input, ?string $expect = null)
+    public function testItSanitisesToPrintableValidUtf8String(string $input, ?string $expect = null): void
     {
         $this->assertSame(
             $expect ?? $input,
@@ -94,7 +94,7 @@ class StringSanitiserTest extends TestCase
     }
 
     #[DataProvider('provider_printable_utf8_max_length')]
-    public function testItCanConstrainPrintableUtf8ToAMaxLength(string $input, array $expected)
+    public function testItCanConstrainPrintableUtf8ToAMaxLength(string $input, array $expected): void
     {
         $actual = [];
         foreach (array_keys($expected) as $max_length) {
@@ -103,7 +103,7 @@ class StringSanitiserTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
-    public function testItDoesNotAffectGlobalSubstituteCharacterState()
+    public function testItDoesNotAffectGlobalSubstituteCharacterState(): void
     {
         $old_encoding = mb_substitute_character();
         mb_substitute_character(0x3013);

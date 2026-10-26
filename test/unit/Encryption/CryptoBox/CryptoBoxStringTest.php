@@ -18,7 +18,7 @@ class CryptoBoxStringTest extends TestCase
      * Heavily tested through the tests for CryptoBoxKeypair and CryptoBoxPublicKey
      */
 
-    public static function provider_invalid_string_format()
+    public static function provider_invalid_string_format(): array
     {
         return [
             'empty' => [''],
@@ -29,13 +29,13 @@ class CryptoBoxStringTest extends TestCase
     }
 
     #[DataProvider('provider_invalid_string_format')]
-    public function testItThrowsInvalidArgumentIfAttemptingToCreateFromInvalidString($keypair_string)
+    public function testItThrowsInvalidArgumentIfAttemptingToCreateFromInvalidString(string $keypair_string): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxString::fromString($keypair_string);
     }
 
-    public function testItCanBeConvertedToStringEncodingAndRecreated()
+    public function testItCanBeConvertedToStringEncodingAndRecreated(): void
     {
         $expected = new CryptoBoxString(ciphertext: random_bytes(21), keypair_id: 'b');
         $exported = (string) $expected;
@@ -48,7 +48,7 @@ class CryptoBoxStringTest extends TestCase
         );
     }
 
-    public function testItCanProvideJustTheCiphertextAsBase64()
+    public function testItCanProvideJustTheCiphertextAsBase64(): void
     {
         $original = random_bytes(23);
         $subject = new CryptoBoxString(ciphertext: $original, keypair_id: 'alpha');

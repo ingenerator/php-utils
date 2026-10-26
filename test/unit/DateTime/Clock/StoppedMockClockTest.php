@@ -2,6 +2,7 @@
 
 namespace test\unit\Ingenerator\PHPUtils\unit\DateTime\Clock;
 
+use Closure;
 use DateInterval;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
@@ -17,7 +18,7 @@ use function sleep;
 
 class StoppedMockClockTest extends TestCase
 {
-    public function testItIsInitialisableNow()
+    public function testItIsInitialisableNow(): void
     {
         $clock = StoppedMockClock::atNow();
         $this->assertEqualsWithDelta(
@@ -28,7 +29,7 @@ class StoppedMockClockTest extends TestCase
         );
     }
 
-    public static function provider_at_fixed()
+    public static function provider_at_fixed(): array
     {
         return [
             [
@@ -50,28 +51,28 @@ class StoppedMockClockTest extends TestCase
     }
 
     #[DataProvider('provider_at_fixed')]
-    public function testItIsInitialisableAtFixedTimeFromStringOrObject($at_what, $expect_time, $expect_micro)
+    public function testItIsInitialisableAtFixedTimeFromStringOrObject(string|DateTimeImmutable $at_what, DateTimeImmutable $expect_time, float $expect_micro): void
     {
         $clock = StoppedMockClock::at($at_what);
         $this->assertEquals($expect_time, $clock->getDateTime());
         $this->assertSame($expect_micro, $clock->getMicrotime());
     }
 
-    public function testItIsInitialisableAtFixedMicrotime()
+    public function testItIsInitialisableAtFixedMicrotime(): void
     {
         $clock = StoppedMockClock::atMicrotime(1551693723.1239);
         $this->assertSame(1551693723.1239, $clock->getMicrotime());
         $this->assertSame('2019-03-04 10:02:03.123900', $clock->getDateTime()->format('Y-m-d H:i:s.u'));
     }
 
-    public function testItIsInitialisableAtADateIntervalInThePast()
+    public function testItIsInitialisableAtADateIntervalInThePast(): void
     {
         $clock = StoppedMockClock::atTimeAgo('P3D');
         $ago = (new DateTimeImmutable())->sub(new DateInterval('P3D'));
         $this->assertEqualsWithDelta($ago, $clock->getDateTime(), 1, 'Time is at correct interval');
     }
 
-    public function testItHoldsItsTimeForeverInRealLife()
+    public function testItHoldsItsTimeForeverInRealLife(): void
     {
         $clock = StoppedMockClock::atNow();
         $start_microtime = $clock->getMicrotime();
@@ -81,7 +82,7 @@ class StoppedMockClockTest extends TestCase
         $this->assertSame($start_microtime, $clock->getMicrotime(), 'Stays at the same microtime');
     }
 
-    public function testItAdvancesTimeAfterEachTick()
+    public function testItAdvancesTimeAfterEachTick(): void
     {
         $clock = StoppedMockClock::at('2019-01-05 10:03:02');
         $this->assertSame(1546682582.0, $clock->getMicrotime(), 'Correct starting microtime');
@@ -91,7 +92,7 @@ class StoppedMockClockTest extends TestCase
         $this->assertSame(1546768982.0, $clock->getMicrotime());
     }
 
-    public function testItAdvancesTimeAfterEachTickMicroseconds()
+    public function testItAdvancesTimeAfterEachTickMicroseconds(): void
     {
         $clock = StoppedMockClock::atMicrotime(1546682582.150);
         $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:02.150'), $clock->getDateTime());
@@ -105,7 +106,7 @@ class StoppedMockClockTest extends TestCase
         $this->assertEquals(new DateTimeImmutable('2019-01-05 10:03:03.050'), $clock->getDateTime(), 'DateTime changed after second boundary');
     }
 
-    public function testItsUsleepIsImmediateButAdvancesTime()
+    public function testItsUsleepIsImmediateButAdvancesTime(): void
     {
         $clock = StoppedMockClock::atMicrotime(1546682582.05);
         $start = microtime(true);
@@ -115,31 +116,31 @@ class StoppedMockClockTest extends TestCase
         $this->assertSame(1546682582.95, round($clock->getMicrotime(), 3), 'Should update time');
     }
 
-    public static function provider_assert_slept_fails()
+    public static function provider_assert_slept_fails(): array
     {
         return [
             [
-                function () {
+                function (): void {
                 },
                 [15],
                 'Never slept at all',
             ],
             [
-                function (StoppedMockClock $clock) {
+                function (StoppedMockClock $clock): void {
                     $clock->usleep(150);
                 },
                 [15],
                 'Wrong amount of sleep',
             ],
             [
-                function (StoppedMockClock $clock) {
+                function (StoppedMockClock $clock): void {
                     $clock->usleep(150);
                 },
                 [150, 30],
                 'Incorrect number of sleeps',
             ],
             [
-                function (StoppedMockClock $clock) {
+                function (StoppedMockClock $clock): void {
                     $clock->usleep(150);
                     $clock->usleep(10);
                 },
@@ -150,7 +151,7 @@ class StoppedMockClockTest extends TestCase
     }
 
     #[DataProvider('provider_assert_slept_fails')]
-    public function testAssertSleptFailsIfNotSleptForExpectedIntervals($callback, $expected, $msg)
+    public function testAssertSleptFailsIfNotSleptForExpectedIntervals(Closure $callback, array $expected, string $msg): void
     {
         $clock = StoppedMockClock::atNow();
         $callback($clock);
@@ -158,7 +159,7 @@ class StoppedMockClockTest extends TestCase
         $clock->assertSlept($expected, $msg);
     }
 
-    public function testAssertSleptPassesIfSleptForExpectedIntervals()
+    public function testAssertSleptPassesIfSleptForExpectedIntervals(): void
     {
         $clock = StoppedMockClock::atNow();
         $clock->usleep(50000);
@@ -169,13 +170,13 @@ class StoppedMockClockTest extends TestCase
         );
     }
 
-    public function testAssertNeverSleptPassesIfNeverSlept()
+    public function testAssertNeverSleptPassesIfNeverSlept(): void
     {
         $clock = StoppedMockClock::atNow();
         $this->assertNull($clock->assertNeverSlept());
     }
 
-    public function testAssertNeverSleptIfEverSlept()
+    public function testAssertNeverSleptIfEverSlept(): void
     {
         $clock = StoppedMockClock::atNow();
         $clock->usleep(500);
@@ -183,7 +184,7 @@ class StoppedMockClockTest extends TestCase
         $clock->assertNeverSlept();
     }
 
-    public function testAgoAndFutureWorkAsExpected()
+    public function testAgoAndFutureWorkAsExpected(): void
     {
         $clock = StoppedMockClock::at('2024-11-14 13:56:20.203123');
         $this->assertSame(

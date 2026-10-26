@@ -13,7 +13,7 @@ use function iterator_to_array;
 
 class UniqueMapTest extends TestCase
 {
-    public function testItReturnsEntriesByKey()
+    public function testItReturnsEntriesByKey(): void
     {
         $bar = new class { };
         $subject = new UniqueMap(
@@ -28,14 +28,14 @@ class UniqueMapTest extends TestCase
         $this->assertSame(null, $subject['nully']);
     }
 
-    public function testItThrowsOnAccessToUndefinedKey()
+    public function testItThrowsOnAccessToUndefinedKey(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $this->expectException(OutOfBoundsException::class);
         $subject['other-item'];
     }
 
-    public function testItAcceptsNewItems()
+    public function testItAcceptsNewItems(): void
     {
         $new1 = new class { };
         $subject = new UniqueMap(['any' => 'item']);
@@ -48,7 +48,7 @@ class UniqueMapTest extends TestCase
         $this->assertSame(null, $subject['new3']);
     }
 
-    public function testItThrowsOnAttemptToOverwriteKey()
+    public function testItThrowsOnAttemptToOverwriteKey(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
 
@@ -61,7 +61,7 @@ class UniqueMapTest extends TestCase
         }
     }
 
-    public function testItReportsIfAnItemExists()
+    public function testItReportsIfAnItemExists(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['other'] = 'thing';
@@ -76,7 +76,7 @@ class UniqueMapTest extends TestCase
         );
     }
 
-    public function testItAllowsItemsToBeDeletedAndReinserted()
+    public function testItAllowsItemsToBeDeletedAndReinserted(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
 
@@ -94,7 +94,7 @@ class UniqueMapTest extends TestCase
         $this->assertSame('new item', $subject['any']);
     }
 
-    public function testItIsIterable()
+    public function testItIsIterable(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
@@ -107,7 +107,7 @@ class UniqueMapTest extends TestCase
         );
     }
 
-    public function testItIsCountable()
+    public function testItIsCountable(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
@@ -116,7 +116,7 @@ class UniqueMapTest extends TestCase
         $this->assertSame(3, count($subject));
     }
 
-    public function testItSupportsConditionalReadLikeAnArray()
+    public function testItSupportsConditionalReadLikeAnArray(): void
     {
         $subject = new UniqueMap(['i-exist' => 'ok']);
         $this->assertSame('any-default', $subject['i do not'] ?? 'any-default');

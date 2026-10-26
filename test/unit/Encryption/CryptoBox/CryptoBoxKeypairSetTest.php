@@ -12,7 +12,7 @@ use UnexpectedValueException;
 
 class CryptoBoxKeypairSetTest extends TestCase
 {
-    public function testItCanReturnKnownKeypairById()
+    public function testItCanReturnKnownKeypairById(): void
     {
         $subject = new CryptoBoxKeypairSet(
             CryptoBoxKeypair::generate('key-a'),
@@ -26,7 +26,7 @@ class CryptoBoxKeypairSetTest extends TestCase
         );
     }
 
-    public function testItThrowsOnConstructionWithDuplicateKeyIds()
+    public function testItThrowsOnConstructionWithDuplicateKeyIds(): void
     {
         $a1 = CryptoBoxKeypair::generate('key-a');
         $a2 = CryptoBoxKeypair::generate('key-a');
@@ -34,7 +34,7 @@ class CryptoBoxKeypairSetTest extends TestCase
         new CryptoBoxKeypairSet($a1, $a2);
     }
 
-    public function testItThrowsOnRequestForUndefinedKey()
+    public function testItThrowsOnRequestForUndefinedKey(): void
     {
         $subject = new CryptoBoxKeypairSet(
             CryptoBoxKeypair::generate('one'),
@@ -46,7 +46,7 @@ class CryptoBoxKeypairSetTest extends TestCase
         $subject->getKeypair('four');
     }
 
-    public function testItProvidesShortcutToDecryptAValueWithKnownKey()
+    public function testItProvidesShortcutToDecryptAValueWithKnownKey(): void
     {
         $subject = new CryptoBoxKeypairSet(
             CryptoBoxKeypair::generate('a'),
@@ -60,7 +60,7 @@ class CryptoBoxKeypairSetTest extends TestCase
         // Actual failure cases for decrypt are tested on the keypair itself
     }
 
-    public function testItCanBeConstructedFromStrings()
+    public function testItCanBeConstructedFromStrings(): void
     {
         $kp1 = CryptoBoxKeypair::generate('one');
         $kp2 = CryptoBoxKeypair::generate('two');

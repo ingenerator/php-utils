@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
@@ -10,7 +12,7 @@ use function random_bytes;
 
 class Base64UrlTest extends TestCase
 {
-    public static function provider_encode_decode()
+    public static function provider_encode_decode(): array
     {
         return [
             ['1'],
@@ -20,13 +22,13 @@ class Base64UrlTest extends TestCase
     }
 
     #[DataProvider('provider_encode_decode')]
-    public function testItCanEncodeAndDecodeAValue($original)
+    public function testItCanEncodeAndDecodeAValue(string $original): void
     {
         $this->assertSame($original, Base64Url::decode(Base64Url::encode($original)));
     }
 
     #[DataProvider('provider_encode_decode')]
-    public function testItsEncodedOutputIsAlwaysUrlSafe($value)
+    public function testItsEncodedOutputIsAlwaysUrlSafe(string $value): void
     {
         $encoded = Base64Url::encode($value);
         $this->assertIsString($encoded);

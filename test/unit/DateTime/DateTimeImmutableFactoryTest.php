@@ -23,7 +23,7 @@ use function date_default_timezone_set;
 class DateTimeImmutableFactoryTest extends TestCase
 {
     #[TestWith(['2017-07-09 10:01:02', '2017-07-09T10:01:02.000000+01:00'])]
-    public function testItFactoriesCorrectObjectFromValidYmdhisInDefaultTz($input, $expect)
+    public function testItFactoriesCorrectObjectFromValidYmdhisInDefaultTz($input, $expect): void
     {
         $old_default = date_default_timezone_get();
         try {
@@ -43,13 +43,13 @@ class DateTimeImmutableFactoryTest extends TestCase
     #[TestWith(['2017-11-10 26:10:10'])]
     #[TestWith(['2017-14-10'])]
     #[TestWith(['10/11/2017'])]
-    public function testItThrowsFromInvalidYmdhisInput($input)
+    public function testItThrowsFromInvalidYmdhisInput($input): void
     {
         $this->expectException(InvalidArgumentException::class);
         DateTimeImmutableFactory::fromYmdHis($input);
     }
 
-    public function testItFactoriesFromUnixTimestampInDefaultTz()
+    public function testItFactoriesFromUnixTimestampInDefaultTz(): void
     {
         try {
             $old_default = date_default_timezone_get();
@@ -67,7 +67,7 @@ class DateTimeImmutableFactoryTest extends TestCase
     #[TestWith([1274437650, '2010-05-21T11:27:30.000000+01:00'])]
     #[TestWith([1274437650, '2010-05-21T11:27:30.000000+01:00'])]
     #[TestWith([1274437650.0, '2010-05-21T11:27:30.000000+01:00'])]
-    public function testItFactoriesFromMicrotimeInDefaultTz($val, $expect)
+    public function testItFactoriesFromMicrotimeInDefaultTz($val, $expect): void
     {
         try {
             $old_default = date_default_timezone_get();
@@ -98,7 +98,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         DateTimeImmutableFactory::fromStrictFormat($val, $format);
     }
 
-    public static function provider_from_iso_ms()
+    public static function provider_from_iso_ms(): array
     {
         return [
             '6 millis in +00:00' => ['2023-02-02T10:03:02.123456+00:00', '2023-02-02T10:03:02.123456+00:00'],
@@ -118,13 +118,13 @@ class DateTimeImmutableFactoryTest extends TestCase
     }
 
     #[DataProvider('provider_from_iso_ms')]
-    public function testItFactoriesFromIsoFormat(string $input, string $expect)
+    public function testItFactoriesFromIsoFormat(string $input, string $expect): void
     {
         $actual = DateTimeImmutableFactory::fromIso($input);
         $this->assertSame($expect, DateString::isoMS($actual));
     }
 
-    public static function provider_throws_from_invalid_iso()
+    public static function provider_throws_from_invalid_iso(): array
     {
         return [
             'missing T separator' => ['2023-04-30 15:56:15.12345642-03:30'],
@@ -136,14 +136,14 @@ class DateTimeImmutableFactoryTest extends TestCase
     }
 
     #[DataProvider('provider_throws_from_invalid_iso')]
-    public function testItThrowsFromInvalidIsoFormat($input)
+    public function testItThrowsFromInvalidIsoFormat(string $input): void
     {
         $this->expectExceptionMessage("`$input` cannot be parsed as a valid ISO date-time");
         $this->expectException(InvalidArgumentException::class);
         DateTimeImmutableFactory::fromIso($input);
     }
 
-    public function testItCanFactoryWithZeroMicros()
+    public function testItCanFactoryWithZeroMicros(): void
     {
         $result = DateTimeImmutableFactory::zeroMicros(
             DateTimeImmutableFactory::fromIso('2023-01-03T10:02:03.123456+01:00')
@@ -151,7 +151,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertSame('2023-01-03T10:02:03.000000+01:00', DateString::isoMS($result));
     }
 
-    public function testZeroMicrosUsesCurrentTimeByDefault()
+    public function testZeroMicrosUsesCurrentTimeByDefault(): void
     {
         $before = DateTimeImmutableFactory::fromYmdHis(date('Y-m-d H:i:s'));
         $result = DateTimeImmutableFactory::zeroMicros();
@@ -161,7 +161,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertGreaterThanOrEqual($before, $result, 'Should be after start of test (ignoring micros)');
     }
 
-    public function testItCanFactoryWithZeroTime()
+    public function testItCanFactoryWithZeroTime(): void
     {
         $result = DateTimeImmutableFactory::zeroTime(
             DateTimeImmutableFactory::fromIso('2023-01-03T10:02:03.123456+01:00')
@@ -169,7 +169,7 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertSame('2023-01-03T00:00:00.000000+01:00', DateString::isoMS($result));
     }
 
-    public function testZeroTimeUsesCurrentTimeByDefault()
+    public function testZeroTimeUsesCurrentTimeByDefault(): void
     {
         $before = new DateTimeImmutable('00:00:00.000000');
         $result = DateTimeImmutableFactory::zeroTime();

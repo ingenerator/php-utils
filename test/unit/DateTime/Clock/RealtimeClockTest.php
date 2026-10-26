@@ -20,12 +20,12 @@ use function usleep;
 
 class RealtimeClockTest extends TestCase
 {
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(RealtimeClock::class, $this->newSubject());
     }
 
-    public function testItReturnsCurrentTime()
+    public function testItReturnsCurrentTime(): void
     {
         $time = $this->newSubject()->getDateTime();
         $this->assertInstanceOf(DateTimeImmutable::class, $time);
@@ -38,7 +38,7 @@ class RealtimeClockTest extends TestCase
         );
     }
 
-    public function testItReturnsMicrotime()
+    public function testItReturnsMicrotime(): void
     {
         $mt = $this->newSubject()->getMicrotime();
         $this->assertIsFloat($mt);
@@ -50,7 +50,7 @@ class RealtimeClockTest extends TestCase
         );
     }
 
-    public function testItSleeps()
+    public function testItSleeps(): void
     {
         $start = microtime(true);
         $subject = $this->newSubject();
@@ -64,7 +64,7 @@ class RealtimeClockTest extends TestCase
     /**
      * @slowThreshold 3000
      */
-    public function testTimeContinuesDuringTheLifeOfAnInstance()
+    public function testTimeContinuesDuringTheLifeOfAnInstance(): void
     {
         $subject = $this->newSubject();
         $start_ts = $subject->getDateTime();
@@ -93,22 +93,22 @@ class RealtimeClockTest extends TestCase
     {
         return [
             'in the past, with time component' => [
-                fn (RealtimeClock $clock) => $clock->ago(DateIntervalFactory::years(6)),
+                fn (RealtimeClock $clock): DateTimeImmutable => $clock->ago(DateIntervalFactory::years(6)),
                 '-6 year',
                 false,
             ],
             'in the past, with date only' => [
-                fn (RealtimeClock $clock) => $clock->ago(DateIntervalFactory::months(6), date_only: true),
+                fn (RealtimeClock $clock): DateTimeImmutable => $clock->ago(DateIntervalFactory::months(6), date_only: true),
                 '-6 months 00:00:00.000000',
                 true,
             ],
             'in the future, with time component' => [
-                fn (RealtimeClock $clock) => $clock->future(DateIntervalFactory::years(2)),
+                fn (RealtimeClock $clock): DateTimeImmutable => $clock->future(DateIntervalFactory::years(2)),
                 '+2 year',
                 false,
             ],
             'in the future, with date only' => [
-                fn (RealtimeClock $clock) => $clock->future(DateIntervalFactory::months(1), date_only: true),
+                fn (RealtimeClock $clock): DateTimeImmutable => $clock->future(DateIntervalFactory::months(1), date_only: true),
                 '+1 months 00:00:00.000000',
                 true,
             ],
@@ -116,7 +116,7 @@ class RealtimeClockTest extends TestCase
     }
 
     #[DataProvider('provider_relative_times')]
-    public function testItReturnsRelativeTimes(Closure $test_method, string $expect_result, bool $expect_zero_time)
+    public function testItReturnsRelativeTimes(Closure $test_method, string $expect_result, bool $expect_zero_time): void
     {
         $subject = $this->newSubject();
         // Capture the time before and after we do the calculation - time will pass during the test so we need to just
@@ -134,7 +134,7 @@ class RealtimeClockTest extends TestCase
         }
     }
 
-    protected function newSubject()
+    protected function newSubject(): RealtimeClock
     {
         return new RealtimeClock();
     }

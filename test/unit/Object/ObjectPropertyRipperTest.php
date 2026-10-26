@@ -15,7 +15,7 @@ use stdClass;
 
 class ObjectPropertyRipperTest extends TestCase
 {
-    public function testItRipsProperties()
+    public function testItRipsProperties(): void
     {
         $this->assertEquals(
             ['something_private' => 'precious', 'something_protected' => 'water'],
@@ -26,7 +26,7 @@ class ObjectPropertyRipperTest extends TestCase
         );
     }
 
-    public function testItRipsOneProperty()
+    public function testItRipsOneProperty(): void
     {
         $this->assertEquals(
             'precious',
@@ -34,7 +34,7 @@ class ObjectPropertyRipperTest extends TestCase
         );
     }
 
-    public function testItRipsAllProperties()
+    public function testItRipsAllProperties(): void
     {
         $this->assertEquals(
             [
@@ -46,7 +46,7 @@ class ObjectPropertyRipperTest extends TestCase
         );
     }
 
-    public function testItCanRipFromStdclass()
+    public function testItCanRipFromStdclass(): void
     {
         $c = new stdClass();
         $c->data = 'something';
@@ -64,7 +64,7 @@ class ObjectPropertyRipperTest extends TestCase
         $this->assertSame(['other' => 1], ObjectPropertyRipper::rip($c, ['other']));
     }
 
-    public function testItCanRipFromClassThatInheritsFromStdclass()
+    public function testItCanRipFromClassThatInheritsFromStdclass(): void
     {
         // This is an edge case and should be fairly unlikely IRL, but it is valid.
 
@@ -87,7 +87,7 @@ class ObjectPropertyRipperTest extends TestCase
         $this->assertSame(['hidden' => 'whatever', 'other' => 1], ObjectPropertyRipper::rip($c, ['hidden', 'other']));
     }
 
-    public function testItThrowsIfRippingAllFromAnObjectWithPrivateParentProperties()
+    public function testItThrowsIfRippingAllFromAnObjectWithPrivateParentProperties(): void
     {
         $this->expectException(DomainException::class);
         ObjectPropertyRipper::ripAll(new ExtensionRippingClass());
@@ -96,12 +96,12 @@ class ObjectPropertyRipperTest extends TestCase
 
 class TestRippingClass
 {
-    private $something_private = 'precious';
+    private string $something_private = 'precious';
     protected $something_protected = 'water';
     protected $something_else = 'else';
 }
 
 class ExtensionRippingClass extends TestRippingClass
 {
-    private $child_private = 'other-private';
+    private string $child_private = 'other-private';
 }

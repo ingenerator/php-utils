@@ -53,7 +53,7 @@ class ObjectPropertyRipper
         // that are not present on other instances of the same class
 
         $props = (self::bindScopedClosure(
-            fn () => get_object_vars($object),
+            fn (): array => get_object_vars($object),
             $object,
         ))();
 
@@ -93,7 +93,7 @@ class ObjectPropertyRipper
     protected static function getRipper($class)
     {
         static::$rippers[$class] ??= self::bindScopedClosure(
-            function ($object, $properties) {
+            function ($object, $properties): array {
                 $values = [];
                 foreach ($properties as $property) {
                     $values[$property] = $object->$property;

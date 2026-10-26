@@ -11,7 +11,7 @@ use stdClass;
 
 class InitialisableSingletonTraitTest extends TestCase
 {
-    public function testItThrowsIfNotInitialised()
+    public function testItThrowsIfNotInitialised(): void
     {
         $class = new class {
             use InitialisableSingletonTrait;
@@ -20,58 +20,58 @@ class InitialisableSingletonTraitTest extends TestCase
         $class::instance();
     }
 
-    public function testItThrowsOnAttemptToReinitialise()
+    public function testItThrowsOnAttemptToReinitialise(): void
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $class::initialise(fn () => new $class());
+        $class::initialise(fn (): object => new $class());
         $this->expectException(LogicException::class);
-        $class::initialise(fn () => new $class());
+        $class::initialise(fn (): object => new $class());
     }
 
-    public function testItIndicatesIfInitialisedOrNot()
+    public function testItIndicatesIfInitialisedOrNot(): void
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
         $this->assertSame(false, $class::isInitialised(), 'Not initialised before init');
 
-        $class::initialise(fn () => new $class());
+        $class::initialise(fn (): object => new $class());
         $this->assertSame(true, $class::isInitialised(), 'Initialised after init');
     }
 
-    public function testItCanInitialiseAndReturnsSingletonFromThenOn()
+    public function testItCanInitialiseAndReturnsSingletonFromThenOn(): void
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
-        $class::initialise(fn () => new $class());
+        $class::initialise(fn (): object => new $class());
         $this->assertInstanceOf($class::class, $class::instance());
         $this->assertSame($class::instance(), $class::instance());
     }
 
-    public function testItThrowsIfInitialiserDoesNotReturnInstanceOfClass()
+    public function testItThrowsIfInitialiserDoesNotReturnInstanceOfClass(): void
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
         $this->expectException(InvalidArgumentException::class);
-        $class::initialise(fn () => new stdClass());
+        $class::initialise(fn (): stdClass => new stdClass());
     }
 
-    public function testItThrowsIfInitialiserReturnsNothing()
+    public function testItThrowsIfInitialiserReturnsNothing(): void
     {
         $class = new class {
             use InitialisableSingletonTrait;
         };
         $this->expectException(InvalidArgumentException::class);
-        $class::initialise(function () { });
+        $class::initialise(function (): void { });
     }
 
-    public function testItIsNotAffectedByMultipleClassesUsingTheTrait()
+    public function testItIsNotAffectedByMultipleClassesUsingTheTrait(): void
     {
-        CustomSingletonOne::initialise(fn () => new CustomSingletonOne());
+        CustomSingletonOne::initialise(fn (): CustomSingletonOne => new CustomSingletonOne());
         $this->assertSame(
             ['one' => true, 'two' => false],
             ['one' => CustomSingletonOne::isInitialised(), 'two' => CustomSingletonTwo::isInitialised()],
@@ -79,7 +79,7 @@ class InitialisableSingletonTraitTest extends TestCase
         );
 
         $inst1 = CustomSingletonOne::instance();
-        CustomSingletonTwo::initialise(fn () => new CustomSingletonTwo());
+        CustomSingletonTwo::initialise(fn (): CustomSingletonTwo => new CustomSingletonTwo());
         $this->assertSame(
             ['one' => true, 'two' => true],
             ['one' => CustomSingletonOne::isInitialised(), 'two' => CustomSingletonTwo::isInitialised()],
@@ -94,13 +94,13 @@ class InitialisableSingletonTraitTest extends TestCase
         );
     }
 
-    public function testItCanBeExtended()
+    public function testItCanBeExtended(): void
     {
         $child = new class extends CustomParentSingleton {
         };
 
         $child::initialise(
-            fn () => new $child()
+            fn (): object => new $child()
         );
 
         $this->assertSame(

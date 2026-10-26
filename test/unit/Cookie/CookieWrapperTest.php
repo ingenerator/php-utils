@@ -17,7 +17,7 @@ class CookieWrapperTest extends TestCase
     #[TestWith(['my', true, 'cookie'])]
     #[TestWith(['has', true, 'values'])]
     #[TestWith(['anything', false, null])]
-    public function testItHasCookiesFromSuperglobal($name, $expect_has, $expect_val)
+    public function testItHasCookiesFromSuperglobal($name, $expect_has, $expect_val): void
     {
         $_COOKIE = ['my' => 'cookie', 'has' => 'values'];
         $subject = $this->newSubject();
@@ -33,7 +33,7 @@ class CookieWrapperTest extends TestCase
         );
     }
 
-    public function testItHasCookiesThatHaveBeenSetDuringRequest()
+    public function testItHasCookiesThatHaveBeenSetDuringRequest(): void
     {
         $_COOKIE = [];
         $subject = $this->newSubject();
@@ -50,7 +50,7 @@ class CookieWrapperTest extends TestCase
         );
     }
 
-    public function testItThrowsFromSetCookieIfHeadersHaveBeenSent()
+    public function testItThrowsFromSetCookieIfHeadersHaveBeenSent(): void
     {
         $subject = $this->newSubject();
         $subject->headers_sent = ['file' => 'myfile.php', 'line' => 152];
@@ -61,7 +61,7 @@ class CookieWrapperTest extends TestCase
         $subject->set('foo', 'anything');
     }
 
-    public function testItSetsCookiesUsingProvidedOptions()
+    public function testItSetsCookiesUsingProvidedOptions(): void
     {
         $this->ssl_available = true;
         $subject = $this->newSubject();
@@ -95,7 +95,7 @@ class CookieWrapperTest extends TestCase
         );
     }
 
-    public function testItAppliesSaneDefaultsWhenSettingCookies()
+    public function testItAppliesSaneDefaultsWhenSettingCookies(): void
     {
         $this->ssl_available = true;
         $subject = $this->newSubject();
@@ -119,7 +119,7 @@ class CookieWrapperTest extends TestCase
         );
     }
 
-    public function testItCanSetExpiresFromDatetimeImmutable()
+    public function testItCanSetExpiresFromDatetimeImmutable(): void
     {
         $subject = $this->newSubject();
         $subject->set(
@@ -136,7 +136,7 @@ class CookieWrapperTest extends TestCase
     #[TestWith([['secure' => true], false])]
     #[TestWith([['secure' => false], false])]
     #[TestWith([[], false])]
-    public function testItDowngradesSecureCookiesWhenNoSslAvailable($opts, $expect)
+    public function testItDowngradesSecureCookiesWhenNoSslAvailable($opts, $expect): void
     {
         $this->ssl_available = false;
         $subject = $this->newSubject();
@@ -149,7 +149,7 @@ class CookieWrapperTest extends TestCase
     #[TestWith([true, ['samesite' => 'Lax'], 'Lax'])]
     #[TestWith([true, ['samesite' => 'None'], 'None'])]
     #[TestWith([false, ['samesite' => 'None'], null])]
-    public function testItAddsSamesiteAttributeOnlyIfSslAvailable($has_ssl, $opts, $expect)
+    public function testItAddsSamesiteAttributeOnlyIfSslAvailable($has_ssl, $opts, $expect): void
     {
         $this->ssl_available = $has_ssl;
         $subject = $this->newSubject();
@@ -162,7 +162,7 @@ class CookieWrapperTest extends TestCase
         }
     }
 
-    public function testItDeletesCookieBySettingValueEmptyAndExpiresInPast()
+    public function testItDeletesCookieBySettingValueEmptyAndExpiresInPast(): void
     {
         $_COOKIE['myvar'] = 'whoopsy';
         $subject = $this->newSubject();
@@ -207,7 +207,7 @@ class CookieWrapperTest extends TestCase
         $_COOKIE = $this->_old_cookie_var;
     }
 
-    protected function newSubject()
+    protected function newSubject(): TestableCookieWrapper
     {
         return new TestableCookieWrapper($this->ssl_available);
     }

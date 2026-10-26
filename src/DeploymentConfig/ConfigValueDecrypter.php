@@ -14,7 +14,7 @@ class ConfigValueDecrypter
     /**
      * @var string[]
      */
-    private $keypairs = [];
+    private array $keypairs = [];
 
     public function __construct(string $keypair_dir)
     {
@@ -58,7 +58,7 @@ class ConfigValueDecrypter
     /**
      * @return bool|string
      */
-    protected function loadAndValidateKeypair(string $name)
+    protected function loadAndValidateKeypair(string $name): string
     {
         $keypair_file = sprintf('%s/%s.secret-config.key', $this->keypair_dir, $name);
         if (!is_file($keypair_file)) {

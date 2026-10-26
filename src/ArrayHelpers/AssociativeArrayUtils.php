@@ -39,10 +39,8 @@ class AssociativeArrayUtils
      *
      * @param array $merge_base        initial array
      * @param array $merge_patches,... array to merge
-     *
-     * @return  array
      */
-    public static function deepMerge(array $merge_base, array ...$merge_patches)
+    public static function deepMerge(array $merge_base, array ...$merge_patches): array
     {
         foreach ($merge_patches as $patch) {
             if (AssociativeArrayUtils::isAssociative($patch)) {
@@ -92,10 +90,8 @@ class AssociativeArrayUtils
 
     /**
      * Turns 'this.thing.here => bar' into ['this']['thing']['here'] = bar.
-     *
-     * @return array
      */
-    public static function pathsToNested(array $input)
+    public static function pathsToNested(array $input): array
     {
         $result = [];
         foreach ($input as $key => $value) {

@@ -15,7 +15,7 @@ use InvalidArgumentException;
 
 class MismatchedSchemaException extends InvalidArgumentException
 {
-    public static function forSchema(array $expected, array $actual)
+    public static function forSchema(array $expected, array $actual): static
     {
         return new static(
             'Mismatched row schema in CSV file:'."\n"

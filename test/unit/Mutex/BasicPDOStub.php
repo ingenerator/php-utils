@@ -13,7 +13,7 @@ if (PHP_MAJOR_VERSION < 8) {
     {
         protected $query_stack = [];
 
-        public static function withQueryStack(array $stack)
+        public static function withQueryStack(array $stack): static
         {
             $i = new static();
             $i->query_stack = $stack;
@@ -43,7 +43,7 @@ if (PHP_MAJOR_VERSION < 8) {
             return new BasicPDOStatementStub($next_query['result']);
         }
 
-        public function assertAllQueriesRan()
+        public function assertAllQueriesRan(): void
         {
             Assert::assertEquals([], $this->query_stack);
         }
@@ -53,7 +53,7 @@ if (PHP_MAJOR_VERSION < 8) {
     {
         protected $query_stack = [];
 
-        public static function withQueryStack(array $stack)
+        public static function withQueryStack(array $stack): static
         {
             $i = new static();
             $i->query_stack = $stack;
@@ -79,7 +79,7 @@ if (PHP_MAJOR_VERSION < 8) {
             return new BasicPDOStatementStub($next_query['result']);
         }
 
-        public function assertAllQueriesRan()
+        public function assertAllQueriesRan(): void
         {
             Assert::assertEquals([], $this->query_stack);
         }

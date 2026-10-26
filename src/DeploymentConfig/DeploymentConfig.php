@@ -73,20 +73,16 @@ class DeploymentConfig
 
     /**
      * @param string $environment,...
-     *
-     * @return bool
      */
-    public function isEnvironment($environment)
+    public function isEnvironment($environment): bool
     {
         return in_array($this->environment, func_get_args(), true);
     }
 
     /**
      * @param string $environment,...
-     *
-     * @return bool
      */
-    public function notEnvironment($environment)
+    public function notEnvironment($environment): bool
     {
         return !in_array($this->environment, func_get_args(), true);
     }

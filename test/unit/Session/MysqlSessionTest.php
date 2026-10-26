@@ -13,6 +13,7 @@ use Ingenerator\PHPUtils\Session\MysqlSession;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use UnexpectedValueException;
 
@@ -20,7 +21,7 @@ class MysqlSessionTest extends TestCase
 {
     private array $old_ini_vars = [];
 
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(MysqlSession::class, $this->newSubject());
     }
@@ -111,7 +112,7 @@ class MysqlSessionTest extends TestCase
         // it would obviously be better if this ran as an integration test against an actual mysql instance - however
         // really here I only want to test that the validation is done against the database e.g. not short-circuited by
         // the pattern matching.
-        $pdo = $this->mockPDOToPrepareQueries(function ($query) {
+        $pdo = $this->mockPDOToPrepareQueries(function ($query): MockObject {
             $result = $this->createMock(PDOStatement::class);
 
             if (str_starts_with($query, 'INSERT INTO `sessions`')) {
@@ -166,7 +167,7 @@ class MysqlSessionTest extends TestCase
 
     protected function newSubject(
         ?PDO $pdo = null,
-    ) {
+    ): MysqlSession {
         return new MysqlSession(
             $pdo ?? $this->mockPDOExpectingNoCalls(),
             'insecure-salt',

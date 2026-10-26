@@ -8,7 +8,7 @@ use JsonException;
 
 class JSON
 {
-    public static function decode(?string $json)
+    public static function decode(?string $json): mixed
     {
         // NOTE: it is deprecated to call this with a null argument, which has always thrown an InvalidJSONException.
         // The typehint is left as ?string for backwards compatibility

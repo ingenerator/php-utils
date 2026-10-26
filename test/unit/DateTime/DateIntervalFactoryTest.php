@@ -9,20 +9,20 @@ use PHPUnit\Framework\TestCase;
 
 class DateIntervalFactoryTest extends TestCase
 {
-    public static function provider_shorthand_single_part()
+    public static function provider_shorthand_single_part(): array
     {
         return [
-            'seconds' => [fn () => DateIntervalFactory::seconds(15), new DateInterval('PT15S')],
-            'minutes' => [fn () => DateIntervalFactory::minutes(3), new DateInterval('PT3M')],
-            'hours' => [fn () => DateIntervalFactory::hours(5), new DateInterval('PT5H')],
-            'days' => [fn () => DateIntervalFactory::days(24), new DateInterval('P24D')],
-            'months' => [fn () => DateIntervalFactory::months(14), new DateInterval('P14M')],
-            'years' => [fn () => DateIntervalFactory::years(2), new DateInterval('P2Y')],
+            'seconds' => [fn (): DateInterval => DateIntervalFactory::seconds(15), new DateInterval('PT15S')],
+            'minutes' => [fn (): DateInterval => DateIntervalFactory::minutes(3), new DateInterval('PT3M')],
+            'hours' => [fn (): DateInterval => DateIntervalFactory::hours(5), new DateInterval('PT5H')],
+            'days' => [fn (): DateInterval => DateIntervalFactory::days(24), new DateInterval('P24D')],
+            'months' => [fn (): DateInterval => DateIntervalFactory::months(14), new DateInterval('P14M')],
+            'years' => [fn (): DateInterval => DateIntervalFactory::years(2), new DateInterval('P2Y')],
         ];
     }
 
     #[DataProvider('provider_shorthand_single_part')]
-    public function testFromShorthandSinglePart(callable $creator, DateInterval $expect)
+    public function testFromShorthandSinglePart(callable $creator, DateInterval $expect): void
     {
         $this->assertEquals($expect, $creator());
     }

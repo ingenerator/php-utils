@@ -158,11 +158,10 @@ abstract class AbstractArrayRepository
      * Used to capture a snapshot of entity state at the time it's saved to allow later comparison
      *
      * @param object $entity
-     * @param array  $seen_objects
      *
      * @return array
      */
-    protected function entityToArray($entity, &$seen_objects = [])
+    protected function entityToArray($entity, array &$seen_objects = [])
     {
         $entity_hash = spl_object_id($entity);
         if (isset($seen_objects[$entity_hash])) {
@@ -171,11 +170,11 @@ abstract class AbstractArrayRepository
         $seen_objects[$entity_hash] = true;
 
         $all_props = Closure::bind(
-            fn ($e) => get_object_vars($e),
+            fn ($e): array => get_object_vars($e),
             null,
             $entity
         );
-        $obj_identity = (fn ($a) => $a::class.'#'.spl_object_id($a));
+        $obj_identity = (fn ($a): string => $a::class.'#'.spl_object_id($a));
         $result = [];
         foreach ($all_props($entity) as $key => $var) {
             if (!is_object($var)) {

@@ -30,7 +30,7 @@ class DateIntervalUtilsTest extends TestCase
         );
     }
 
-    public static function provider_unsupported_human_intervals()
+    public static function provider_unsupported_human_intervals(): array
     {
         $diff = fn (string $dt1, string $dt2) => (new DateTimeImmutable($dt1))->diff(new DateTimeImmutable($dt2));
 
@@ -41,7 +41,7 @@ class DateIntervalUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_unsupported_human_intervals')]
-    public function testToHumanThrowsWithUnsupportedIntervals(DateInterval $interval)
+    public function testToHumanThrowsWithUnsupportedIntervals(DateInterval $interval): void
     {
         $this->expectException(InvalidArgumentException::class);
         DateIntervalUtils::toHuman($interval);

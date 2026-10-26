@@ -18,7 +18,7 @@ class AssociativeArrayUtilsTest extends TestCase
     #[TestWith([['one', 'two', 'three'], false])]
     #[TestWith([[1 => 'mixed indices', 5 => 'also mixed'], true])]
     #[TestWith([['one' => 'o clock', 'two' => 'o clock', 'three' => 'o clock'], true])]
-    public function testIsAssociative(array $array, $expected)
+    public function testIsAssociative(array $array, $expected): void
     {
         $this->assertSame(
             $expected,
@@ -53,7 +53,7 @@ class AssociativeArrayUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_paths_to_nested')]
-    public function testItConvertsPathedHashToNestedArrays($input, $expect)
+    public function testItConvertsPathedHashToNestedArrays(array $input, array $expect): void
     {
         $this->assertSame($expect, AssociativeArrayUtils::pathsToNested($input));
     }
@@ -90,7 +90,7 @@ class AssociativeArrayUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_pop_keys')]
-    public function testItCanPopKeysFromASourceArray($source, $pop_keys, $expect)
+    public function testItCanPopKeysFromASourceArray(array $source, array $pop_keys, array $expect): void
     {
         $result = AssociativeArrayUtils::popKeys($source, $pop_keys);
         $this->assertSame($expect, ['popped' => $result, 'source' => $source]);
@@ -121,7 +121,7 @@ class AssociativeArrayUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_set_path')]
-    public function testSetPath($expected, $array, ...$args)
+    public function testSetPath(array $expected, array $array, ...$args): void
     {
         AssociativeArrayUtils::setPath($array, ...$args);
 
@@ -259,7 +259,7 @@ class AssociativeArrayUtilsTest extends TestCase
     }
 
     #[DataProvider('provider_merge')]
-    public function testDeepMerge($expected, ...$args)
+    public function testDeepMerge(array $expected, ...$args): void
     {
         $this->assertSame(
             $expected,

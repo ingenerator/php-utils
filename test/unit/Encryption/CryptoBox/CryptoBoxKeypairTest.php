@@ -16,7 +16,7 @@ use function str_replace;
 
 class CryptoBoxKeypairTest extends TestCase
 {
-    public function testItCanBeGeneratedAsANewKeypairAndUsedToDecrypt()
+    public function testItCanBeGeneratedAsANewKeypairAndUsedToDecrypt(): void
     {
         $first_keypair = CryptoBoxKeypair::generate('any-id');
         $this->assertSame('any-id', $first_keypair->keypair_id);
@@ -37,13 +37,13 @@ class CryptoBoxKeypairTest extends TestCase
     #[TestWith(['multi words'])]
     #[TestWith([''])]
     #[TestWith(['Whoopdedo!'])]
-    public function testItCannotBeCreatedWithKeypairIdInInvalidFormat($key_id)
+    public function testItCannotBeCreatedWithKeypairIdInInvalidFormat($key_id): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxKeypair::generate($key_id);
     }
 
-    public function testItCanBeConvertedFromKnownStringInputAndUsedToDecrypt()
+    public function testItCanBeConvertedFromKnownStringInputAndUsedToDecrypt(): void
     {
         $subject = CryptoBoxKeypair::fromString(
             'some-key.zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'
@@ -61,7 +61,7 @@ class CryptoBoxKeypairTest extends TestCase
         );
     }
 
-    public static function provider_invalid_keypair_string()
+    public static function provider_invalid_keypair_string(): array
     {
         return [
             'empty' => [''],
@@ -73,13 +73,13 @@ class CryptoBoxKeypairTest extends TestCase
     }
 
     #[DataProvider('provider_invalid_keypair_string')]
-    public function testItThrowsInvalidArgumentIfAttemptingToCreateFromInvalidString($keypair_string)
+    public function testItThrowsInvalidArgumentIfAttemptingToCreateFromInvalidString(string $keypair_string): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxKeypair::fromString($keypair_string);
     }
 
-    public function testItThrowsDecryptionFailedIfAttemptingToDecryptCryptoBoxStringForDifferentKeyId()
+    public function testItThrowsDecryptionFailedIfAttemptingToDecryptCryptoBoxStringForDifferentKeyId(): void
     {
         // It doesn't matter that in this example they have the same actual keypair value, they are different key IDs
         // and should be treated as an error to try and decrypt a value with the wrong key
@@ -94,7 +94,7 @@ class CryptoBoxKeypairTest extends TestCase
         CryptoBoxKeypair::fromString($keypair_string)->decrypt($enc);
     }
 
-    public static function provider_bad_decryption()
+    public static function provider_bad_decryption(): array
     {
         return [
             'valid as a key, but not for this message' => [
@@ -106,7 +106,7 @@ class CryptoBoxKeypairTest extends TestCase
     }
 
     #[DataProvider('provider_bad_decryption')]
-    public function testItThrowsDecryptionFailedWithIncorrectKey($bad_keypair)
+    public function testItThrowsDecryptionFailedWithIncorrectKey(string $bad_keypair): void
     {
         $encrypted = CryptoBoxKeypair::generate('a')
             ->getPublicKey()
@@ -118,7 +118,7 @@ class CryptoBoxKeypairTest extends TestCase
         $subject->decrypt($encrypted);
     }
 
-    public function testItThrowsDecryptionFailedIfCiphertextHasBeenTamperedWith()
+    public function testItThrowsDecryptionFailedIfCiphertextHasBeenTamperedWith(): void
     {
         // Don't need to cover every case, we can trust that libsodium will deal with it, we just need to validate
         // that we are catching & throwing on the sodium failure
@@ -133,7 +133,7 @@ class CryptoBoxKeypairTest extends TestCase
         $keypair->decrypt($tampered_msg);
     }
 
-    public function testItCanBeConvertedToUrlsafeBase64AndRecreatedWithAllData()
+    public function testItCanBeConvertedToUrlsafeBase64AndRecreatedWithAllData(): void
     {
         $expected = CryptoBoxKeypair::generate('key-one');
         $exported = $expected->exportToString();

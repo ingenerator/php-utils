@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
  *
@@ -16,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class DateStringTest extends TestCase
 {
-    public static function provider_generic_format()
+    public static function provider_generic_format(): array
     {
         return [
             [null, 'Y-m-d', 'nothing', 'nothing'],
@@ -26,12 +28,12 @@ class DateStringTest extends TestCase
     }
 
     #[DataProvider('provider_generic_format')]
-    public function testItFormatsDateOrReturnsFallbackString($date, $format, $empty, $expect)
+    public function testItFormatsDateOrReturnsFallbackString(?DateTimeImmutable $date, string $format, string $empty, string $expect): void
     {
         $this->assertSame($expect, DateString::format($date, $format, $empty));
     }
 
-    public static function provider_ymdhis()
+    public static function provider_ymdhis(): array
     {
         return [
             [null, 'nothing', 'nothing'],
@@ -40,12 +42,12 @@ class DateStringTest extends TestCase
     }
 
     #[DataProvider('provider_ymdhis')]
-    public function testItFormatsWithYmdhisOrFallback($date, $fallback, $expect)
+    public function testItFormatsWithYmdhisOrFallback(?DateTimeImmutable $date, string $fallback, string $expect): void
     {
         $this->assertSame($expect, DateString::ymdhis($date, $fallback));
     }
 
-    public static function provider_ymd()
+    public static function provider_ymd(): array
     {
         return [
             [null, 'nothing', 'nothing'],
@@ -54,12 +56,12 @@ class DateStringTest extends TestCase
     }
 
     #[DataProvider('provider_ymd')]
-    public function testItFormatsWithYmdOrFallback($date, $fallback, $expect)
+    public function testItFormatsWithYmdOrFallback(?DateTimeImmutable $date, string $fallback, string $expect): void
     {
         $this->assertSame($expect, DateString::ymd($date, $fallback));
     }
 
-    public static function provider_isoms()
+    public static function provider_isoms(): array
     {
         $lndn = new DateTimeZone('Europe/London');
 
@@ -70,7 +72,7 @@ class DateStringTest extends TestCase
     }
 
     #[DataProvider('provider_isoms')]
-    public function testItFormatsToIso8601WithMilliseconds($date, $fallback, $expect)
+    public function testItFormatsToIso8601WithMilliseconds(?DateTimeImmutable $date, string $fallback, string $expect): void
     {
         $this->assertSame($expect, DateString::isoMS($date, $fallback));
     }

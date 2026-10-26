@@ -27,7 +27,7 @@ if (PHP_MAJOR_VERSION < 8) {
             }
             if ($fetch_style === PDO::FETCH_COLUMN) {
                 return array_map(
-                    fn ($row) => $row[$fetch_argument],
+                    fn (array $row) => $row[$fetch_argument],
                     $this->result
                 );
             }
@@ -50,7 +50,7 @@ if (PHP_MAJOR_VERSION < 8) {
                 return $this->result;
             }
             if ($fetch_style === PDO::FETCH_COLUMN) {
-                return array_map(fn ($row) => $row[$fetch_argument[0]], $this->result);
+                return array_map(fn (array $row) => $row[$fetch_argument[0]], $this->result);
             }
             throw new UnexpectedValueException('Not mocked '.$fetch_style);
         }

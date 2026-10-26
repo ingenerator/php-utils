@@ -16,14 +16,14 @@ use function get_object_vars;
 
 class ObjectPropertyPopulatorTest extends TestCase
 {
-    public function testItAssignsSingleProperty()
+    public function testItAssignsSingleProperty(): void
     {
         $class = new TestPopulatingClass();
         ObjectPropertyPopulator::assign($class, 'something_private', 'food');
         $this->assertSame('food', $class->toArray()['something_private']);
     }
 
-    public function testItAssignsArrayOfProperties()
+    public function testItAssignsArrayOfProperties(): void
     {
         $class = new TestPopulatingClass();
         ObjectPropertyPopulator::assignHash(
@@ -43,7 +43,7 @@ class ObjectPropertyPopulatorTest extends TestCase
         );
     }
 
-    public function testItThrowsIfAssigningUnknownProperty()
+    public function testItThrowsIfAssigningUnknownProperty(): void
     {
         $this->expectException(InvalidArgumentException::class);
         ObjectPropertyPopulator::assignHash(new TestPopulatingClass(), ['junk' => 'rubbish']);
@@ -56,7 +56,7 @@ class TestPopulatingClass
     protected $something_protected;
     protected $already_init = 'Foo';
 
-    public function toArray()
+    public function toArray(): array
     {
         return get_object_vars($this);
     }

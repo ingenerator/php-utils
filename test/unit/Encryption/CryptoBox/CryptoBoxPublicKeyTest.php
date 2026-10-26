@@ -17,7 +17,7 @@ class CryptoBoxPublicKeyTest extends TestCase
      * by testing through the behaviour of the public key.
      */
 
-    public function testItCanBeCreatedFromAKnownStringInputAndUsedToEncrypt()
+    public function testItCanBeCreatedFromAKnownStringInputAndUsedToEncrypt(): void
     {
         $subject = CryptoBoxPublicKey::fromString('some-key.-J5fsjd53SB2lLmTVcGC0k0w59d9E-qBOYVcuDzUpRU');
         $encrypted = $subject->encrypt('open sesame');
@@ -31,7 +31,7 @@ class CryptoBoxPublicKeyTest extends TestCase
         );
     }
 
-    public static function provider_invalid_keypair_string()
+    public static function provider_invalid_keypair_string(): array
     {
         return [
             'empty' => [''],
@@ -43,13 +43,13 @@ class CryptoBoxPublicKeyTest extends TestCase
     }
 
     #[DataProvider('provider_invalid_keypair_string')]
-    public function testItThrowsOnAttemptToCreateFromInvalidString($invalid)
+    public function testItThrowsOnAttemptToCreateFromInvalidString(string $invalid): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxPublicKey::fromString($invalid);
     }
 
-    public function testItCanBeConvertedToAUrlsafeBase64StringAndBack()
+    public function testItCanBeConvertedToAUrlsafeBase64StringAndBack(): void
     {
         $expected = CryptoBoxKeypair::generate('key-one')->getPublicKey();
 

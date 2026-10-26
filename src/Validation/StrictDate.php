@@ -21,10 +21,8 @@ class StrictDate
      * @param string       $to_field
      *
      * @deprecated validate input before creating DateTimeImmutable objects
-     *
-     * @return bool
      */
-    public static function date_after(ArrayAccess $validation, $from_field, $to_field)
+    public static function date_after(ArrayAccess $validation, $from_field, $to_field): bool
     {
         $from = $validation[$from_field];
         $to = $validation[$to_field];
@@ -44,10 +42,8 @@ class StrictDate
      * @param string       $to_field
      *
      * @deprecated validate input before creating DateTimeImmutable objects
-     *
-     * @return bool
      */
-    public static function date_on_or_after(ArrayAccess $validation, $from_field, $to_field)
+    public static function date_on_or_after(ArrayAccess $validation, $from_field, $to_field): bool
     {
         $from = $validation[$from_field];
         $to = $validation[$to_field];
@@ -72,10 +68,8 @@ class StrictDate
 
     /**
      * Value is NULL or a valid DateTimeImmutable.
-     *
-     * @return bool
      */
-    public static function datetime_immutable($value)
+    public static function datetime_immutable($value): bool
     {
         if ($value === null) {
             return true;
@@ -104,7 +98,7 @@ class StrictDate
         return self::is_datetime_format('Y-m-d', $value);
     }
 
-    protected static function is_datetime_format($format, $value)
+    protected static function is_datetime_format($format, $value): bool
     {
         $dt = DateTimeImmutable::createFromFormat($format, (string) $value);
 
@@ -115,10 +109,8 @@ class StrictDate
      * Shorthand way to specify the fully qualified validator callback.
      *
      * @param string $rulename
-     *
-     * @return string
      */
-    public static function rule($rulename)
+    public static function rule($rulename): string
     {
         return match ($rulename) {
             'date_after',

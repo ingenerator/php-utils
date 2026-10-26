@@ -26,18 +26,18 @@ class ValidNumberTest extends TestCase
     #[TestWith([13, 13.5, false])]
     #[TestWith([13.5, 13.5, true])]
     #[TestWith([14, 13.5, true])]
-    public function testItValidatesMinimumAsGreaterOrEqual($value, $min, $expect)
+    public function testItValidatesMinimumAsGreaterOrEqual($value, $min, $expect): void
     {
         $this->assertSame($expect, ValidNumber::minimum($value, $min));
     }
 
-    public function testItThrowsForUnknownRuleName()
+    public function testItThrowsForUnknownRuleName(): void
     {
         $this->expectException(InvalidArgumentException::class);
         ValidNumber::rule('random nonsense');
     }
 
-    public function testItReturnsValidatorName()
+    public function testItReturnsValidatorName(): void
     {
         $this->assertSame(
             'Ingenerator\PHPUtils\Validation\ValidNumber::minimum',

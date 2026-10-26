@@ -14,16 +14,16 @@ class DbBackedMutexWrapperTest extends TestCase
     /**
      * @var MockObject
      */
-    private $pdo;
+    private BasicPDOStub $pdo;
 
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $subject = $this->newSubject();
         $this->assertInstanceOf(DbBackedMutexWrapper::class, $subject);
         $this->assertInstanceOf(MutexWrapper::class, $subject);
     }
 
-    public function testItRequestsLockAndThrowsIfNotAvailableWithoutRunningCallback()
+    public function testItRequestsLockAndThrowsIfNotAvailableWithoutRunningCallback(): void
     {
         $this->pdo = BasicPDOStub::withQueryStack(
             [
@@ -43,11 +43,11 @@ class DbBackedMutexWrapperTest extends TestCase
         $subject->withLock(
             'mylock',
             5,
-            function () { throw new RuntimeException('Callback should never fire'); }
+            function (): void { throw new RuntimeException('Callback should never fire'); }
         );
     }
 
-    public function testItReleasesLockAfterSuccessfulCallbackAndReturnsResult()
+    public function testItReleasesLockAfterSuccessfulCallbackAndReturnsResult(): void
     {
         $this->pdo = BasicPDOStub::withQueryStack(
             [
@@ -68,13 +68,13 @@ class DbBackedMutexWrapperTest extends TestCase
             $subject->withLock(
                 'somelock',
                 2,
-                fn () => 'a value'
+                fn (): string => 'a value'
             )
         );
         $this->pdo->assertAllQueriesRan();
     }
 
-    public function testItReleasesLockAfterFailedCallbackAndBubbles()
+    public function testItReleasesLockAfterFailedCallbackAndBubbles(): void
     {
         $this->pdo = BasicPDOStub::withQueryStack(
             [
@@ -91,7 +91,7 @@ class DbBackedMutexWrapperTest extends TestCase
 
         $subject = $this->newSubject();
         try {
-            $subject->withLock('somelock', 2, function () { throw new RuntimeException('Stop'); });
+            $subject->withLock('somelock', 2, function (): void { throw new RuntimeException('Stop'); });
             $this->fail('Should have bubbled exception');
         } catch (RuntimeException$e) {
             $this->assertSame('Stop', $e->getMessage());
@@ -105,7 +105,7 @@ class DbBackedMutexWrapperTest extends TestCase
         $this->pdo = new BasicPDOStub();
     }
 
-    protected function newSubject()
+    protected function newSubject(): DbBackedMutexWrapper
     {
         return new DbBackedMutexWrapper($this->pdo);
     }

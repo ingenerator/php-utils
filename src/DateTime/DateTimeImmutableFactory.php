@@ -105,7 +105,7 @@ class DateTimeImmutableFactory
             '/(?P<hms>T\d{2}:\d{2}:\d{2})(\.(?P<millis>\d+))?(?P<tz_prefix>[+-])/',
             // Can't use sprintf because we want to truncate the milliseconds, not round them
             // So it's simpler to just handle this as a string and cut / pad as required.
-            fn ($matches) => $matches['hms']
+            fn ($matches): string => $matches['hms']
                             .'.'
                             .substr(str_pad($matches['millis'], 6, '0'), 0, 6)
                             .$matches['tz_prefix'],

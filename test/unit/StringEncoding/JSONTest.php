@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class JSONTest extends TestCase
 {
-    public static function provider_valid_json()
+    public static function provider_valid_json(): array
     {
         return [
             ['1', 1],
@@ -22,7 +22,7 @@ class JSONTest extends TestCase
     }
 
     #[DataProvider('provider_valid_json')]
-    public function testItParsesValidJsonWithObjectsAsArrays($json, $expect)
+    public function testItParsesValidJsonWithObjectsAsArrays(string $json, int|bool|string|array|null $expect): void
     {
         $this->assertSame($expect, JSON::decode($json));
     }
@@ -30,31 +30,31 @@ class JSONTest extends TestCase
     #[TestWith([null, 'Cannot decode a null value'])]
     #[TestWith(['', 'Syntax error'])]
     #[TestWith(['i am not json', 'Syntax error'])]
-    public function testItThrowsOnParsingInvalidJson($value, $expect_msg)
+    public function testItThrowsOnParsingInvalidJson($value, $expect_msg): void
     {
         $this->expectException(InvalidJSONException::class);
         $this->expectExceptionMessage($expect_msg);
         JSON::decode($value);
     }
 
-    public function testItCanDecodeJsonAsExplicitArray()
+    public function testItCanDecodeJsonAsExplicitArray(): void
     {
         $this->assertSame(['foo' => 'bar'], JSON::decodeArray('{"foo": "bar"}'));
     }
 
-    public function testItThrowsFromDecodeArrayIfValueNotArray()
+    public function testItThrowsFromDecodeArrayIfValueNotArray(): void
     {
         $this->expectException(InvalidJSONException::class);
         $this->expectExceptionMessage('expected array, got string');
         JSON::decodeArray('"foo"');
     }
 
-    public function testDecodeArrayReturnsEmptyArrayForJsonNullInput()
+    public function testDecodeArrayReturnsEmptyArrayForJsonNullInput(): void
     {
         $this->assertSame([], JSON::decodeArray(json_encode(null)));
     }
 
-    public static function provider_valid_encode()
+    public static function provider_valid_encode(): array
     {
         return [
             [1, false, '1'],
@@ -65,19 +65,19 @@ class JSONTest extends TestCase
     }
 
     #[DataProvider('provider_valid_encode')]
-    public function testEncodeEncodesJsonPrettilyOrNot($val, $pretty, $expect)
+    public function testEncodeEncodesJsonPrettilyOrNot(int|array $val, bool $pretty, string $expect): void
     {
         $this->assertSame($expect, JSON::encode($val, $pretty));
     }
 
-    public function testItThrowsOnErrorJsonEncoding()
+    public function testItThrowsOnErrorJsonEncoding(): void
     {
         $this->expectException(InvalidJSONException::class);
         // BAD UTF8 string content
         JSON::encode("\xC3\x2E");
     }
 
-    public function testItCanPrettifyExistingJson()
+    public function testItCanPrettifyExistingJson(): void
     {
         $this->assertSame(
             "{\n    \"foo\": \"bar\",\n    \"baz\": \"ban\"\n}",

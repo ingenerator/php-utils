@@ -29,7 +29,7 @@ class StrictDateTest extends TestCase
     #[TestWith(['2016-01-01 50:12:00', false])]
     #[TestWith(['2016-01-01T10:00:00', false])]
     #[TestWith(['2016-01-01 10:00:00', true])]
-    public function testItValidatesIsoDatetime($value, $expect)
+    public function testItValidatesIsoDatetime($value, $expect): void
     {
         $this->assertSame($expect, StrictDate::iso_datetime($value));
     }
@@ -42,12 +42,12 @@ class StrictDateTest extends TestCase
     #[TestWith(['2016-02-30', false])]
     #[TestWith(['2016-01-01', true])]
     #[TestWith(['2016-02-30 10:00:00', false])]
-    public function testItValidatesIsoDate($value, $expect)
+    public function testItValidatesIsoDate($value, $expect): void
     {
         $this->assertSame($expect, StrictDate::iso_date($value));
     }
 
-    public static function provider_datetime_immutable()
+    public static function provider_datetime_immutable(): array
     {
         return [
             [null, true],
@@ -59,18 +59,18 @@ class StrictDateTest extends TestCase
     }
 
     #[DataProvider('provider_datetime_immutable')]
-    public function testItValidatesDatetimeImmutableInstance($value, $expect)
+    public function testItValidatesDatetimeImmutableInstance(DateTimeImmutable|bool|DateTime|string|null $value, bool $expect): void
     {
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
     #[DataProvider('provider_datetime_immutable')]
-    public function testItValidatesDateImmutableInstance($value, $expect)
+    public function testItValidatesDateImmutableInstance(DateTimeImmutable|bool|DateTime|string|null $value, bool $expect): void
     {
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
-    public static function provider_date_before_after_invalid_inputs()
+    public static function provider_date_before_after_invalid_inputs(): array
     {
         return [
             [['from' => null, 'to' => null], 'from', 'to', true],
@@ -80,7 +80,7 @@ class StrictDateTest extends TestCase
     }
 
     #[DataProvider('provider_date_before_after_invalid_inputs')]
-    public function testDateCompareFuncsValidateInvalidInput($data, $from_field, $to_field)
+    public function testDateCompareFuncsValidateInvalidInput(array $data, string $from_field, string $to_field): void
     {
         // This is so that an invalid date just says "invalid date" rather than also "must be after"
         $data = new ArrayObject($data);
@@ -91,7 +91,7 @@ class StrictDateTest extends TestCase
         );
     }
 
-    public static function provider_date_after_date()
+    public static function provider_date_after_date(): array
     {
         return [
             'long before' => ['2022-10-02 13:04:03', '2015-11-02 10:03:02', false],
@@ -104,7 +104,7 @@ class StrictDateTest extends TestCase
     }
 
     #[DataProvider('provider_date_after_date')]
-    public function testItValidatesDateAfterDate($from, $to, $expect)
+    public function testItValidatesDateAfterDate(string $from, string $to, bool $expect): void
     {
         $this->assertSame(
             $expect,
@@ -126,7 +126,7 @@ class StrictDateTest extends TestCase
     #[TestWith(['2017-01-04 00:00:00', '2017-01-04 00:00:00', true])]
     #[TestWith(['2017-01-04 10:00:00', '2017-01-04 08:00:00', true])]
     #[TestWith(['2017-05-06 10:00:00', '2018-12-30 00:00:00', true])]
-    public function testItValidatesDateOnOrAfterDate($from, $to, $expect)
+    public function testItValidatesDateOnOrAfterDate($from, $to, $expect): void
     {
         $this->assertSame(
             $expect,
@@ -143,13 +143,13 @@ class StrictDateTest extends TestCase
         );
     }
 
-    public function testItThrowsForUnknownRuleName()
+    public function testItThrowsForUnknownRuleName(): void
     {
         $this->expectException(InvalidArgumentException::class);
         StrictDate::rule('random nonsense');
     }
 
-    public function testItReturnsValidatorName()
+    public function testItReturnsValidatorName(): void
     {
         $this->assertSame(
             'Ingenerator\PHPUtils\Validation\StrictDate::iso_date',

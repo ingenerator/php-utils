@@ -22,7 +22,7 @@ class DefaultLogMetadata
      */
     public static function deviceIdentityLazy(): callable
     {
-        return fn () => [
+        return fn (): array => [
             'context' => ['did' => DeviceIdentifier::get()],
         ];
     }

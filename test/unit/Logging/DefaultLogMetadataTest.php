@@ -16,7 +16,7 @@ class DefaultLogMetadataTest extends TestCase
      * deviceIdentity
      * ---------------------------------.
      */
-    public function testItsDeviceIdentityProvidesDeviceIdAsDeferredValue()
+    public function testItsDeviceIdentityProvidesDeviceIdAsDeferredValue(): void
     {
         $result = DefaultLogMetadata::deviceIdentityLazy();
         $this->assertIsCallable($result);
@@ -26,7 +26,7 @@ class DefaultLogMetadataTest extends TestCase
 
     #[TestWith([['REMOTE_ADDR' => '192.182.382.39'], '192.182.382.39'])]
     #[TestWith([[], '{na}'])]
-    public function testItsHttpContextProvidesClientIpFromServerVars($server, $expect)
+    public function testItsHttpContextProvidesClientIpFromServerVars($server, $expect): void
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['remoteIp']);
@@ -35,7 +35,7 @@ class DefaultLogMetadataTest extends TestCase
     #[TestWith([['REQUEST_URI' => '/foobar/foo'], '/foobar/foo'])]
     #[TestWith([['REQUEST_URI' => '/foobar/foo?arg=what'], '/foobar/foo?arg=what'])]
     #[TestWith([[], null])]
-    public function testItsHttpContextProvidesRequestUrlFromServerVars($server, $expect)
+    public function testItsHttpContextProvidesRequestUrlFromServerVars($server, $expect): void
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['requestUrl']);
@@ -43,7 +43,7 @@ class DefaultLogMetadataTest extends TestCase
 
     #[TestWith([['REQUEST_METHOD' => 'POST'], 'POST'])]
     #[TestWith([[], null])]
-    public function testItsHttpContextProvidesRequestMethodFromServerVars($server, $expect)
+    public function testItsHttpContextProvidesRequestMethodFromServerVars($server, $expect): void
     {
         $result = DefaultLogMetadata::httpContext($server);
         $this->assertSame($expect, $result['context']['httpRequest']['requestMethod']);
@@ -54,7 +54,7 @@ class DefaultLogMetadataTest extends TestCase
      * requestTrace
      * ---------------------------------.
      */
-    public function testItsRequestTracingDataAddsRandomRequestId()
+    public function testItsRequestTracingDataAddsRandomRequestId(): void
     {
         $result1 = DefaultLogMetadata::requestTrace();
         $this->assertMatchesRegularExpression(
@@ -71,7 +71,7 @@ class DefaultLogMetadataTest extends TestCase
     }
 
     public function testItsRequestTracingDataAddsTraceIdWithRequestIdIfNoHeadersAvailable(
-    ) {
+    ): void {
         $result = DefaultLogMetadata::requestTrace();
         $this->assertSame(
             $result['context']['req'],
@@ -80,7 +80,7 @@ class DefaultLogMetadataTest extends TestCase
         );
     }
 
-    public static function provider_trace_header()
+    public static function provider_trace_header(): array
     {
         return [
             [
@@ -113,10 +113,10 @@ class DefaultLogMetadataTest extends TestCase
 
     #[DataProvider('provider_trace_header')]
     public function testItsRequestTracingDataAddsTraceIdWithFromHeaderAndOptionallyProjectIfAvailable(
-        $server,
-        $project,
-        $expect,
-    ) {
+        array $server,
+        ?string $project,
+        string $expect,
+    ): void {
         $result = DefaultLogMetadata::requestTrace($server, $project);
         $this->assertSame(
             $expect,
@@ -130,7 +130,7 @@ class DefaultLogMetadataTest extends TestCase
      * serviceContext
      * ---------------------------------.
      */
-    public function testItsServiceContextProvidesServiceName()
+    public function testItsServiceContextProvidesServiceName(): void
     {
         $result = DefaultLogMetadata::serviceContext('my-svc');
         $this->assertSame('my-svc', $result['serviceContext']['service']);
@@ -141,7 +141,7 @@ class DefaultLogMetadataTest extends TestCase
     #[TestWith(["<?php 'abcdefe';", '#ERROR#'])]
     #[TestWith(["<?php return 'abcdef123';", 'abcdef123'])]
     #[TestWith([false, '#ERROR#'])]
-    public function testItsServiceContextLoadsVersionFromFileIgnoringAnyErrors($file_content, $expect)
+    public function testItsServiceContextLoadsVersionFromFileIgnoringAnyErrors($file_content, $expect): void
     {
         $vfs = vfsStream::setup();
         if ($file_content !== false) {

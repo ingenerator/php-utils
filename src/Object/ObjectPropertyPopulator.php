@@ -30,7 +30,7 @@ class ObjectPropertyPopulator
      * @param object $object
      * @param string $property
      */
-    public static function assign($object, $property, $value)
+    public static function assign($object, $property, $value): void
     {
         static::assignHash($object, [$property => $value]);
     }
@@ -40,7 +40,7 @@ class ObjectPropertyPopulator
      *
      * @param object $object
      */
-    public static function assignHash($object, array $properties)
+    public static function assignHash($object, array $properties): void
     {
         if ($undefined = self::listUndefinedProperties($object, array_keys($properties))) {
             throw new InvalidArgumentException(
@@ -52,7 +52,7 @@ class ObjectPropertyPopulator
         // properties as though the method existed within the object's own class definition (therefore including private
         // and protected properties).
         $populate_func = Closure::bind(
-            function ($object, array $properties) {
+            function ($object, array $properties): void {
                 foreach ($properties as $property => $value) {
                     $object->$property = $value;
                 }
@@ -63,12 +63,12 @@ class ObjectPropertyPopulator
         $populate_func($object, $properties);
     }
 
-    private static function listUndefinedProperties($object, array $property_names)
+    private static function listUndefinedProperties($object, array $property_names): array
     {
         return array_values(
             array_filter(
                 $property_names,
-                fn ($property_name) => !property_exists($object, $property_name)
+                fn ($property_name): bool => !property_exists($object, $property_name)
             )
         );
     }

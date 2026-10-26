@@ -23,19 +23,19 @@ class StaticAssetUrlProviderTest extends TestCase
      */
     protected $vfs;
 
-    public function testItIsInitialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(StaticAssetUrlProvider::class, $this->newSubject());
     }
 
-    public function testItThrowsInInvalidMode()
+    public function testItThrowsInInvalidMode(): void
     {
         $this->options['mode'] = 'some-junk';
         $this->expectException(InvalidArgumentException::class);
         $this->newSubject();
     }
 
-    public function testInLocalModeGetUrlThrowsIfFileDoesNotExist()
+    public function testInLocalModeGetUrlThrowsIfFileDoesNotExist(): void
     {
         $subject = $this->newSubject();
         $this->expectException(RuntimeException::class);
@@ -44,7 +44,7 @@ class StaticAssetUrlProviderTest extends TestCase
 
     #[TestWith(['assets/my-file.css'])]
     #[TestWith(['/assets/my-file.css'])]
-    public function testInLocalModeGetUrlReturnsAbsoluteUrlWithMtimeSuffix($rel_path)
+    public function testInLocalModeGetUrlReturnsAbsoluteUrlWithMtimeSuffix($rel_path): void
     {
         vfsStream::create(
             [
@@ -61,7 +61,7 @@ class StaticAssetUrlProviderTest extends TestCase
         );
     }
 
-    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotExist()
+    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotExist(): void
     {
         $this->options['asset_base_url_file'] = $this->vfs->url().'/no-such-file.php';
         $this->options['mode'] = StaticAssetUrlProvider::MODE_REMOTE;
@@ -74,7 +74,7 @@ class StaticAssetUrlProviderTest extends TestCase
     #[TestWith(['some content that is not php'])]
     #[TestWith(['<?php $a = 1;'])]
     #[TestWith(["<?php return '';"])]
-    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotReturnString($file_content)
+    public function testInRemoteModeGetUrlThrowsIfAssetBaseUrlFileDoesNotReturnString($file_content): void
     {
         vfsStream::create(
             ['asset-base-url.php' => $file_content],
@@ -90,7 +90,7 @@ class StaticAssetUrlProviderTest extends TestCase
 
     #[TestWith(['assets/my-file.css'])]
     #[TestWith(['/assets/my-file.css'])]
-    public function testItRemoteModeGetUrlReturnsUrlPrefixedWithBaseUrl($rel_path)
+    public function testItRemoteModeGetUrlReturnsUrlPrefixedWithBaseUrl($rel_path): void
     {
         vfsStream::create(
             ['asset-base-url.php' => '<?php return "https://i.am.the.walrus/branch/sha";'],
@@ -114,7 +114,7 @@ class StaticAssetUrlProviderTest extends TestCase
         $this->options['asset_base_url_file'] = $this->vfs->url().'/asset-base-url.php';
     }
 
-    protected function newSubject()
+    protected function newSubject(): StaticAssetUrlProvider
     {
         return new StaticAssetUrlProvider(
             $this->options['mode'],

@@ -16,7 +16,7 @@ class ArrayCookieWrapperStubTest extends TestCase
         $name,
         $expect_has,
         $expect_val,
-    ) {
+    ): void {
         $old_cookie = $_COOKIE;
         try {
             $_COOKIE = ['anything' => 'whoops'];
@@ -36,7 +36,7 @@ class ArrayCookieWrapperStubTest extends TestCase
         }
     }
 
-    public function testItCanSimulateSetCookieAndCaptureArgs()
+    public function testItCanSimulateSetCookieAndCaptureArgs(): void
     {
         $exp = new DateTimeImmutable('tomorrow');
         $subject = $this->newSubject();
@@ -57,7 +57,7 @@ class ArrayCookieWrapperStubTest extends TestCase
         );
     }
 
-    protected function newSubject(array $cookies = [])
+    protected function newSubject(array $cookies = []): ArrayCookieWrapperStub
     {
         return new ArrayCookieWrapperStub($cookies);
     }

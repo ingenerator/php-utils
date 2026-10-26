@@ -18,14 +18,14 @@ class DeviceIdentifierTest extends TestCase
 
     #[TestWith([['did' => 'OfLAtnofliaNqvkAjhhsFA']])]
     #[TestWith([['didf' => 'OfLAtnofliaNqvkAjhhsFA']])]
-    public function testItsInitDoesNotSetNewCookieIfEitherCookiePresent($cookie)
+    public function testItsInitDoesNotSetNewCookieIfEitherCookiePresent($cookie): void
     {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
         $this->newSubject()->init();
         $this->assertSame([], $this->cookies->inspectSetCookies());
     }
 
-    public function testItsInitUsesValueAndDeletesFallbackIfBothCookiesPresent()
+    public function testItsInitUsesValueAndDeletesFallbackIfBothCookiesPresent(): void
     {
         $this->cookies = new ArrayCookieWrapperStub(
             [
@@ -52,7 +52,7 @@ class DeviceIdentifierTest extends TestCase
     #[TestWith([[]])]
     #[TestWith([['did' => "i am an abusive person!!! \$\$@@~~##''\$\$\$"]])]
     #[TestWith([['did' => '', 'didf' => '']])]
-    public function testItsInitSetsNewCookiesIfNotPresentOrNotValid($cookie)
+    public function testItsInitSetsNewCookiesIfNotPresentOrNotValid($cookie): void
     {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
 
@@ -65,7 +65,7 @@ class DeviceIdentifierTest extends TestCase
         $this->assertSame($subject->getValue(), $cookies_set['didf'][0]['value']);
     }
 
-    public function testItSetsCookiesWith5YearExpiry()
+    public function testItSetsCookiesWith5YearExpiry(): void
     {
         $this->cookies = new ArrayCookieWrapperStub([]);
         $this->newSubject()->init();
@@ -75,7 +75,7 @@ class DeviceIdentifierTest extends TestCase
         $this->assertEqualsWithDelta($expect, $cookies_set['didf'][0]['opts']['expires'], 1);
     }
 
-    public function testItSetsCookiesAsSecure()
+    public function testItSetsCookiesAsSecure(): void
     {
         $this->cookies = new ArrayCookieWrapperStub([]);
         $this->newSubject()->init();
@@ -95,7 +95,7 @@ class DeviceIdentifierTest extends TestCase
 
     #[TestWith([true, '/;SameSite=none'])]
     #[TestWith([false, '/'])]
-    public function testItSetsOneCookieAsSamesiteNoneAndFallbackWithout()
+    public function testItSetsOneCookieAsSamesiteNoneAndFallbackWithout(): void
     {
         $this->cookies = new ArrayCookieWrapperStub([]);
         $this->newSubject()->init();
@@ -122,12 +122,12 @@ class DeviceIdentifierTest extends TestCase
     public function testItsGetterReturnsValidCookieValueOrUnsetIfInitialisedNeverCalled(
         $cookie,
         $expect,
-    ) {
+    ): void {
         $this->cookies = new ArrayCookieWrapperStub($cookie);
         $this->assertSame($expect, $this->newSubject()->getValue());
     }
 
-    public function testItsGetterReturnsInitialisedValueIfInitialised()
+    public function testItsGetterReturnsInitialisedValueIfInitialised(): void
     {
         $this->cookies = new ArrayCookieWrapperStub([]);
         $subj = $this->newSubject();
@@ -136,11 +136,11 @@ class DeviceIdentifierTest extends TestCase
         $this->assertMatchesRegularExpression(DeviceIdentifier::VALID_REGEX, $value);
     }
 
-    public function testItsStaticInitCreatesInstanceAndInitialises()
+    public function testItsStaticInitCreatesInstanceAndInitialises(): void
     {
         ScopeChangingCaller::call(
             DeviceIdentifier::class,
-            function () { DeviceIdentifier::$instance = null; }
+            function (): void { DeviceIdentifier::$instance = null; }
         );
 
         $old_cookie = $_COOKIE;
@@ -159,11 +159,11 @@ class DeviceIdentifierTest extends TestCase
         $this->assertSame('1234567890123456789012', DeviceIdentifier::get());
     }
 
-    public function testItsStaticInitCreatesInstanceAndInitialisesWithFixedIdInCli()
+    public function testItsStaticInitCreatesInstanceAndInitialisesWithFixedIdInCli(): void
     {
         ScopeChangingCaller::call(
             DeviceIdentifier::class,
-            function () { DeviceIdentifier::$instance = null; }
+            function (): void { DeviceIdentifier::$instance = null; }
         );
 
         DeviceIdentifier::initAndEnsureCookieSet(true); // Fall back to default arg
@@ -171,11 +171,11 @@ class DeviceIdentifierTest extends TestCase
         $this->assertMatchesRegularExpression(DeviceIdentifier::VALID_REGEX, DeviceIdentifier::get());
     }
 
-    public function testItsStaticGetCanReadFromCookiesEvenIfNotInitialised()
+    public function testItsStaticGetCanReadFromCookiesEvenIfNotInitialised(): void
     {
         ScopeChangingCaller::call(
             DeviceIdentifier::class,
-            function () { DeviceIdentifier::$instance = null; }
+            function (): void { DeviceIdentifier::$instance = null; }
         );
 
         $old_cookie = $_COOKIE;
@@ -192,7 +192,7 @@ class DeviceIdentifierTest extends TestCase
         }
     }
 
-    public function testItsForceTestValueForcesValueWithoutSettingCookies()
+    public function testItsForceTestValueForcesValueWithoutSettingCookies(): void
     {
         DeviceIdentifier::forceGlobalTestValue('abc4567890123456789012');
         $this->assertSame('abc4567890123456789012', DeviceIdentifier::get());
@@ -208,7 +208,7 @@ class DeviceIdentifierTest extends TestCase
     {
         return ScopeChangingCaller::call(
             DeviceIdentifier::class,
-            fn ($cookies) => new DeviceIdentifier($cookies),
+            fn ($cookies): DeviceIdentifier => new DeviceIdentifier($cookies),
             $this->cookies
         );
     }
