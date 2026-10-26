@@ -33,10 +33,7 @@ class StoppedMockClock extends RealtimeClock
         $this->current_microtime = (float) $start_time->format('U.u');
     }
 
-    /**
-     * @param float $microtime
-     */
-    public static function atMicrotime($microtime): static
+    public static function atMicrotime(float $microtime): static
     {
         return new static(DateTimeImmutableFactory::atMicrotime($microtime));
     }
@@ -46,10 +43,7 @@ class StoppedMockClock extends RealtimeClock
         return new static(new DateTimeImmutable());
     }
 
-    /**
-     * @param string $time
-     */
-    public static function at($time): static
+    public static function at(string $time): static
     {
         if (!$time instanceof DateTimeImmutable) {
             $time = new DateTimeImmutable($time);
@@ -58,10 +52,7 @@ class StoppedMockClock extends RealtimeClock
         return new static($time);
     }
 
-    /**
-     * @param string $interval_spec
-     */
-    public static function atTimeAgo($interval_spec): static
+    public static function atTimeAgo(string $interval_spec): static
     {
         $now = new DateTimeImmutable();
         $ago = $now->sub(new DateInterval($interval_spec));
@@ -85,10 +76,7 @@ class StoppedMockClock extends RealtimeClock
         $this->current_microtime = (float) $now->getTimestamp();
     }
 
-    /**
-     * @param float $microseconds
-     */
-    public function tickMicroseconds($microseconds): void
+    public function tickMicroseconds(float $microseconds): void
     {
         $this->current_microtime += ($microseconds / 1000000);
     }

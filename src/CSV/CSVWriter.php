@@ -50,9 +50,10 @@ class CSVWriter
     ];
 
     /**
-     * @param string $file
+     * @param string|resource $file
+     * @param array{write_utf8_bom?: bool, quote_headers?: bool, eol?: string} $options
      */
-    public function open($file, array $options = []): void
+    public function open(mixed $file, array $options = []): void
     {
         if (is_resource($file) && get_resource_type($file) === 'stream') {
             $this->resource = $file;

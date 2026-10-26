@@ -8,6 +8,7 @@ use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use RuntimeException;
+use Stringable;
 use Throwable;
 
 use function array_pad;
@@ -155,10 +156,8 @@ class StackdriverApplicationLogger extends AbstractLogger
      * Note that the sourceLocation should be the location of the code that triggered the logging call (e.g. the error
      * handler / exception catch block). Where an exception is provided, the exception data structure will contain the
      * details of the location where the exception itself was thrown.
-     *
-     * @param string $message
      */
-    public function log($level, $message, array $context = []): void
+    public function log($level, string|Stringable $message, array $context = []): void
     {
         // These are the only `context` keys that will be used as top-level properties. Anything else is moved to a
         // `custom_context` key to prevent it overwriting internal metadata and low-level log entry properties e.g.

@@ -71,18 +71,12 @@ class DeploymentConfig
         return $this->environment;
     }
 
-    /**
-     * @param string $environment,...
-     */
-    public function isEnvironment($environment): bool
+    public function isEnvironment(string $environment): bool
     {
         return in_array($this->environment, func_get_args(), true);
     }
 
-    /**
-     * @param string $environment,...
-     */
-    public function notEnvironment($environment): bool
+    public function notEnvironment(string $environment): bool
     {
         return !in_array($this->environment, func_get_args(), true);
     }
@@ -94,11 +88,9 @@ class DeploymentConfig
      * [!!] NOTE: This method always returns values as strings - if they are type-sensitive you will instead
      *      need to provision the configs as JSON values and load them with getJson()
      *
-     * @param string $path
-     *
      * @return string
      */
-    public function read($path)
+    public function read(string $path)
     {
         if ($this->environment === static::STANDALONE) {
             return null;
@@ -113,10 +105,8 @@ class DeploymentConfig
 
     /**
      * Use this when the value of a config / secret is type-sensitive (integer / boolean / supports null value).
-     *
-     * @param string $string
      */
-    public function readJSON($string)
+    public function readJSON(string $string)
     {
         $value = $this->read($string);
         if ($value === null) {

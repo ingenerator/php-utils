@@ -20,27 +20,19 @@ class ConstantDirectory
      */
     protected $constants;
 
-    /**
-     * @param string $class_name
-     */
-    protected function __construct(protected $class_name)
+    protected function __construct(protected string $class_name)
     {
     }
 
-    /**
-     * @param string $class
-     */
-    public static function forClass($class): static
+    public static function forClass(string $class): static
     {
         return new static($class);
     }
 
     /**
-     * @param string $prefix
-     *
      * @return array keyed by the constant id
      */
-    public function filterConstants($prefix): array
+    public function filterConstants(string $prefix): array
     {
         $prefix_len = strlen($prefix);
         $consts = [];

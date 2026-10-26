@@ -28,9 +28,8 @@ class ObjectPropertyPopulator
 
     /**
      * @param object $object
-     * @param string $property
      */
-    public static function assign($object, $property, $value): void
+    public static function assign($object, string $property, $value): void
     {
         static::assignHash($object, [$property => $value]);
     }

@@ -17,12 +17,9 @@ class StrictDate
     /**
      * Validate that value of one field is a date after the value of another.
      *
-     * @param string       $from_field
-     * @param string       $to_field
-     *
      * @deprecated validate input before creating DateTimeImmutable objects
      */
-    public static function date_after(ArrayAccess $validation, $from_field, $to_field): bool
+    public static function date_after(ArrayAccess $validation, string $from_field, string $to_field): bool
     {
         $from = $validation[$from_field];
         $to = $validation[$to_field];
@@ -38,12 +35,9 @@ class StrictDate
     /**
      * Validate that value of one field is a date on or after value of another (>= ignoring time).
      *
-     * @param string       $from_field
-     * @param string       $to_field
-     *
      * @deprecated validate input before creating DateTimeImmutable objects
      */
-    public static function date_on_or_after(ArrayAccess $validation, $from_field, $to_field): bool
+    public static function date_on_or_after(ArrayAccess $validation, string $from_field, string $to_field): bool
     {
         $from = $validation[$from_field];
         $to = $validation[$to_field];
@@ -76,18 +70,12 @@ class StrictDate
         return $value instanceof DateTimeImmutable;
     }
 
-    /**
-     * @param string $value
-     */
-    public static function iso_datetime($value): bool
+    public static function iso_datetime(string $value): bool
     {
         return self::is_datetime_format('Y-m-d H:i:s', $value);
     }
 
-    /**
-     * @param string $value
-     */
-    public static function iso_date($value): bool
+    public static function iso_date(string $value): bool
     {
         return self::is_datetime_format('Y-m-d', $value);
     }
@@ -101,10 +89,8 @@ class StrictDate
 
     /**
      * Shorthand way to specify the fully qualified validator callback.
-     *
-     * @param string $rulename
      */
-    public static function rule($rulename): string
+    public static function rule(string $rulename): string
     {
         return match ($rulename) {
             'date_after',

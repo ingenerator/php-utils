@@ -15,13 +15,7 @@ use DateTimeImmutable;
  */
 class DateString
 {
-    /**
-     * @param string                  $format
-     * @param string                  $empty_value
-     *
-     * @return string
-     */
-    public static function format(?DateTimeImmutable $date, $format, $empty_value = '')
+    public static function format(?DateTimeImmutable $date, string $format, string $empty_value = ''): string
     {
         if (!$date instanceof DateTimeImmutable) {
             return $empty_value;
@@ -41,11 +35,9 @@ class DateString
     /**
      * Formats as Y-m-d H:i:s.
      *
-     * @param string                  $empty_value
-     *
      * @return string
      */
-    public static function ymd(?DateTimeImmutable $date, $empty_value = '')
+    public static function ymd(?DateTimeImmutable $date, string $empty_value = '')
     {
         return static::format($date, 'Y-m-d', $empty_value);
     }
@@ -53,11 +45,9 @@ class DateString
     /**
      * Formats as Y-m-d H:i:s.
      *
-     * @param string                  $empty_value
-     *
      * @return string
      */
-    public static function ymdhis(?DateTimeImmutable $date, $empty_value = '')
+    public static function ymdhis(?DateTimeImmutable $date, string $empty_value = '')
     {
         return static::format($date, 'Y-m-d H:i:s', $empty_value);
     }

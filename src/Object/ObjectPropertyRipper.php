@@ -75,9 +75,8 @@ class ObjectPropertyRipper
      * Grab a single property value from the object.
      *
      * @param object $object
-     * @param string $property
      */
-    public static function ripOne($object, $property)
+    public static function ripOne($object, string $property)
     {
         return static::rip($object, [$property])[$property];
     }
@@ -86,11 +85,9 @@ class ObjectPropertyRipper
      * Create a callback bound to the scope of the provided class so that it has access to internal
      * properties.
      *
-     * @param string $class
-     *
      * @return Closure
      */
-    protected static function getRipper($class)
+    protected static function getRipper(string $class)
     {
         static::$rippers[$class] ??= self::bindScopedClosure(
             function ($object, $properties): array {

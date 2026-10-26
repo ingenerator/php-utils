@@ -9,12 +9,9 @@ use RuntimeException;
 class InvalidConfigException extends RuntimeException
 {
     /**
-     * @param string $path
-     * @param string $error
-     *
      * @return InvalidConfigException
      */
-    public static function badJSON($path, $error): static
+    public static function badJSON(string $path, string $error): static
     {
         return new static(
             "Config `$path` contains invalid JSON ($error) - should it be a quoted string?"

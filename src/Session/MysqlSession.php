@@ -59,10 +59,9 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
     protected $client_user_agent;
 
     /**
-     * @param string $hash_salt
      * @param int    $lock_timeout seconds to wait for MySQL lock
      */
-    public function __construct(PDO $db, protected $hash_salt, protected $lock_timeout = 20)
+    public function __construct(PDO $db, protected string $hash_salt, protected int $lock_timeout = 20)
     {
         $this->db = $db;
         $this->session_lifetime = \ini_get('session.gc_maxlifetime');
