@@ -63,59 +63,6 @@ class DateTimeImmutableFactory
         return static::atMicrotime($timestamp);
     }
 
-    /**
-     * Create a date from a d/m/y or d/m/Y date
-     *
-     * @param string $input
-     *
-     * @return DateTimeImmutable|InvalidUserDateTime|null
-     *
-     * @deprecated Validate your input and create a DateTimeImmutable adhering to a strict format
-     */
-    public static function fromUserDateInput($input)
-    {
-        return static::fromPossibleFormats($input, ['Y-m-d', 'd/m/Y', 'd/m/y', 'j/n/Y', 'j/n/y']);
-    }
-
-    protected static function fromPossibleFormats($input, array $formats)
-    {
-        if ( ! $input) {
-            return NULL;
-        }
-        foreach ($formats as $format) {
-            $date = DateTimeImmutable::createFromFormat('!'.$format, $input);
-            if ($date and $date->format($format) === $input) {
-                return $date;
-            }
-        }
-
-        return new InvalidUserDateTime($input);
-    }
-
-    /**
-     * @param string $input
-     *
-     * @return DateTimeImmutable|InvalidUserDateTime|null
-     *
-     * @deprecated Validate your input and create a DateTimeImmutable adhering to a strict format
-     */
-    public static function fromUserDateTimeInput($input)
-    {
-        return static::fromPossibleFormats($input, ['Y-m-d H:i:s', 'Y-m-d H:i']);
-    }
-
-    /**
-     * @param string $input
-     *
-     * @return  DateTimeImmutable|InvalidUserDateTime|null
-     *
-     * @deprecated Validate your input and create a DateTimeImmutable adhering to a strict format
-     */
-    public static function fromYmdInput($input)
-    {
-        return static::fromPossibleFormats($input, ['Y-m-d']);
-    }
-
     public static function fromYmdHis(string $input): DateTimeImmutable
     {
         $format = 'Y-m-d H:i:s';

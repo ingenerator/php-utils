@@ -7,8 +7,6 @@
 namespace Ingenerator\PHPUtils\Validation;
 
 
-use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
-
 class StrictDate
 {
 
@@ -25,12 +23,13 @@ class StrictDate
      */
     public static function date_after(\ArrayAccess $validation, $from_field, $to_field)
     {
-        if ( ! $dates = static::get_valid_date_pair($validation, $from_field, $to_field)) {
+        $from = $validation[$from_field];
+        $to = $validation[$to_field];
+
+        if (!$from instanceof \DateTimeImmutable || !$to instanceof \DateTimeImmutable) {
             // Return true if either value is empty or invalid, this will be picked up by other rules
             return TRUE;
         }
-
-        list($from, $to) = $dates;
 
         return ($to > $from);
     }
@@ -48,47 +47,21 @@ class StrictDate
      */
     public static function date_on_or_after(\ArrayAccess $validation, $from_field, $to_field)
     {
-        if ( ! $dates = static::get_valid_date_pair($validation, $from_field, $to_field)) {
+        $from = $validation[$from_field];
+        $to = $validation[$to_field];
+
+        if (!$from instanceof \DateTimeImmutable || !$to instanceof \DateTimeImmutable) {
             // Return true if either value is empty or invalid, this will be picked up by other rules
             return TRUE;
         }
-
-        list($from, $to) = $dates;
 
         return ($to->format('Y-m-d') >= $from->format('Y-m-d'));
     }
 
     /**
-     * @param \ArrayAccess $validation
-     * @param string       $from_field
-     * @param string       $to_field
-     *
-     * @deprecated validate input before creating DateTimeImmutable objects
-     *
-     * @return \DateTimeImmutable[]
-     */
-    protected static function get_valid_date_pair(\ArrayAccess $validation, $from_field, $to_field)
-    {
-        $from = $validation[$from_field];
-        $to   = $validation[$to_field];
-
-        // Return true if either value is empty or invalid, this will be picked up by other rules
-        if ($from instanceof InvalidUserDateTime OR ! $from instanceof \DateTimeImmutable) {
-            return NULL;
-        }
-        if ($to instanceof InvalidUserDateTime OR ! $to instanceof \DateTimeImmutable) {
-            return NULL;
-        }
-
-        return [$from, $to];
-    }
-
-    /**
-     * Value is NULL or a valid DateTimeImmutable - not an InvalidUserDateTime
+     * Value is NULL or a valid DateTimeImmutable
      *
      * @param mixed $value
-     *
-     * @deprecated validate input before creating DateTimeImmutable objects
      *
      * @return bool
      */
@@ -98,11 +71,9 @@ class StrictDate
     }
 
     /**
-     * Value is NULL or a valid DateTimeImmutable - not an InvalidUserDateTime
+     * Value is NULL or a valid DateTimeImmutable
      *
      * @param mixed $value
-     *
-     * @deprecated validate input before creating DateTimeImmutable objects
      *
      * @return bool
      */
@@ -110,8 +81,6 @@ class StrictDate
     {
         if ($value === NULL) {
             return TRUE;
-        } elseif ($value instanceof InvalidUserDateTime) {
-            return FALSE;
         } elseif ($value instanceof \DateTimeImmutable) {
             return TRUE;
         } else {

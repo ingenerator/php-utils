@@ -10,7 +10,6 @@ namespace test\unit\Ingenerator\PHPUtils\Validation;
 use ArrayObject;
 use DateTime;
 use DateTimeImmutable;
-use Ingenerator\PHPUtils\DateTime\InvalidUserDateTime;
 use Ingenerator\PHPUtils\Validation\StrictDate;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -56,7 +55,6 @@ class StrictDateTest extends TestCase
             [FALSE, FALSE],
             [new DateTime, FALSE],
             ["2017-08-01", FALSE],
-            [new InvalidUserDateTime('1/30/2018'), FALSE],
         ];
     }
 
@@ -78,18 +76,6 @@ class StrictDateTest extends TestCase
             [['from' => NULL, 'to' => NULL], 'from', 'to', TRUE],
             [['from' => new DateTimeImmutable, 'to' => NULL], 'from', 'to', TRUE],
             [['from' => NULL, 'to' => new DateTimeImmutable], 'from', 'to', TRUE],
-            [
-                ['from' => new DateTimeImmutable, 'to' => new InvalidUserDateTime('any')],
-                'from',
-                'to',
-                TRUE
-            ],
-            [
-                ['from' => new InvalidUserDateTime('any'), 'to' => new DateTimeImmutable],
-                'from',
-                'to',
-                TRUE
-            ],
         ];
     }
 

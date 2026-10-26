@@ -4,15 +4,18 @@
          bootstrap="test/phpunit-bootstrap.php"
          colors="true"
          failOnDeprecation="true"
+         failOnPhpunitDeprecation="true"
          failOnNotice="true"
          failOnWarning="true"
          failOnRisky="true"
          displayDetailsOnIncompleteTests="true"
          displayDetailsOnSkippedTests="true"
          displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnPhpunitDeprecations="true"
          displayDetailsOnTestsThatTriggerErrors="true"
          displayDetailsOnTestsThatTriggerNotices="true"
          displayDetailsOnTestsThatTriggerWarnings="true"
+         stopOnDeprecation="true"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd">
     <source>
         <include>
