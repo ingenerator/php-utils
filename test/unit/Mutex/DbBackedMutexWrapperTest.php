@@ -7,15 +7,11 @@ namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 use Ingenerator\PHPUtils\Mutex\DbBackedMutexWrapper;
 use Ingenerator\PHPUtils\Mutex\MutexTimedOutException;
 use Ingenerator\PHPUtils\Mutex\MutexWrapper;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 final class DbBackedMutexWrapperTest extends TestCase
 {
-    /**
-     * @var MockObject
-     */
     private BasicPDOStub $pdo;
 
     public function testItIsInitialisable(): void

@@ -170,15 +170,13 @@ final class StoppedMockClockTest extends TestCase
         $clock->usleep(50000);
         $clock->usleep(20000);
         $clock->usleep(15000);
-        $this->assertNull(
-            $clock->assertSlept([50000, 20000, 15000])
-        );
+        $clock->assertSlept([50000, 20000, 15000]);
     }
 
     public function testAssertNeverSleptPassesIfNeverSlept(): void
     {
         $clock = StoppedMockClock::atNow();
-        $this->assertNull($clock->assertNeverSlept());
+        $clock->assertNeverSlept();
     }
 
     public function testAssertNeverSleptIfEverSlept(): void
