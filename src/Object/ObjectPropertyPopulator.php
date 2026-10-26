@@ -39,6 +39,7 @@ class ObjectPropertyPopulator
      * Assign an array of properties on the object keyed by their name, throwing if any property is undefined.
      *
      * @param object $object
+     * @param array<string, mixed> $properties
      */
     public static function assignHash($object, array $properties): void
     {
@@ -63,12 +64,15 @@ class ObjectPropertyPopulator
         $populate_func($object, $properties);
     }
 
+    /**
+     * @param string[] $property_names
+     */
     private static function listUndefinedProperties($object, array $property_names): array
     {
         return array_values(
             array_filter(
                 $property_names,
-                fn ($property_name): bool => !property_exists($object, $property_name)
+                fn (string $property_name): bool => !property_exists($object, $property_name)
             )
         );
     }

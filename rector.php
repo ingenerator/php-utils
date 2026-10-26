@@ -11,7 +11,7 @@ return RectorConfig::configure()
         __DIR__.'/test',
     ])
     ->withRootFiles()
-    ->withPreparedSets(codeQuality: true, typeDeclarations: true)
+    ->withPreparedSets(codeQuality: true, typeDeclarations: true, typeDeclarationDocblocks: true)
     ->withPhpSets(php82: true)
     ->withSkip([
         // Don't make whole classes read-only in libraries, it makes BC awkward

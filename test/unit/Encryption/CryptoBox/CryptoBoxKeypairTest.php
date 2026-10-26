@@ -61,6 +61,9 @@ class CryptoBoxKeypairTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public static function provider_invalid_keypair_string(): array
     {
         return [
@@ -94,6 +97,9 @@ class CryptoBoxKeypairTest extends TestCase
         CryptoBoxKeypair::fromString($keypair_string)->decrypt($enc);
     }
 
+    /**
+     * @return array<string, array<int, string>>
+     */
     public static function provider_bad_decryption(): array
     {
         return [

@@ -9,6 +9,7 @@
 namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
+use non;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -26,6 +27,9 @@ class AssociativeArrayUtilsTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, array<mixed, array<string, mixed>>>
+     */
     public static function provider_paths_to_nested(): array
     {
         return [
@@ -58,6 +62,9 @@ class AssociativeArrayUtilsTest extends TestCase
         $this->assertSame($expect, AssociativeArrayUtils::pathsToNested($input));
     }
 
+    /**
+     * @return array<int, array<mixed, array<int|string, mixed>>>
+     */
     public static function provider_pop_keys(): array
     {
         return [
@@ -98,6 +105,8 @@ class AssociativeArrayUtilsTest extends TestCase
 
     /**
      * Provides test data for test_path().
+     *
+     * @return array<int, mixed[]>
      */
     public static function provider_set_path(): array
     {
@@ -128,6 +137,9 @@ class AssociativeArrayUtilsTest extends TestCase
         $this->assertSame($expected, $array);
     }
 
+    /**
+     * @return array<int, non-empty-list<array<string, mixed>>>
+     */
     public static function provider_merge(): array
     {
         return [

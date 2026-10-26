@@ -80,6 +80,9 @@ class DefaultLogMetadataTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, string[]|array<string, string>[]|null[]>
+     */
     public static function provider_trace_header(): array
     {
         return [

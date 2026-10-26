@@ -137,6 +137,9 @@ class CSVWriterTest extends TestCase
         fclose($file);
     }
 
+    /**
+     * @return array<string, string[]|string[]|true[][]|array<string, string|false>[]>
+     */
     public static function providerQuotedHeaders(): array
     {
         $row = ['our data' => 'is at times', 'really big' => 'often'];
@@ -195,6 +198,9 @@ class CSVWriterTest extends TestCase
         fclose($file);
     }
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public static function providerLineEndings(): array
     {
         return [

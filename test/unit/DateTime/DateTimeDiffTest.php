@@ -18,6 +18,9 @@ use PHPUnit\Framework\TestCase;
 
 class DateTimeDiffTest extends TestCase
 {
+    /**
+     * @return array<int, array<int, DateTimeImmutable|int>>
+     */
     public static function date_time_diff(): array
     {
         return [

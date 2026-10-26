@@ -60,7 +60,7 @@ class ConstantDirectoryTest extends TestCase
         );
     }
 
-    protected function newSubject($class = self::class)
+    protected function newSubject($class = self::class): ConstantDirectory
     {
         return ConstantDirectory::forClass($class);
     }

@@ -17,7 +17,9 @@ class CryptoBoxStringTest extends TestCase
     /*
      * Heavily tested through the tests for CryptoBoxKeypair and CryptoBoxPublicKey
      */
-
+    /**
+     * @return array<string, string[]>
+     */
     public static function provider_invalid_string_format(): array
     {
         return [

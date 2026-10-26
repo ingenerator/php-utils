@@ -2,6 +2,7 @@
 
 namespace test\unit\Ingenerator\PHPUtils\DateTime;
 
+use Closure;
 use DateInterval;
 use Ingenerator\PHPUtils\DateTime\DateIntervalFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -9,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 class DateIntervalFactoryTest extends TestCase
 {
+    /**
+     * @return array<string, array<int, Closure():DateInterval|DateInterval>>
+     */
     public static function provider_shorthand_single_part(): array
     {
         return [

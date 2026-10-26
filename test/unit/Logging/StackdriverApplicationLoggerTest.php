@@ -63,6 +63,9 @@ class StackdriverApplicationLoggerTest extends TestCase
         $subject->info('Anything breaks it');
     }
 
+    /**
+     * @return array<int, array<int, string[]>>
+     */
     public static function provider_log_lines(): array
     {
         return [
@@ -129,6 +132,9 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame('Another message appended', array_shift($entries)['message']);
     }
 
+    /**
+     * @return array<int, string[]>
+     */
     public static function provider_severity_levels(): array
     {
         return [
@@ -375,6 +381,9 @@ class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, mixed[]>
+     */
     public static function provider_exception_chains(): array
     {
         $e1 = new InvalidArgumentException('I am an exception', 102);
@@ -515,6 +524,9 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame('rqst', $entry['@ingenType']);
     }
 
+    /**
+     * @return array<int, int[]|string[]>
+     */
     public static function provider_request_status_level(): array
     {
         return [
@@ -708,6 +720,9 @@ class StackdriverApplicationLoggerTest extends TestCase
         return $expect_trace;
     }
 
+    /**
+     * @param array<string, mixed> $entry
+     */
     protected function assertClonesSourceLocationToContextReportLocation(array $entry): void
     {
         // Oh look, Google use different keys for the same values in different places. Thanks @google

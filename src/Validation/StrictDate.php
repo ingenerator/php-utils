@@ -58,10 +58,8 @@ class StrictDate
 
     /**
      * Value is NULL or a valid DateTimeImmutable.
-     *
-     * @return bool
      */
-    public static function date_immutable($value)
+    public static function date_immutable($value): bool
     {
         return static::datetime_immutable($value);
     }
@@ -80,20 +78,16 @@ class StrictDate
 
     /**
      * @param string $value
-     *
-     * @return bool
      */
-    public static function iso_datetime($value)
+    public static function iso_datetime($value): bool
     {
         return self::is_datetime_format('Y-m-d H:i:s', $value);
     }
 
     /**
      * @param string $value
-     *
-     * @return bool
      */
-    public static function iso_date($value)
+    public static function iso_date($value): bool
     {
         return self::is_datetime_format('Y-m-d', $value);
     }

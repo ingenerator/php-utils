@@ -108,6 +108,9 @@ class CSVWriter
         $this->resource = null;
     }
 
+    /**
+     * @param int[]|string[] $keys
+     */
     private function writeHeaders(array $keys): void
     {
         if ($this->options['quote_headers']) {

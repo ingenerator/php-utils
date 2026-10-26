@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 
 use Ingenerator\PHPUtils\Mutex\DbBackedMutexWrapper;

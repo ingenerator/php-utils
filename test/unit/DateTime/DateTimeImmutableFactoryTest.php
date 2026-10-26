@@ -98,6 +98,9 @@ class DateTimeImmutableFactoryTest extends TestCase
         DateTimeImmutableFactory::fromStrictFormat($val, $format);
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public static function provider_from_iso_ms(): array
     {
         return [
@@ -124,6 +127,9 @@ class DateTimeImmutableFactoryTest extends TestCase
         $this->assertSame($expect, DateString::isoMS($actual));
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public static function provider_throws_from_invalid_iso(): array
     {
         return [

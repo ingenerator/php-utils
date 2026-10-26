@@ -92,6 +92,9 @@ class ExternalCallSiteFinderTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, string[]>
+     */
     public static function provider_source_location_call_sites(): array
     {
         return [
@@ -233,7 +236,7 @@ class TestCallsiteCaller extends TestCallSiteCallerParent
         return $finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);
     }
 
-    public function throughInternalMethod(ExternalCallSiteFinder $finder)
+    public function throughInternalMethod(ExternalCallSiteFinder $finder): array
     {
         return $this->singleExternal($finder);
     }
@@ -262,7 +265,7 @@ abstract class TestCallSiteCallerParent
 
 class TestCallSiteProxy
 {
-    public function throughExpectedDependency(ExternalCallSiteFinder $finder)
+    public function throughExpectedDependency(ExternalCallSiteFinder $finder): array
     {
         $caller = new TestCallsiteCaller();
 
@@ -276,6 +279,9 @@ class TestCallSiteAsserter
     {
     }
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public function test(array $expected): array
     {
         $actual = $this->finder->findExternalCall(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), [static::class]);

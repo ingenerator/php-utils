@@ -17,9 +17,6 @@ class Base64Url
         return rtrim(strtr($base64, ['+' => '-', '/' => '_']), '=');
     }
 
-    /**
-     * @return bool|string
-     */
     public static function decode(string $value): string|false
     {
         $string = strtr($value, ['-' => '+', '_' => '/']);

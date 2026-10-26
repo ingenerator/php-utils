@@ -158,6 +158,7 @@ abstract class AbstractArrayRepository
      * Used to capture a snapshot of entity state at the time it's saved to allow later comparison
      *
      * @param object $entity
+     * @param array<int, mixed> $seen_objects
      *
      * @return array
      */

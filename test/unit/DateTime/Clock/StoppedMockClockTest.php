@@ -29,6 +29,9 @@ class StoppedMockClockTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, array<int, DateTimeImmutable|string|float>>
+     */
     public static function provider_at_fixed(): array
     {
         return [
@@ -116,6 +119,9 @@ class StoppedMockClockTest extends TestCase
         $this->assertSame(1546682582.95, round($clock->getMicrotime(), 3), 'Should update time');
     }
 
+    /**
+     * @return array<int, Closure():void[]|string[]|int[][]|Closure(StoppedMockClock $clock):void[]>
+     */
     public static function provider_assert_slept_fails(): array
     {
         return [

@@ -31,6 +31,9 @@ class CryptoBoxPublicKeyTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public static function provider_invalid_keypair_string(): array
     {
         return [

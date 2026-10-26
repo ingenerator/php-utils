@@ -26,6 +26,9 @@ class MysqlSessionTest extends TestCase
         $this->assertInstanceOf(MysqlSession::class, $this->newSubject());
     }
 
+    /**
+     * @return array<string, array<int, string|array<string, string>|mixed[]>>
+     */
     public static function provider_validate_invalid_sid(): array
     {
         return [
@@ -76,6 +79,9 @@ class MysqlSessionTest extends TestCase
         $this->assertFalse($subject->validateId($sid));
     }
 
+    /**
+     * @return array<string, string[]|never[][]|array<string, string>[]|non-empty-array<string, string>[]>
+     */
     public static function provider_validate_own_sid(): array
     {
         return [
@@ -182,6 +188,9 @@ class MysqlSessionTest extends TestCase
         return $pdo;
     }
 
+    /**
+     * @param array<string, string> $config
+     */
     private function configurePhpIniVars(array $config): void
     {
         foreach ($config as $setting => $value) {

@@ -89,6 +89,9 @@ class RealtimeClockTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string, Closure(RealtimeClock $clock):DateTimeImmutable[]|string[]|bool[]>
+     */
     public static function provider_relative_times(): array
     {
         return [

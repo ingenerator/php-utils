@@ -296,6 +296,9 @@ class StackdriverApplicationLogger extends AbstractLogger
         return implode("\n", $trace_lines);
     }
 
+    /**
+     * @param array<string, mixed> $log_entry
+     */
     protected function addStackdriverErrorReportingData(array $log_entry): array
     {
         $log_entry['@type'] = self::TYPE_STACKDRIVER_ERROR;

@@ -12,6 +12,9 @@ use function random_bytes;
 
 class Base64UrlTest extends TestCase
 {
+    /**
+     * @return array<int, array<int, string>>
+     */
     public static function provider_encode_decode(): array
     {
         return [

@@ -47,6 +47,9 @@ class StrictDateTest extends TestCase
         $this->assertSame($expect, StrictDate::iso_date($value));
     }
 
+    /**
+     * @return array<int, DateTimeImmutable[]|bool[]|null[]|DateTime[]|string[]>
+     */
     public static function provider_datetime_immutable(): array
     {
         return [
@@ -70,6 +73,9 @@ class StrictDateTest extends TestCase
         $this->assertSame($expect, StrictDate::date_immutable($value));
     }
 
+    /**
+     * @return array<int, array<int, array<string, DateTimeImmutable|null>|string|bool>>
+     */
     public static function provider_date_before_after_invalid_inputs(): array
     {
         return [
@@ -91,6 +97,9 @@ class StrictDateTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string, string[]|bool[]>
+     */
     public static function provider_date_after_date(): array
     {
         return [

@@ -31,6 +31,9 @@ class ConfigValueDecrypterTest extends TestCase
         $this->assertSame($value, $this->newSubject()->decrypt($value));
     }
 
+    /**
+     * @return array<int, string[]|array<string, string>[]>
+     */
     public static function provider_decrypt(): array
     {
         // A mix of pre-encrypted static values and runtime tests that encrypt / decrypt still works as expected
@@ -112,6 +115,9 @@ class ConfigValueDecrypterTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, array<int, string>>
+     */
     public static function provider_corrupt_key(): array
     {
         return [
@@ -149,6 +155,9 @@ class ConfigValueDecrypterTest extends TestCase
         $subject->decrypt("#SECRET-$other_keypair_name#$valid_encrypted_val");
     }
 
+    /**
+     * @return array<int, array<int, string>>
+     */
     public static function provider_failed_decrypt(): array
     {
         $lost_key_pub = sodium_crypto_box_publickey(sodium_crypto_box_keypair());

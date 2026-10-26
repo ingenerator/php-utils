@@ -11,6 +11,9 @@ use PHPUnit\Framework\TestCase;
 
 class SitemapParserTest extends TestCase
 {
+    /**
+     * @return array<int, string[]>
+     */
     public static function provider_invalid(): array
     {
         return [
@@ -74,6 +77,9 @@ class SitemapParserTest extends TestCase
         );
     }
 
+    /**
+     * @return array<int, mixed[]>
+     */
     public static function provider_parse(): array
     {
         return [

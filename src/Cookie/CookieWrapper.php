@@ -40,6 +40,9 @@ class CookieWrapper
         $this->has_ssl_available = $has_ssl_available;
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
     public function set(string $name, ?string $value = null, array $options = []): void
     {
         if ($this->headers_sent($file, $line)) {

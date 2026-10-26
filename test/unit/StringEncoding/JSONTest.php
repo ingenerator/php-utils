@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 class JSONTest extends TestCase
 {
+    /**
+     * @return array<int, mixed[]>
+     */
     public static function provider_valid_json(): array
     {
         return [
@@ -54,6 +57,9 @@ class JSONTest extends TestCase
         $this->assertSame([], JSON::decodeArray(json_encode(null)));
     }
 
+    /**
+     * @return array<int, int[]|bool[]|string[]|array<string, string>[]>
+     */
     public static function provider_valid_encode(): array
     {
         return [

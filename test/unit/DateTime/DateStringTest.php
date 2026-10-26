@@ -18,6 +18,9 @@ use PHPUnit\Framework\TestCase;
 
 class DateStringTest extends TestCase
 {
+    /**
+     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     */
     public static function provider_generic_format(): array
     {
         return [
@@ -33,6 +36,9 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::format($date, $format, $empty));
     }
 
+    /**
+     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     */
     public static function provider_ymdhis(): array
     {
         return [
@@ -47,6 +53,9 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::ymdhis($date, $fallback));
     }
 
+    /**
+     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     */
     public static function provider_ymd(): array
     {
         return [
@@ -61,6 +70,9 @@ class DateStringTest extends TestCase
         $this->assertSame($expect, DateString::ymd($date, $fallback));
     }
 
+    /**
+     * @return array<int, string[]|null[]|DateTimeImmutable[]>
+     */
     public static function provider_isoms(): array
     {
         $lndn = new DateTimeZone('Europe/London');

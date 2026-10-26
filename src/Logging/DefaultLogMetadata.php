@@ -33,7 +33,9 @@ class DefaultLogMetadata
      * Note that these values are also "hoisted" by the request logger rather than look them up separately so you should
      * always include this or an equivalent metadata set with the same values.
      *
-     * @param array $server the $_SERVER global
+     * @param array<string, mixed> $server the $_SERVER global
+     *
+     * @return array<string, array<string, array<string, mixed>>>
      */
     public static function httpContext(array $server): array
     {
@@ -50,6 +52,10 @@ class DefaultLogMetadata
 
     /**
      * Basic request tracing information including a random unique request ID and google trace if any.
+     *
+     * @param array<string, mixed> $server
+     *
+     * @return array<string, string|array<string, string>>
      */
     public static function requestTrace(array $server = [], ?string $gcp_project = null): array
     {

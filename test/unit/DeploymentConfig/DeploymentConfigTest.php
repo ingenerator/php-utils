@@ -57,6 +57,9 @@ class DeploymentConfigTest extends TestCase
         }
     }
 
+    /**
+     * @return array<int, string[]|bool[]|string[][]>
+     */
     public static function provider_is_current_env(): array
     {
         return [
@@ -293,6 +296,9 @@ class DeploymentConfigTest extends TestCase
         return $this->newSubject(['INGENERATOR_ENV' => $env]);
     }
 
+    /**
+     * @param array<string, string> $env_vars
+     */
     private function newSubject(array $env_vars): DeploymentConfig
     {
         $creator = Closure::bind(

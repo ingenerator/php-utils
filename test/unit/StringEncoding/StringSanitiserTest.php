@@ -8,6 +8,9 @@ use PHPUnit\Framework\TestCase;
 
 class StringSanitiserTest extends TestCase
 {
+    /**
+     * @return array<string, string[]>
+     */
     public static function provider_printable_utf8(): array
     {
         return [
@@ -67,6 +70,9 @@ class StringSanitiserTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string, string[]|string[][]>
+     */
     public static function provider_printable_utf8_max_length(): array
     {
         return [
