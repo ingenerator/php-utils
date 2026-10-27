@@ -1,16 +1,13 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\DeploymentConfig;
 
-
-use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
+use function array_values;
 
 class ConfigMapDeclarationParser
 {
-
     /**
-     * Takes a shorthand config map declaration and turns it into a simple hash of all the enviroments
+     * Takes a shorthand config map declaration and turns it into a simple hash of all the enviroments.
      *
      * e.g. given this set of declarations:
      *
@@ -26,16 +23,17 @@ class ConfigMapDeclarationParser
      * ]
      *
      * This can then be used as a simple lookup table in the deployment config class
+     */
+    /**
+     * @param array<mixed> $declarations
      *
-     * @param array $declarations
-     *
-     * @return array
+     * @return array<string, mixed>
      */
     public function parse(array $declarations): array
     {
         $result = [];
         foreach ($declarations as $declaration) {
-            list($environments, $value) = $this->validateDeclaration($declaration);
+            [$environments, $value] = $this->validateDeclaration($declaration);
             foreach ($environments as $env) {
                 if (array_key_exists($env, $result)) {
                     throw InvalidConfigException::duplicateEnvironmentMap($env);
@@ -47,9 +45,12 @@ class ConfigMapDeclarationParser
         return $result;
     }
 
-    protected function validateDeclaration($declaration): array
+    /**
+     * @return array{list<string>, mixed}
+     */
+    protected function validateDeclaration(mixed $declaration): array
     {
-        if ( ! is_array($declaration)) {
+        if (!is_array($declaration)) {
             throw InvalidConfigException::invalidMapDeclaration('not an array');
         }
 
@@ -61,10 +62,19 @@ class ConfigMapDeclarationParser
             throw InvalidConfigException::invalidMapDeclaration('must be indexed array with keys 0, 1');
         }
 
-        if (is_string($declaration[0])) {
-            $declaration[0] = [$declaration[0]];
+        $environments = $declaration[0];
+        if (is_string($environments)) {
+            $environments = [$environments];
+        }
+        if (!is_array($environments)) {
+            throw InvalidConfigException::invalidMapDeclaration('environments must be a string or array of strings');
+        }
+        foreach ($environments as $environment) {
+            if (!is_string($environment)) {
+                throw InvalidConfigException::invalidMapDeclaration('environments must be a string or array of strings');
+            }
         }
 
-        return $declaration;
+        return [array_values($environments), $declaration[1]];
     }
 }

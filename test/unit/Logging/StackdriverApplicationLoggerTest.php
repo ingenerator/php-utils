@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
@@ -8,12 +9,12 @@ use DateTimeImmutable;
 use Ingenerator\PHPUtils\Logging\LoggingFailureException;
 use Ingenerator\PHPUtils\Logging\LogMetadataProvider;
 use Ingenerator\PHPUtils\Logging\StackdriverApplicationLogger;
-use Ingenerator\PHPUtils\Monitoring\ArrayMetricsAgent;
-use Ingenerator\PHPUtils\Monitoring\MetricId;
-use Ingenerator\PHPUtils\Monitoring\NullMetricsAgent;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use InvalidArgumentException;
+use Iterator;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
@@ -23,11 +24,11 @@ use RuntimeException;
 use stdClass;
 use Throwable;
 use TypeError;
+
 use function array_intersect_key;
 use function array_map;
 use function array_pop;
 use function array_shift;
-use function call_user_func_array;
 use function explode;
 use function file_get_contents;
 use function http_response_code;
@@ -36,27 +37,37 @@ use function memory_get_peak_usage;
 use function microtime;
 use function preg_replace;
 use function str_replace;
-use const PHP_MAJOR_VERSION;
 
-class StackdriverApplicationLoggerTest extends TestCase
+/**
+ * @phpstan-type TJsonLogEntry array{
+ *     severity: int,
+ *     message: string,
+ *     context: array<string, mixed>,
+ *     "@type": string,
+ *     "@ingenType": string,
+ *     "logging.googleapis.com/sourceLocation": array<string, mixed>,
+ *     ...
+ *   }
+ */
+final class StackdriverApplicationLoggerTest extends TestCase
 {
+    private vfsStreamDirectory $vfs;
 
-    protected $vfs;
+    private string $log_stream;
 
-    protected $log_stream;
+    /** @var list<array<string, mixed>|callable(): array<string, mixed>|LogMetadataProvider> */
+    private array $meta_args = [];
 
-    protected $meta_args = [];
-
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable(): void
     {
         $logger = $this->newSubject();
         $this->assertInstanceOf(StackdriverApplicationLogger::class, $logger);
         $this->assertInstanceOf(LoggerInterface::class, $logger);
     }
 
-    public function test_it_throws_if_it_cannot_write_log_entry()
+    public function testItThrowsIfItCannotWriteLogEntry(): void
     {
-        $previous         = vfsStream::newFile('invalid-log.log')
+        $previous = vfsStream::newFile('invalid-log.log')
             ->chmod(000)
             ->at($this->vfs);
         $this->log_stream = $previous->url();
@@ -66,20 +77,22 @@ class StackdriverApplicationLoggerTest extends TestCase
         $subject->info('Anything breaks it');
     }
 
-    public static function provider_log_lines()
+    /**
+     * @return Iterator<int, array<int, array<string>>>
+     */
+    public static function provider_log_lines(): Iterator
     {
-        return [
-            [
-                ['This is my info'],
-            ],
-            [
-                ['This info', 'Another msg'],
-            ],
+        yield [
+            ['This is my info'],
+        ];
+        yield [
+            ['This info', 'Another msg'],
         ];
     }
 
+    /** @param list<string> $messages */
     #[DataProvider('provider_log_lines')]
-    public function test_it_logs_to_specified_location_as_json_line_with_expected_message($messages)
+    public function testItLogsToSpecifiedLocationAsJsonLineWithExpectedMessage(array $messages): void
     {
         $subject = $this->newSubject();
         foreach ($messages as $msg) {
@@ -87,11 +100,11 @@ class StackdriverApplicationLoggerTest extends TestCase
         }
 
         $entries = $this->assertLoggedJSONLines();
-        $actual  = array_map(function (array $msg) { return $msg['message']; }, $entries);
+        $actual = array_map(fn (array $msg): mixed => $msg['message'], $entries);
         $this->assertSame($messages, $actual, 'Expect correct log messages');
     }
 
-    public function test_it_handles_invalid_utf8_when_logging()
+    public function testItHandlesInvalidUtf8WhenLogging(): void
     {
         $subject = $this->newSubject();
         $line = __LINE__ + 1;
@@ -101,12 +114,12 @@ class StackdriverApplicationLoggerTest extends TestCase
             [
                 [
                     'severity' => 'INFO',
-                    'message' => "This got truncated somewhere� then appended to",
+                    'message' => 'This got truncated somewhere� then appended to',
                     '@ingenType' => 'app',
                     'logging.googleapis.com/sourceLocation' => [
                         'file' => __FILE__,
                         'line' => $line,
-                        'function' => __CLASS__.'->'.__FUNCTION__,
+                        'function' => self::class.'->'.__FUNCTION__,
                     ],
                     'custom_context' => [
                         'and' => 'this was junk��',
@@ -117,7 +130,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
-    public function test_it_appends_logs_to_existing_content_if_file_specified()
+    public function testItAppendsLogsToExistingContentIfFileSpecified(): void
     {
         $previous = vfsStream::newFile('existing-log.log')
             ->withContent('{"previous":"content"}'."\n")
@@ -129,26 +142,27 @@ class StackdriverApplicationLoggerTest extends TestCase
 
         $entries = $this->assertLoggedJSONLines();
         $this->assertSame(['previous' => 'content'], array_shift($entries));
-        $this->assertSame('Another message appended', array_shift($entries)['message']);
+        $this->assertSame('Another message appended', array_shift($entries)['message'] ?? null);
     }
 
-    public static function provider_severity_levels()
+    /**
+     * @return Iterator<int, array<string>>
+     */
+    public static function provider_severity_levels(): Iterator
     {
-        return [
-            [LogLevel::DEBUG, 'DEBUG'],
-            [LogLevel::EMERGENCY, 'EMERGENCY'],
-        ];
+        yield [LogLevel::DEBUG, 'DEBUG'];
+        yield [LogLevel::EMERGENCY, 'EMERGENCY'];
     }
 
     #[DataProvider('provider_severity_levels')]
-    public function test_it_logs_with_expected_severity($psr_level, $stackdriver_level)
+    public function testItLogsWithExpectedSeverity(string $psr_level, string $stackdriver_level): void
     {
         $this->newSubject()->log($psr_level, 'A message');
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($stackdriver_level, $entry['severity']);
     }
 
-    public function test_it_logs_with_metadata_provided_in_constructor()
+    public function testItLogsWithMetadataProvidedInConstructor(): void
     {
         $this->meta_args = [
             ['serviceContext' => ['app' => 'mine', 'ver' => 'this']],
@@ -157,11 +171,11 @@ class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             ['app' => 'mine', 'ver' => 'this'],
-            $entry['serviceContext']
+            $entry['serviceContext'] ?? null
         );
     }
 
-    public function test_it_recursively_merges_multiple_metadata_sets_from_constructor()
+    public function testItRecursivelyMergesMultipleMetadataSetsFromConstructor(): void
     {
         $this->meta_args = [
             ['serviceContext' => ['app' => 'mine', 'ver' => 'this']],
@@ -171,18 +185,18 @@ class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             ['app' => 'mine', 'ver' => 'other', 'microsite' => 'whatever'],
-            $entry['serviceContext']
+            $entry['serviceContext'] ?? null
         );
     }
 
-    public function test_it_lazily_retrieves_metadata_callbacks_for_first_log_call()
+    public function testItLazilyRetrievesMetadataCallbacksForFirstLogCall(): void
     {
-        $call_site       = 'immediate';
-        $call_count      = 0;
+        $call_site = 'immediate';
+        $call_count = 0;
         $this->meta_args = [
             ['lambda' => ['req' => 'ab92823232']],
-            function () use (&$call_site, &$call_count) {
-                $call_count++;
+            function () use (&$call_site, &$call_count): array {
+                ++$call_count;
 
                 return ['lambda' => ['call_site' => $call_site]];
             },
@@ -203,23 +217,24 @@ class StackdriverApplicationLoggerTest extends TestCase
         foreach ($lines as $idx => $line) {
             $this->assertSame(
                 ['req' => 'ab92823232', 'call_site' => 'lazy'],
-                $line['lambda'],
+                $line['lambda'] ?? null,
                 'Expect correct meta line '.$idx
             );
         }
     }
 
-    public function test_it_can_lazily_retrieve_metadata_from_provider_class()
+    public function testItCanLazilyRetrieveMetadataFromProviderClass(): void
     {
         $meta_provider_class = new class implements LogMetadataProvider {
-            protected $call_count = 0;
+            protected int $call_count = 0;
 
+            /** @return array<string, mixed> */
             public function getMetadata(): array
             {
                 return ['context' => ['call_count' => ++$this->call_count]];
             }
 
-            public function getCallCount()
+            public function getCallCount(): int
             {
                 return $this->call_count;
             }
@@ -250,15 +265,18 @@ class StackdriverApplicationLoggerTest extends TestCase
         }
     }
 
-    public function test_it_swallows_and_logs_any_errors_while_retrieving_metadata_callbacks()
+    public function testItSwallowsAndLogsAnyErrorsWhileRetrievingMetadataCallbacks(): void
     {
+        // @phpstan-ignore assign.propertyType (this test deliberately supplies malformed metadata callbacks)
         $this->meta_args = [
             ['sources' => ['first_ok']],
-            function () { return new DateTimeImmutable(new stdClass); },
+            /* @phpstan-ignore argument.type (intentional, to make it have an error) */
+            fn (): DateTimeImmutable => new DateTimeImmutable(new stdClass()),
             ['sources' => ['third_ok']],
-            function () { throw new InvalidArgumentException('Broken'); },
+            function (): never { throw new InvalidArgumentException('Broken'); },
             ['sources' => ['fifth_ok']],
             new class implements LogMetadataProvider {
+                /** @return array<string, mixed> */
                 public function getMetadata(): array
                 {
                     throw new BadMethodCallException('The class broke');
@@ -275,62 +293,58 @@ class StackdriverApplicationLoggerTest extends TestCase
         foreach ($lines as $line) {
             $this->assertSame(
                 ['first_ok', 'third_ok', 'fifth_ok', 'seventh_ok'],
-                $line['sources'],
+                $line['sources'] ?? null,
                 'Should log best-effort metadata for all entries'
             );
             $actual[] = $line['severity'].': '.$line['message'];
         }
 
-        if (PHP_MAJOR_VERSION < 8){
-            $this->assertSame(
-                [
-                    'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct() expects parameter 1 to be string, object given',
-                    'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
-                    'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
-                    'INFO: I am an info',
-                ],
-                $actual
-            );
-        } else {
-            $this->assertSame(
-                [
-                    'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct(): Argument #1 ($datetime) must be of type string, stdClass given',
-                    'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
-                    'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
-                    'INFO: I am an info',
-                ],
-                $actual
-            );
-        }
+        $this->assertSame(
+            [
+                'ALERT: Invalid log metadata source#1 [TypeError] DateTimeImmutable::__construct(): Argument #1 ($datetime) must be of type string, stdClass given',
+                'ALERT: Invalid log metadata source#3 [InvalidArgumentException] Broken',
+                'ALERT: Invalid log metadata source#5 [BadMethodCallException] The class broke',
+                'INFO: I am an info',
+            ],
+            $actual
+        );
     }
 
+    /** @param array<string, string> $context */
     #[TestWith([[], 'app'])]
     #[TestWith([['@ingenType' => 'rqst'], 'rqst'])]
-    public function test_it_assigns_ingenerator_type_unless_overridden($context, $expect_type)
+    public function testItAssignsIngeneratorTypeUnlessOverridden(array $context, string $expect_type): void
     {
         $this->newSubject()->warning('Anything', $context);
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect_type, $entry['@ingenType']);
     }
 
+    /** @param list<string> $args */
     #[TestWith(['log', ['info', 'Some info']])]
     #[TestWith(['info', ['Some info']])]
-    public function test_it_logs_with_source_location_as_immediate_caller($log_method, $args)
+    public function testItLogsWithSourceLocationAsImmediateCaller(string $log_method, array $args): void
     {
-        $expect_line = __LINE__ + 1;
-        call_user_func_array([$this->newSubject(), $log_method], $args);
+        $logger = $this->newSubject();
+        if ($log_method === 'log') {
+            $expect_line = __LINE__ + 1;
+            $logger->log(...$args);
+        } else {
+            $expect_line = __LINE__ + 1;
+            $logger->info(...$args);
+        }
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             [
-                'file'     => __FILE__,
-                'line'     => $expect_line,
-                'function' => __CLASS__.'->'.__FUNCTION__,
+                'file' => __FILE__,
+                'line' => $expect_line,
+                'function' => self::class.'->'.__FUNCTION__,
             ],
             $entry['logging.googleapis.com/sourceLocation']
         );
     }
 
-    public function test_it_allows_caller_to_override_source_location()
+    public function testItAllowsCallerToOverrideSourceLocation(): void
     {
         $this->newSubject()->info(
             'Any message',
@@ -343,7 +357,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
-    public function test_it_includes_arbitrary_custom_context_under_namespaced_key()
+    public function testItIncludesArbitraryCustomContextUnderNamespacedKey(): void
     {
         // If we allow the app to override our standard keys / metadata etc there is a high risk of unexpected and
         // undetected data loss particularly as the logger will often be provided to / called by third-party code.
@@ -357,7 +371,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             ['context' => ['user' => 'her', 'page' => 'ourpage']],
-            $entry['custom_context']
+            $entry['custom_context'] ?? null
         );
         $this->assertSame(
             ['user' => 'me', 'sess' => 'sass'],
@@ -365,7 +379,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
-    public function test_it_publishes_exception_string_in_context_without_issues()
+    public function testItPublishesExceptionStringInContextWithoutIssues(): void
     {
         $this->newSubject()->info(
             'Any message',
@@ -374,72 +388,73 @@ class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             'Well now, this is a string',
-            $entry['exception']
+            $entry['exception'] ?? null
         );
     }
 
-    public static function provider_exception_chains()
+    /**
+     * @return Iterator<int, array<mixed>>
+     */
+    public static function provider_exception_chains(): Iterator
     {
-        $e1      = new InvalidArgumentException('I am an exception', 102);
+        $e1 = new InvalidArgumentException('I am an exception', 102);
         $e1_line = __LINE__ - 1;
 
-        $e2      = new RuntimeException('It went wrong', 02, $e1);
+        $e2 = new RuntimeException('It went wrong', 02, $e1);
         $e2_line = __LINE__ - 1;
 
-        $e3      = new TypeError('Stuff happened', 02, $e2);
+        $e3 = new TypeError('Stuff happened', 02, $e2);
         $e3_line = __LINE__ - 1;
-
-        return [
+        yield [
+            $e1,
             [
-                $e1,
-                [
-                    'class' => InvalidArgumentException::class,
-                    'msg'   => 'I am an exception',
-                    'code'  => 102,
-                    'file'  => __FILE__,
-                    'line'  => $e1_line,
-                    'trace' => self::makeExpectedSanitisedTrace($e1),
-                ],
+                'class' => InvalidArgumentException::class,
+                'msg' => 'I am an exception',
+                'code' => 102,
+                'file' => __FILE__,
+                'line' => $e1_line,
+                'trace' => self::makeExpectedSanitisedTrace($e1),
             ],
+        ];
+        yield [
+            $e3,
             [
-                $e3,
-                [
-                    'class'    => TypeError::class,
-                    'msg'      => 'Stuff happened',
-                    'code'     => 02,
-                    'file'     => __FILE__,
-                    'line'     => $e3_line,
-                    'trace'    => self::makeExpectedSanitisedTrace($e1),
+                'class' => TypeError::class,
+                'msg' => 'Stuff happened',
+                'code' => 02,
+                'file' => __FILE__,
+                'line' => $e3_line,
+                'trace' => self::makeExpectedSanitisedTrace($e1),
+                'previous' => [
+                    'class' => RuntimeException::class,
+                    'msg' => 'It went wrong',
+                    'code' => 02,
+                    'file' => __FILE__,
+                    'line' => $e2_line,
+                    'trace' => self::makeExpectedSanitisedTrace($e2),
                     'previous' => [
-                        'class'    => RuntimeException::class,
-                        'msg'      => 'It went wrong',
-                        'code'     => 02,
-                        'file'     => __FILE__,
-                        'line'     => $e2_line,
-                        'trace'    => self::makeExpectedSanitisedTrace($e2),
-                        'previous' => [
-                            'class' => InvalidArgumentException::class,
-                            'msg'   => 'I am an exception',
-                            'code'  => 102,
-                            'file'  => __FILE__,
-                            'line'  => $e1_line,
-                            'trace' => self::makeExpectedSanitisedTrace($e3),
-                        ],
+                        'class' => InvalidArgumentException::class,
+                        'msg' => 'I am an exception',
+                        'code' => 102,
+                        'file' => __FILE__,
+                        'line' => $e1_line,
+                        'trace' => self::makeExpectedSanitisedTrace($e3),
                     ],
                 ],
             ],
         ];
     }
 
+    /** @param array<mixed> $expect */
     #[DataProvider('provider_exception_chains')]
-    public function test_it_recursively_formats_exception_chain_as_structs_with_trace_excluding_args($e, $expect)
+    public function testItRecursivelyFormatsExceptionChainAsStructsWithTraceExcludingArgs(InvalidArgumentException|TypeError $e, array $expect): void
     {
         $this->newSubject()->info('Broken', ['exception' => $e]);
         $entry = $this->assertLoggedOneLine();
-        $this->assertSame($expect, $entry['exception']);
+        $this->assertSame($expect, $entry['exception'] ?? null);
     }
 
-    public function test_it_reports_exception_as_stackdriver_error_by_default_with_stack_trace_in_stackdriver_format()
+    public function testItReportsExceptionAsStackdriverErrorByDefaultWithStackTraceInStackdriverFormat(): void
     {
         // https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext
         // https://cloud.google.com/error-reporting/reference/rest/v1beta1/projects.events/report#ReportedErrorEvent
@@ -458,8 +473,8 @@ class StackdriverApplicationLoggerTest extends TestCase
         $source_location = $entry[StackdriverApplicationLogger::PROP_SOURCE_LOCATION];
         $this->assertSame(
             [
-                'filePath'     => $source_location['file'],
-                'lineNumber'   => $source_location['line'],
+                'filePath' => $source_location['file'],
+                'lineNumber' => $source_location['line'],
                 'functionName' => $source_location['function'],
             ],
             $entry['context']['reportLocation'],
@@ -473,31 +488,33 @@ class StackdriverApplicationLoggerTest extends TestCase
         // This does mean we are duplicating this text on every log entry that contains an exception, which will add up
         // over time...
         $expect_text = 'PHP Warning: '.preg_replace(
-                '/Stack trace:.+$/s',
-                "Stack trace:\n".self::makeExpectedSanitisedTrace($e),
-                (string) $e
-            );
-        $this->assertSame($expect_text, $entry['stack_trace']);
+            '/Stack trace:.+$/s',
+            "Stack trace:\n".self::makeExpectedSanitisedTrace($e),
+            (string) $e
+        );
+        $this->assertSame($expect_text, $entry['stack_trace'] ?? null);
     }
 
-    public function test_it_does_not_report_exception_as_stackdriver_error_if_flag_overriden()
+    public function testItDoesNotReportExceptionAsStackdriverErrorIfFlagOverriden(): void
     {
         $e = new RuntimeException('There was a problem');
         $this->newSubject()->info(
             'Arg',
-            ['exception' => $e, StackdriverApplicationLogger::PROP_REPORT_STACKDRIVER_ERROR => FALSE]
+            ['exception' => $e, StackdriverApplicationLogger::PROP_REPORT_STACKDRIVER_ERROR => false]
         );
         $entry = $this->assertLoggedOneLine();
         $this->assertArrayNotHasKey('@type', $entry);
         $this->assertArrayNotHasKey('stack_trace', $entry);
-        $this->assertNull($entry['context']['reportLocation'] ?? NULL, 'Should not have context.reportLocation');
+        $context = $entry['context'] ?? [];
+        $this->assertIsArray($context);
+        $this->assertArrayNotHasKey('reportLocation', $context, 'Should not have context.reportLocation');
     }
 
-    public function test_it_can_optionally_report_stackdriver_error_without_exception()
+    public function testItCanOptionallyReportStackdriverErrorWithoutException(): void
     {
         $this->newSubject()->info(
             'Any old problem we want to report',
-            [StackdriverApplicationLogger::PROP_REPORT_STACKDRIVER_ERROR => TRUE]
+            [StackdriverApplicationLogger::PROP_REPORT_STACKDRIVER_ERROR => true]
         );
         $entry = $this->assertLoggedOneLine();
 
@@ -511,141 +528,150 @@ class StackdriverApplicationLoggerTest extends TestCase
         $this->assertArrayNotHasKey('exception', $entry, 'Should not have an exception property');
     }
 
-    public function test_its_request_logger_logs_request_as_ingenerator_request_log_type()
+    public function testItsRequestLoggerLogsRequestAsIngeneratorRequestLogType(): void
     {
-        $this->newSubject()->logRequest([]);
+        $this->newSubject()->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame('rqst', $entry['@ingenType']);
     }
 
-    public static function provider_request_status_level()
+    /**
+     * @return Iterator<int, array<(int | string)>>
+     */
+    public static function provider_request_status_level(): Iterator
     {
-        return [
-            [200, 'INFO'],
-            [202, 'INFO'],
-            [400, 'NOTICE'],
-            [403, 'WARNING'],
-            [422, 'NOTICE'],
-            [500, 'ERROR'],
-            [502, 'ERROR'],
-        ];
+        yield [200, 'INFO'];
+        yield [202, 'INFO'];
+        yield [400, 'NOTICE'];
+        yield [403, 'WARNING'];
+        yield [422, 'NOTICE'];
+        yield [500, 'ERROR'];
+        yield [502, 'ERROR'];
     }
 
     #[DataProvider('provider_request_status_level')]
-    public function test_its_request_logger_assigns_loglevel_based_on_http_response_code($http_status, $expect)
+    public function testItsRequestLoggerAssignsLoglevelBasedOnHttpResponseCode(int $http_status, string $expect): void
     {
         $logger = $this->newSubject();
         http_response_code($http_status);
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect, $entry['severity'], 'Expect correct severity');
     }
 
-    public function test_its_request_logger_hoists_http_metadata_to_top_level()
+    public function testItsRequestLoggerHoistsHttpMetadataToTopLevel(): void
     {
         $original_http_meta = [
             'requestMethod' => 'POST',
-            'requestUrl'    => '/logger.php',
-            'remoteIp'      => '0.5.3.2',
+            'requestUrl' => '/logger.php',
+            'remoteIp' => '0.5.3.2',
         ];
-        $this->meta_args    = [
-            ['context' => ['httpRequest' => $original_http_meta,]],
+        $this->meta_args = [
+            ['context' => ['httpRequest' => $original_http_meta]],
         ];
 
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame(
             $original_http_meta,
             array_intersect_key($entry['httpRequest'], $original_http_meta),
             'Should include metadata in top-level httpRequest struct'
         );
-        $this->assertFalse(isset($entry['context']['httpRequest']), 'Should not duplicate httpRequest meta in context');
+        $this->assertArrayNotHasKey('httpRequest', $entry['context'], 'Should not duplicate httpRequest meta in context');
     }
 
     #[TestWith(['message'])]
     #[TestWith(['logging.googleapis.com/sourceLocation'])]
-    public function test_its_request_logger_does_not_log_irrelevant_properties($prop)
+    public function testItsRequestLoggerDoesNotLogIrrelevantProperties(string $prop): void
     {
-        $this->newSubject()->logRequest([]);
+        $this->newSubject()->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertArrayNotHasKey($prop, $entry);
     }
 
-    public function test_its_request_logger_logs_custom_metadata()
+    public function testItsRequestLoggerLogsCustomMetadata(): void
     {
         $this->meta_args = [
             ['context' => ['user' => 'john@do.com']],
         ];
 
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(['mem_mb', 'user'], array_keys($entry['context']));
         $this->assertSame('john@do.com', $entry['context']['user']);
     }
 
-    public function test_its_request_logger_logs_http_response_code()
+    public function testItsRequestLoggerLogsHttpResponseCode(): void
     {
         http_response_code(402);
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([[], ''])]
     #[TestWith([['HTTP_USER_AGENT' => 'chrome 10'], 'chrome 10'])]
     #[TestWith([
         ['HTTP_USER_AGENT' => "Mozilla/5.0 (compatible; Baiduspider/2.0; \xa3\xa9 and more stuff"],
         'Mozilla/5.0 (compatible; Baiduspider/2.0; �� and more stuff',
     ])]
-    public function test_its_request_logger_logs_user_agent_from_global_array($server, $expect)
+    public function testItsRequestLoggerLogsUserAgentFromGlobalArray(array $server, string $expect): void
     {
         http_response_code(402);
         $logger = $this->newSubject();
-        $logger->logRequest($server);
+        $logger->logRequest(ServerGlobal::fake($server));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
 
-    public function test_its_request_logger_truncates_long_user_agents()
+    public function testItsRequestLoggerTruncatesLongUserAgents(): void
     {
         $ua_val = 'abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 long ※ note the utf8 safe truncation and trimming';
         $expect = 'abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 long…';
         $logger = $this->newSubject();
-        $logger->logRequest(['HTTP_USER_AGENT' => $ua_val]);
+        $logger->logRequest(ServerGlobal::fake(['HTTP_USER_AGENT' => $ua_val]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
 
-    public function test_its_request_logger_logs_latency_since_start_time_if_provided()
+    public function testItsRequestLoggerLogsLatencySinceStartTimeIfProvided(): void
     {
-        $start  = microtime(TRUE);
+        $start = microtime(true);
         $logger = $this->newSubject();
-        $logger->logRequest([], $start);
-        $end   = microtime(TRUE);
+        $logger->logRequest(ServerGlobal::fake([]), $start);
+        $end = microtime(true);
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
+        $this->assertIsString($entry['httpRequest']['latency'] ?? null);
         $this->assertMatchesRegularExpression('/^(0\.[0-9]+)s$/', $entry['httpRequest']['latency']);
         $seconds = (float) str_replace('s', '', $entry['httpRequest']['latency']);
         $this->assertEqualsWithDelta($end - $start, $seconds, 0.1);
     }
 
-    public function test_its_request_logger_logs_null_latency_if_no_start_time()
+    public function testItsRequestLoggerLogsNullLatencyIfNoStartTime(): void
     {
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertNull($entry['httpRequest']['latency']);
     }
 
-    public function test_its_request_logger_logs_peak_memory_usage_in_mb()
+    public function testItsRequestLoggerLogsPeakMemoryUsageInMb(): void
     {
-        $logger      = $this->newSubject();
-        $peak_before = memory_get_peak_usage(TRUE);
-        $logger->logRequest([]);
-        $peak_after = memory_get_peak_usage(TRUE);
-        $entry      = $this->assertLoggedOneLine();
+        $logger = $this->newSubject();
+        $peak_before = memory_get_peak_usage(true);
+        $logger->logRequest(ServerGlobal::fake([]));
+        $peak_after = memory_get_peak_usage(true);
+        $entry = $this->assertLoggedOneLine();
         $this->assertIsString(
             $entry['context']['mem_mb'],
             'Encode memory as string to avoid risk of JSON serialization precision increasing payload size'
@@ -657,92 +683,49 @@ class StackdriverApplicationLoggerTest extends TestCase
         // memory usage that the logger saw - but it must be no less than the value before we called it, and no more
         // than the value immediately after we called it
         $this->assertTrue(
-            ($logged_meg >= round($peak_before / 1000 / 1000, 2))
-            and
-            ($logged_meg <= round($peak_after / 1000 / 1000, 2)),
+            $logged_meg >= round($peak_before / 1000 / 1000, 2) && $logged_meg <= round($peak_after / 1000 / 1000, 2),
             "Logged value should be within $peak_before and $peak_after and in the right units"
         );
     }
 
-    public function test_it_can_be_created_with_metrics_agent_to_publish_counter_on_each_log()
-    {
-        $agent   = new ArrayMetricsAgent;
-        $subject = StackdriverApplicationLogger::withMetrics(
-            $agent,
-            'some-metric-name',
-            $this->log_stream,
-            ...$this->meta_args
-        );
-        $subject->error('An error');
-        $subject->info('And an info');
-        $subject->info('Another info');
-        // Note the request logger does not produce a metric
-        $subject->logRequest($_SERVER);
-
-        $expect = new ArrayMetricsAgent;
-        $expect->incrementCounterByOne(MetricId::nameAndSource('some-metric-name', 'error'));
-        $expect->incrementCounterByOne(MetricId::nameAndSource('some-metric-name', 'info'));
-        $expect->incrementCounterByOne(MetricId::nameAndSource('some-metric-name', 'info'));
-
-        $this->assertSame($expect->getMetrics(), $agent->getMetrics());
-    }
-
-    public function test_it_logs_as_expected_when_using_the_with_metrics_constructor()
-    {
-        $logger = StackdriverApplicationLogger::withMetrics(
-            new NullMetricsAgent,
-            'some-name',
-            $this->log_stream,
-            ['context' => ['foo' => 'bar']],
-            fn() => ['context' => ['other' => 'stuff']],
-            new class implements LogMetadataProvider {
-                public function getMetadata(): array
-                {
-                    return ['context' => ['from' => 'provider']];
-                }
-            }
-        );
-        $logger->info('Anything');
-        $entry = $this->assertLoggedOneLine();
-        $this->assertSame(
-            [
-                'foo' => 'bar',
-                'other' => 'stuff',
-                'from' => 'provider',
-            ],
-            $entry['context']
-        );
-    }
-
-
-    /**
-     * @return array
-     */
+    /** @return list<TJsonLogEntry> */
     protected function assertLoggedJSONLines(): array
     {
-        if ( ! is_file($this->log_stream)) {
+        if (!is_file($this->log_stream)) {
             $this->fail('Log stream '.$this->log_stream.' does not exist');
         }
 
         $content = file_get_contents($this->log_stream);
-        $lines   = explode("\n", $content);
-        $this->assertSame("", array_pop($lines), 'Expect trailing newline after last message');
+        if ($content === false) {
+            throw new RuntimeException('Unable to read log stream '.$this->log_stream);
+        }
+        $lines = explode("\n", $content);
+        $this->assertSame('', array_pop($lines), 'Expect trailing newline after last message');
 
         return array_map(
-            function (string $line) { return JSON::decodeArray($line); },
+            function (string $l): array {
+                $log = JSON::decodeArray($l);
+
+                // We write and parse this ourselves, assume that it follows the expected structure and matches our
+                // virtual type.
+                /** @var TJsonLogEntry $log */
+                return $log;
+            },
             $lines
         );
     }
 
-    /**
-     * @return array
-     */
+    /** @return TJsonLogEntry */
     protected function assertLoggedOneLine(): array
     {
         $entries = $this->assertLoggedJSONLines();
         $this->assertCount(1, $entries, 'Expected a single log entry');
 
-        return array_shift($entries);
+        $entry = array_shift($entries);
+        // Could only happen if PHP or PHPUnit was broken, we asserted a nonzero array above
+        $this->assertNotNull($entry, 'Expected a single log entry');
+
+        return $entry;
     }
 
     protected static function makeExpectedSanitisedTrace(Throwable $e): string
@@ -754,7 +737,7 @@ class StackdriverApplicationLoggerTest extends TestCase
         $expect_trace = implode(
             "\n",
             array_map(
-                function ($trace_line) {
+                function ($trace_line): string {
                     $parts = explode(' ', $trace_line, 3);
                     if (isset($parts[2])) {
                         // Strip args from the string
@@ -771,19 +754,20 @@ class StackdriverApplicationLoggerTest extends TestCase
     }
 
     /**
-     * @param array $entry
+     * @param TJsonLogEntry $entry
      */
     protected function assertClonesSourceLocationToContextReportLocation(array $entry): void
     {
         // Oh look, Google use different keys for the same values in different places. Thanks @google
         $source_location = $entry[StackdriverApplicationLogger::PROP_SOURCE_LOCATION];
+        $this->assertIsArray($source_location);
         $this->assertSame(
             [
-                'filePath'     => $source_location['file'],
-                'lineNumber'   => $source_location['line'],
+                'filePath' => $source_location['file'],
+                'lineNumber' => $source_location['line'],
                 'functionName' => $source_location['function'],
             ],
-            $entry['context']['reportLocation'],
+            $entry['context']['reportLocation'] ?? null,
             'Should copy sourceLocation to context.reportLocation'
         );
     }
@@ -791,10 +775,9 @@ class StackdriverApplicationLoggerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->vfs        = vfsStream::setup();
+        $this->vfs = vfsStream::setup();
         $this->log_stream = $this->vfs->url().'/log-str.log';
     }
-
 
     protected function newSubject(): StackdriverApplicationLogger
     {
@@ -803,6 +786,4 @@ class StackdriverApplicationLoggerTest extends TestCase
             ...$this->meta_args
         );
     }
-
 }
-

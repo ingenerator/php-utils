@@ -1,65 +1,66 @@
 <?php
 
+declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Logging;
 
-
 use Ingenerator\PHPUtils\Logging\DefaultLogMetadata;
 use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
+use Iterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
-class DefaultLogMetadataTest extends TestCase
+final class DefaultLogMetadataTest extends TestCase
 {
     /**
      * ---------------------------------
      * deviceIdentity
-     * ---------------------------------
+     * ---------------------------------.
      */
-
-    public function test_its_device_identity_provides_device_id_as_deferred_value()
+    public function testItsDeviceIdentityProvidesDeviceIdAsDeferredValue(): void
     {
         $result = DefaultLogMetadata::deviceIdentityLazy();
-        $this->assertIsCallable($result);
         DeviceIdentifier::forceGlobalTestValue('abc4567890123456789012');
         $this->assertSame(['context' => ['did' => 'abc4567890123456789012']], $result());
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([['REMOTE_ADDR' => '192.182.382.39'], '192.182.382.39'])]
     #[TestWith([[], '{na}'])]
-    public function test_its_http_context_provides_client_ip_from_server_vars($server, $expect)
+    public function testItsHttpContextProvidesClientIpFromServerVars(array $server, string $expect): void
     {
-        $result = DefaultLogMetadata::httpContext($server);
+        $result = DefaultLogMetadata::httpContext(ServerGlobal::fake($server));
         $this->assertSame($expect, $result['context']['httpRequest']['remoteIp']);
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([['REQUEST_URI' => '/foobar/foo'], '/foobar/foo'])]
     #[TestWith([['REQUEST_URI' => '/foobar/foo?arg=what'], '/foobar/foo?arg=what'])]
     #[TestWith([[], null])]
-    public function test_its_http_context_provides_request_url_from_server_vars($server, $expect)
+    public function testItsHttpContextProvidesRequestUrlFromServerVars(array $server, ?string $expect): void
     {
-        $result = DefaultLogMetadata::httpContext($server);
+        $result = DefaultLogMetadata::httpContext(ServerGlobal::fake($server));
         $this->assertSame($expect, $result['context']['httpRequest']['requestUrl']);
     }
 
+    /** @param array<string, string> $server */
     #[TestWith([['REQUEST_METHOD' => 'POST'], 'POST'])]
     #[TestWith([[], null])]
-    public function test_its_http_context_provides_request_method_from_server_vars($server, $expect)
+    public function testItsHttpContextProvidesRequestMethodFromServerVars(array $server, ?string $expect): void
     {
-        $result = DefaultLogMetadata::httpContext($server);
+        $result = DefaultLogMetadata::httpContext(ServerGlobal::fake($server));
         $this->assertSame($expect, $result['context']['httpRequest']['requestMethod']);
     }
-
 
     /**
      * ---------------------------------
      * requestTrace
-     * ---------------------------------
+     * ---------------------------------.
      */
-
-    public function test_its_request_tracing_data_adds_random_request_id()
+    public function testItsRequestTracingDataAddsRandomRequestId(): void
     {
         $result1 = DefaultLogMetadata::requestTrace();
         $this->assertMatchesRegularExpression(
@@ -75,10 +76,10 @@ class DefaultLogMetadataTest extends TestCase
         );
     }
 
-    public function test_its_request_tracing_data_adds_trace_id_with_request_id_if_no_headers_available(
-    )
-    {
+    public function testItsRequestTracingDataAddsTraceIdWithRequestIdIfNoHeadersAvailable(
+    ): void {
         $result = DefaultLogMetadata::requestTrace();
+        $this->assertArrayHasKey('logging.googleapis.com/trace', $result);
         $this->assertSame(
             $result['context']['req'],
             $result['logging.googleapis.com/trace'],
@@ -86,44 +87,47 @@ class DefaultLogMetadataTest extends TestCase
         );
     }
 
-    public static function provider_trace_header()
+    /**
+     * @return Iterator<int, array<(array<string, string> | string | null)>>
+     */
+    public static function provider_trace_header(): Iterator
     {
-        return [
-            [
-                // Doesn't match expected format, pass through as-is (with or without project)
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
-                NULL,
-                'abcdef-invalid',
-            ],
-            [
-                // Doesn't match expected format, pass through as-is (with or without project)
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
-                'ig-smth',
-                'abcdef-invalid',
-            ],
-            [
-                // Expected format but no GCP project - pass through the first key
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
-                NULL,
-                'a82732dfd72b2872',
-                'projects/a82732dfd72b2872/traces/935674659030955431',
-            ],
-            [
-                // Expected format and GCP project - convert to GCP format
-                ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
-                'ig-smth',
-                'projects/ig-smth/traces/a82732dfd72b2872',
-            ],
+        yield [
+            // Doesn't match expected format, pass through as-is (with or without project)
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
+            null,
+            'abcdef-invalid',
+        ];
+        yield [
+            // Doesn't match expected format, pass through as-is (with or without project)
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'abcdef-invalid'],
+            'ig-smth',
+            'abcdef-invalid',
+        ];
+        yield [
+            // Expected format but no GCP project - pass through the first key
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
+            null,
+            'a82732dfd72b2872',
+            'projects/a82732dfd72b2872/traces/935674659030955431',
+        ];
+        yield [
+            // Expected format and GCP project - convert to GCP format
+            ['HTTP_X_CLOUD_TRACE_CONTEXT' => 'a82732dfd72b2872/935674659030955431'],
+            'ig-smth',
+            'projects/ig-smth/traces/a82732dfd72b2872',
         ];
     }
 
+    /** @param array<string, string> $server */
     #[DataProvider('provider_trace_header')]
-    public function test_its_request_tracing_data_adds_trace_id_with_from_header_and_optionally_project_if_available(
-        $server,
-        $project,
-        $expect
-    ) {
-        $result = DefaultLogMetadata::requestTrace($server, $project);
+    public function testItsRequestTracingDataAddsTraceIdWithFromHeaderAndOptionallyProjectIfAvailable(
+        array $server,
+        ?string $project,
+        string $expect,
+    ): void {
+        $result = DefaultLogMetadata::requestTrace(ServerGlobal::fake($server), $project);
+        $this->assertArrayHasKey('logging.googleapis.com/trace', $result);
         $this->assertSame(
             $expect,
             $result['logging.googleapis.com/trace'],
@@ -134,10 +138,9 @@ class DefaultLogMetadataTest extends TestCase
     /**
      * ---------------------------------
      * serviceContext
-     * ---------------------------------
+     * ---------------------------------.
      */
-
-    public function test_its_service_context_provides_service_name()
+    public function testItsServiceContextProvidesServiceName(): void
     {
         $result = DefaultLogMetadata::serviceContext('my-svc');
         $this->assertSame('my-svc', $result['serviceContext']['service']);
@@ -148,10 +151,10 @@ class DefaultLogMetadataTest extends TestCase
     #[TestWith(["<?php 'abcdefe';", '#ERROR#'])]
     #[TestWith(["<?php return 'abcdef123';", 'abcdef123'])]
     #[TestWith([false, '#ERROR#'])]
-    public function test_its_service_context_loads_version_from_file_ignoring_any_errors($file_content, $expect)
+    public function testItsServiceContextLoadsVersionFromFileIgnoringAnyErrors(string|false $file_content, string $expect): void
     {
         $vfs = vfsStream::setup();
-        if ($file_content !== FALSE) {
+        if ($file_content !== false) {
             $version_file_path = vfsStream::newFile('version.php')
                 ->at($vfs)
                 ->withContent($file_content)
@@ -163,6 +166,4 @@ class DefaultLogMetadataTest extends TestCase
         $result = DefaultLogMetadata::serviceContext('any', $version_file_path);
         $this->assertSame($expect, $result['serviceContext']['version']);
     }
-
-
 }

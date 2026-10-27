@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\Logging;
 
-
+use DateInterval;
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\ArrayCookieWrapperStub;
 use Ingenerator\PHPUtils\Cookie\CookieWrapper;
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
+
+use function preg_match;
+use function random_bytes;
 
 /**
  * Allocates each user a unique device ID cookie that persists across time / login state / etc.
@@ -21,31 +26,31 @@ use Ingenerator\PHPUtils\StringEncoding\Base64Url;
  * It *must not* be used for any application logic as the value is protected only against invalid
  * formats, it is not in any way protected against forgery or cloning.
  */
-class DeviceIdentifier
+final class DeviceIdentifier
 {
-    /**
-     * @var \Ingenerator\PHPUtils\Logging\DeviceIdentifier
-     */
-    protected static $instance;
+    private static ?DeviceIdentifier $instance;
 
     /**
-     * Forces the singleton state to a known value for use in testing
-     *
-     * @param string $id
+     * @internal
      */
-    public static function forceGlobalTestValue(string $id): void
+    public static function resetInstance(): void
     {
-        static::$instance = new DeviceIdentifier(new ArrayCookieWrapperStub(['did' => $id]));
+        self::$instance = null;
     }
 
     /**
-     * Initialises the instance, loading the current ID from cookies or setting new cookies
+     * Forces the singleton state to a known value for use in testing.
+     */
+    public static function forceGlobalTestValue(string $id): void
+    {
+        self::$instance = new DeviceIdentifier(new ArrayCookieWrapperStub(['did' => $id]));
+    }
+
+    /**
+     * Initialises the instance, loading the current ID from cookies or setting new cookies.
      *
      * You must call this as early as possible in your bootstrapping to ensure that the ID is set
      * before sending any output.
-     *
-     * @param bool $ssl_available
-     * @param bool $is_cli
      */
     public static function initAndEnsureCookieSet(bool $ssl_available, bool $is_cli = (PHP_SAPI === 'cli')): void
     {
@@ -54,46 +59,36 @@ class DeviceIdentifier
             // Note that as it's not really appropriate to inject the `is_cli` arg to `::get()`, and we can't stub
             // PHP_SAPI for testing, that method will still return `-unset-` if it is called before
             // ::initAndEnsureCookieSet()
-            static::forceGlobalTestValue(static::CLI_ID);
+            self::forceGlobalTestValue(self::CLI_ID);
         } else {
-            static::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
+            self::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
         }
-        static::$instance->init();
+        assert(self::$instance instanceof DeviceIdentifier, 'Should have been assigned by above or by ::forceGlobalTestValue');
+        self::$instance->init();
     }
 
     /**
-     * Returns the current device ID
+     * Returns the current device ID.
      *
      * If ::initAndEnsureCookieSet has not yet been called, this method will return the value from
      * $_COOKIE if one was set on a previous request. If this is a user's first request then the
      * value will be `-unset-`
-     *
-     * @return string
      */
     public static function get(): string
     {
-        $i = static::$instance ?: new DeviceIdentifier(new CookieWrapper);
+        $i = self::$instance ?? new DeviceIdentifier(new CookieWrapper());
 
         return $i->getValue();
     }
 
-    const CLI_ID          = 'cli-------------------';
-    const COOKIE_LIFETIME = 'P5Y';
-    const VALID_REGEX     = '/^[a-zA-Z0-9\-_=]{22}$/';
+    public const CLI_ID = 'cli-------------------';
+    public const COOKIE_LIFETIME = 'P5Y';
+    public const VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
 
-    /**
-     * @var string|null
-     */
-    protected $id;
+    private ?string $id = null;
 
-    /**
-     * @var \Ingenerator\PHPUtils\Cookie\CookieWrapper
-     */
-    protected $cookies;
-
-    protected function __construct(CookieWrapper $cookies)
+    private function __construct(private readonly CookieWrapper $cookies)
     {
-        $this->cookies = $cookies;
     }
 
     /**
@@ -101,11 +96,11 @@ class DeviceIdentifier
      */
     public function getValue(): string
     {
-        if ($this->id === NULL) {
+        if ($this->id === null) {
             $id = $this->cookies->get('did') ?: $this->cookies->get('didf');
             if (empty($id)) {
                 $id = '-unset-';
-            } elseif ( ! \preg_match(self::VALID_REGEX, $id)) {
+            } elseif (!preg_match(self::VALID_REGEX, $id)) {
                 // Safety check - prevent malicious user sending long / manipulated ids that could
                 // cause excessive log volume or problematic values
                 $id = '-invalid-';
@@ -123,20 +118,19 @@ class DeviceIdentifier
     {
         $current_value = $this->getValue();
 
-        if (($current_value === '-unset-') or ($current_value === '-invalid-')) {
+        if ($current_value === '-unset-' || $current_value === '-invalid-') {
             // Do the init
             $this->assignNewIdAndSetCookies();
-        } elseif ($this->cookies->has('did') and $this->cookies->has('didf')) {
+        } elseif ($this->cookies->has('did') && $this->cookies->has('didf')) {
             // Delete the spare cookie
             $this->cookies->delete('didf');
         }
-
     }
 
-    protected function assignNewIdAndSetCookies()
+    private function assignNewIdAndSetCookies(): void
     {
-        $this->id = Base64Url::encode(\random_bytes(16));
-        $expire   = (new \DateTimeImmutable)->add(new \DateInterval(static::COOKIE_LIFETIME));
+        $this->id = Base64Url::encode(random_bytes(16));
+        $expire = (new DateTimeImmutable())->add(new DateInterval(self::COOKIE_LIFETIME));
 
         // The cookies are set with httponly=false to allow access from JS (though generally it is
         // preferred to render it server-side and inject into javascript through data attributes /
@@ -145,12 +139,12 @@ class DeviceIdentifier
         $this->cookies->set(
             'did',
             $this->id,
-            ['expires' => $expire, 'httponly' => FALSE, 'secure' => TRUE, 'samesite' => 'none']
+            ['expires' => $expire, 'httponly' => false, 'secure' => true, 'samesite' => 'none']
         );
         $this->cookies->set(
             'didf',
             $this->id,
-            ['expires' => $expire, 'httponly' => FALSE, 'secure' => TRUE, 'samesite' => NULL]
+            ['expires' => $expire, 'httponly' => false, 'secure' => true, 'samesite' => null]
         );
     }
 }

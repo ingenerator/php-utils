@@ -1,31 +1,29 @@
 <?php
 
+declare(strict_types=1);
 
 namespace unit\Ingenerator\PHPUtils\DeploymentConfig;
 
-
-use Base_TestCase;
 use Ingenerator\PHPUtils\DeploymentConfig\ConfigMapDeclarationParser;
 use Ingenerator\PHPUtils\DeploymentConfig\DeploymentConfig;
 use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class ConfigMapDeclarationParserTest extends TestCase
+final class ConfigMapDeclarationParserTest extends TestCase
 {
-
-    public function test_it_is_initialisable()
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(ConfigMapDeclarationParser::class, $this->newSubject());
     }
 
-    public function test_it_parses_simple_value_pairs_to_simple_hash()
+    public function testItParsesSimpleValuePairsToSimpleHash(): void
     {
         $this->assertSame(
             [
                 DeploymentConfig::PRODUCTION => 'prod-stuff',
-                DeploymentConfig::QA         => 'qa-stuff',
-                DeploymentConfig::ANY        => 'fallback',
+                DeploymentConfig::QA => 'qa-stuff',
+                DeploymentConfig::ANY => 'fallback',
             ],
             $this->newSubject()->parse(
                 [
@@ -37,15 +35,15 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function test_it_parses_arrays_of_environments_to_simple_hash()
+    public function testItParsesArraysOfEnvironmentsToSimpleHash(): void
     {
         $this->assertSame(
             [
                 DeploymentConfig::PRODUCTION => 'prod-stuff',
-                DeploymentConfig::QA         => 'prod-stuff',
-                DeploymentConfig::CI         => 'dev-stuff',
-                DeploymentConfig::DEV        => 'dev-stuff',
-                DeploymentConfig::ANY        => 'fallback',
+                DeploymentConfig::QA => 'prod-stuff',
+                DeploymentConfig::CI => 'dev-stuff',
+                DeploymentConfig::DEV => 'dev-stuff',
+                DeploymentConfig::ANY => 'fallback',
             ],
             $this->newSubject()->parse(
                 [
@@ -57,13 +55,13 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function test_it_supports_declarations_with_array_values()
+    public function testItSupportsDeclarationsWithArrayValues(): void
     {
         $this->assertSame(
             [
                 DeploymentConfig::PRODUCTION => ['array' => 'of things'],
-                DeploymentConfig::QA         => ['array' => 'of things'],
-                DeploymentConfig::CI         => 'dev-stuff',
+                DeploymentConfig::QA => ['array' => 'of things'],
+                DeploymentConfig::CI => 'dev-stuff',
             ],
             $this->newSubject()->parse(
                 [
@@ -74,7 +72,7 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public function test_it_throws_if_an_environment_mapped_more_than_once()
+    public function testItThrowsIfAnEnvironmentMappedMoreThanOnce(): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidConfigException::class);
@@ -87,11 +85,12 @@ class ConfigMapDeclarationParserTest extends TestCase
         );
     }
 
-    public static function provider_invalid_declarations()
+    /** @return array<int, array<mixed>> */
+    public static function provider_invalid_declarations(): array
     {
         // Compose like this because by the time you nest the different levels of data provider cases and argument arrays
         // it's hard to see what the actual test values are...
-        $invalid   = [];
+        $invalid = [];
         $invalid[] = ['declaration is not an array'];
         $invalid[] = [
             [[DeploymentConfig::PRODUCTION, DeploymentConfig::QA, 'array closed after value instead of before']],
@@ -112,11 +111,12 @@ class ConfigMapDeclarationParserTest extends TestCase
             ['some' => 'unexpected', 'hash' => 'value'],
         ];
 
-        return array_map(function (array $declarations) { return [$declarations]; }, $invalid);
+        return array_map(fn (array $declarations): array => [$declarations], $invalid);
     }
 
+    /** @param array<mixed> $declarations */
     #[DataProvider('provider_invalid_declarations')]
-    public function test_it_throws_if_any_declarations_do_not_have_exactly_two_values($declarations)
+    public function testItThrowsIfAnyDeclarationsDoNotHaveExactlyTwoValues(array $declarations): void
     {
         $subject = $this->newSubject();
         $this->expectException(InvalidConfigException::class);
@@ -126,7 +126,6 @@ class ConfigMapDeclarationParserTest extends TestCase
 
     protected function newSubject(): ConfigMapDeclarationParser
     {
-        return new ConfigMapDeclarationParser;
+        return new ConfigMapDeclarationParser();
     }
-
 }

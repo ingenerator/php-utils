@@ -1,31 +1,32 @@
 <?php
 
+declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\StringEncoding;
 
-
+use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
+use Ingenerator\PHPUtils\StringEncoding\JSON;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use Ingenerator\PHPUtils\StringEncoding\JSON;
-use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
 
-class JSONTest extends TestCase
+final class JSONTest extends TestCase
 {
-
-    public static function provider_valid_json()
+    /**
+     * @return Iterator<int, array<mixed>>
+     */
+    public static function provider_valid_json(): Iterator
     {
-        return [
-            ['1', 1],
-            ['true', TRUE],
-            ['"4"', '4'],
-            ['null', NULL],
-            ['{"foo": "bar", "baz": {"bin":"boo"}}', ['foo' => 'bar', 'baz' => ['bin' => 'boo']]]
-        ];
+        yield ['1', 1];
+        yield ['true', true];
+        yield ['"4"', '4'];
+        yield ['null', null];
+        yield ['{"foo": "bar", "baz": {"bin":"boo"}}', ['foo' => 'bar', 'baz' => ['bin' => 'boo']]];
     }
 
     #[DataProvider('provider_valid_json')]
-    public function test_it_parses_valid_json_with_objects_as_arrays($json, $expect)
+    public function testItParsesValidJsonWithObjectsAsArrays(string $json, mixed $expect): void
     {
         $this->assertSame($expect, JSON::decode($json));
     }
@@ -33,59 +34,59 @@ class JSONTest extends TestCase
     #[TestWith([null, 'Cannot decode a null value'])]
     #[TestWith(['', 'Syntax error'])]
     #[TestWith(['i am not json', 'Syntax error'])]
-    public function test_it_throws_on_parsing_invalid_json($value, $expect_msg)
+    public function testItThrowsOnParsingInvalidJson(?string $value, string $expect_msg): void
     {
         $this->expectException(InvalidJSONException::class);
         $this->expectExceptionMessage($expect_msg);
         JSON::decode($value);
     }
 
-    public function test_it_can_decode_json_as_explicit_array()
+    public function testItCanDecodeJsonAsExplicitArray(): void
     {
         $this->assertSame(['foo' => 'bar'], JSON::decodeArray('{"foo": "bar"}'));
     }
 
-    public function test_it_throws_from_decode_array_if_value_not_array()
+    public function testItThrowsFromDecodeArrayIfValueNotArray(): void
     {
         $this->expectException(InvalidJSONException::class);
         $this->expectExceptionMessage('expected array, got string');
         JSON::decodeArray('"foo"');
     }
 
-    public function test_decode_array_returns_empty_array_for_json_null_input()
+    public function testDecodeArrayReturnsEmptyArrayForJsonNullInput(): void
     {
-        $this->assertSame([], JSON::decodeArray(json_encode(null)));
+        $this->assertSame([], JSON::decodeArray('null'));
     }
 
-    public static function provider_valid_encode()
+    /**
+     * @return Iterator<int, array<(array<string, string> | bool | int | string)>>
+     */
+    public static function provider_valid_encode(): Iterator
     {
-        return [
-            [1, FALSE, '1'],
-            [['foo' => 'bar'], FALSE, '{"foo":"bar"}'],
-            [['foo' => 'bar', 'baz' => 'ban'], FALSE, '{"foo":"bar","baz":"ban"}'],
-            [['foo' => 'bar', 'baz' => 'ban'], TRUE, "{\n    \"foo\": \"bar\",\n    \"baz\": \"ban\"\n}"],
-        ];
+        yield [1, false, '1'];
+        yield [['foo' => 'bar'], false, '{"foo":"bar"}'];
+        yield [['foo' => 'bar', 'baz' => 'ban'], false, '{"foo":"bar","baz":"ban"}'];
+        yield [['foo' => 'bar', 'baz' => 'ban'], true, "{\n    \"foo\": \"bar\",\n    \"baz\": \"ban\"\n}"];
     }
 
     #[DataProvider('provider_valid_encode')]
-    public function test_encode_encodes_json_prettily_or_not($val, $pretty, $expect)
+    public function testEncodeEncodesJsonPrettilyOrNot(mixed $val, bool $pretty, string $expect): void
     {
         $this->assertSame($expect, JSON::encode($val, $pretty));
     }
 
-    public function test_it_throws_on_error_json_encoding()
+    public function testItThrowsOnErrorJsonEncoding(): void
     {
         $this->expectException(InvalidJSONException::class);
         // BAD UTF8 string content
         JSON::encode("\xC3\x2E");
     }
 
-    public function test_it_can_prettify_existing_json()
+    public function testItCanPrettifyExistingJson(): void
     {
         $this->assertSame(
             "{\n    \"foo\": \"bar\",\n    \"baz\": \"ban\"\n}",
             JSON::prettify('{"foo":"bar","baz":"ban"}')
         );
     }
-
 }

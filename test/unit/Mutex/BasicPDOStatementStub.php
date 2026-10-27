@@ -3,52 +3,45 @@
 namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
 
 use PDO;
+use PDOStatement;
+use UnexpectedValueException;
+
 use function array_map;
-use const PHP_MAJOR_VERSION;
 
-if (PHP_MAJOR_VERSION < 8) {
-    class BasicPDOStatementStub extends \PDOStatement
+class BasicPDOStatementStub extends PDOStatement
+{
+    /** @var array<mixed> */
+    protected $result;
+
+    /** @param array<mixed> $result */
+    public function __construct(array $result)
     {
-        protected $result;
-
-        public function __construct(array $result) { $this->result = $result; }
-
-        public function fetchAll($fetch_style = NULL, $fetch_argument = NULL, $ctor_args = NULL): array
-        {
-            if ($fetch_style === NULL) {
-                return $this->result;
-            } elseif ($fetch_style === PDO::FETCH_COLUMN) {
-                return array_map(
-                    function ($row) use ($fetch_argument) {
-                        return $row[$fetch_argument];
-                    },
-                    $this->result
-                );
-            } else {
-                throw new \UnexpectedValueException('Not mocked '.$fetch_style);
-            }
-        }
-
-
+        $this->result = $result;
     }
-} else {
-    class BasicPDOStatementStub extends \PDOStatement
+
+    /** @return array<mixed> */
+    public function fetchAll(?int $mode = null, mixed ...$fetch_argument): array
     {
-        protected $result;
-
-        public function __construct(array $result) { $this->result = $result; }
-
-        public function fetchAll(?int $fetch_style = NULL, mixed ...$fetch_argument): array
-        {
-            if ($fetch_style === NULL) {
-                return $this->result;
-            } elseif ($fetch_style === PDO::FETCH_COLUMN) {
-                return array_map(fn($row) => $row[$fetch_argument[0]], $this->result);
-            } else {
-                throw new \UnexpectedValueException('Not mocked '.$fetch_style);
-            }
+        if ($mode === null) {
+            return $this->result;
         }
+        if ($mode === PDO::FETCH_COLUMN) {
+            $column = $fetch_argument[0] ?? 0;
+            if (!is_int($column) && !is_string($column)) {
+                throw new UnexpectedValueException('Column index must be int or string');
+            }
 
+            return array_map(
+                static function (mixed $row) use ($column): mixed {
+                    if (!is_array($row)) {
+                        throw new UnexpectedValueException('Expected array row');
+                    }
 
+                    return $row[$column] ?? null;
+                },
+                $this->result
+            );
+        }
+        throw new UnexpectedValueException('Not mocked '.$mode);
     }
 }

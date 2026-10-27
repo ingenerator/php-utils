@@ -1,46 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace test\unit\Ingenerator\PHPUtils\Sitemap;
 
-
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\Sitemap\SitemapParser;
 use Ingenerator\PHPUtils\Sitemap\SitemapRenderer;
+use LogicException;
 use PHPUnit\Framework\TestCase;
+use UnderflowException;
 
-class SitemapRendererTest extends TestCase
+final class SitemapRendererTest extends TestCase
 {
-    public function test_it_is_initialisable(): void
+    public function testItIsInitialisable(): void
     {
         $this->assertInstanceOf(SitemapRenderer::class, $this->newSubject());
     }
 
-    public function test_it_throws_on_attempt_to_render_empty_map(): void
+    public function testItThrowsOnAttemptToRenderEmptyMap(): void
     {
         // Sitemaps aren't allowed to contain no <url> elements
         $subject = $this->newSubject();
-        $this->expectException(\UnderflowException::class);
+        $this->expectException(UnderflowException::class);
         $subject->render();
     }
 
-    public function test_it_throws_on_attempt_to_modify_after_render(): void
+    public function testItThrowsOnAttemptToModifyAfterRender(): void
     {
         $subject = $this->newSubject();
         $subject->addUrl('http://any.thing/wherever');
         $subject->render();
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $subject->addUrl('http://any.thing/other');
     }
 
-    public function test_it_throws_on_attempt_to_render_multiple_times(): void
+    public function testItThrowsOnAttemptToRenderMultipleTimes(): void
     {
         $subject = $this->newSubject();
         $subject->addUrl('http://any.thing/wherever');
         $subject->render();
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $subject->render();
     }
 
-    public function test_it_renders_valid_sitemap_with_simple_entry(): void
+    public function testItRendersValidSitemapWithSimpleEntry(): void
     {
         $subject = $this->newSubject();
         $subject->addUrl('https://foo.bar/baz');
@@ -57,12 +61,12 @@ class SitemapRendererTest extends TestCase
         );
     }
 
-    public function test_it_renders_valid_sitemap_with_optional_parameters(): void
+    public function testItRendersValidSitemapWithOptionalParameters(): void
     {
         $subject = $this->newSubject();
         $subject->addUrl(
             'https://foo.bar/baz',
-            lastmod: new \DateTimeImmutable('2022-02-03 10:30:20'),
+            lastmod: new DateTimeImmutable('2022-02-03 10:30:20'),
             changefreq: 'monthly',
             priority: 0.3
         );
@@ -79,7 +83,7 @@ class SitemapRendererTest extends TestCase
         );
     }
 
-    public function test_it_escapes_special_characters_in_urls(): void
+    public function testItEscapesSpecialCharactersInUrls(): void
     {
         $subject = $this->newSubject();
         $subject->addUrl('https://foo.bar/baz?any=thing&other=thing');
@@ -96,11 +100,11 @@ class SitemapRendererTest extends TestCase
         );
     }
 
-    public function test_it_includes_multiple_urls(): void
+    public function testItIncludesMultipleUrls(): void
     {
         $subject = $this->newSubject();
-        $subject->addUrl('http://foo.bar/home', new \DateTimeImmutable('2022-01-03'), 'monthly', 0.5);
-        $subject->addUrl('http://foo.bar/news', new \DateTimeImmutable('2022-05-04'), 'daily', 0.7);
+        $subject->addUrl('http://foo.bar/home', new DateTimeImmutable('2022-01-03'), 'monthly', 0.5);
+        $subject->addUrl('http://foo.bar/news', new DateTimeImmutable('2022-05-04'), 'daily', 0.7);
         $subject->addUrl('http://foo.bar/misc');
         $this->assertSame(
             [

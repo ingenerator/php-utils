@@ -1,14 +1,16 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Cookie;
+
+use DateTimeImmutable;
+use UnexpectedValueException;
 
 use function array_merge;
 use function headers_sent;
 use function setcookie;
 
 /**
- * Provides an injectable wrapper for setting and accessing cookies from other classes
+ * Provides an injectable wrapper for setting and accessing cookies from other classes.
  *
  * This includes:
  *  - Actually setting cookies, with sane defaults
@@ -20,33 +22,31 @@ use function setcookie;
  *
  * See also ArrayCookieWrapperStub for a simulated implementation that doesn't actually attempt to
  * set cookies, for use in unit tests.
- *
  */
 class CookieWrapper
 {
-
     /**
-     * @var mixed[]
+     * Note: PHP $_COOKIE is normally array<string,string> however:
+     *  - It can contain arrays following the same syntax as form-encoded fields e.g. a cookie named
+     *    `foo[bar]` with value `ok` will produce a $_COOKIE like ['foo' => ['bar' => 'ok']]
+     *  - It can have any level of nested array structure
+     *  - Nested array keys can be ints e.g. cookie `foo[5]` will produce ['foo' => [5 => 'ok']]
+     *
+     * However we only support returning string values.
+     *
+     * @var array<mixed>
      */
-    protected $cookies = [];
+    protected array $cookies = [];
 
-    /**
-     * @var boolean
-     */
-    protected $has_ssl_available;
-
-    public function __construct(bool $has_ssl_available = TRUE)
+    public function __construct(protected bool $has_ssl_available = true)
     {
-        $this->cookies           = $_COOKIE;
-        $this->has_ssl_available = $has_ssl_available;
+        $this->cookies = $_COOKIE;
     }
 
     /**
-     * @param string $name
-     * @param string $value
-     * @param array  $options
+     * @param array<string, mixed> $options
      */
-    public function set(string $name, ?string $value = NULL, array $options = []): void
+    public function set(string $name, string $value = '', array $options = []): void
     {
         if ($this->headers_sent($file, $line)) {
             throw new HeadersSentException($name, $file, $line);
@@ -55,22 +55,26 @@ class CookieWrapper
         $default_options = [
             'domain' => '',
             'expires' => 0,
-            'httponly'=> TRUE,
+            'httponly' => true,
             'path' => '/',
             'secure' => $this->has_ssl_available,
         ];
         $options = array_merge($default_options, $options);
 
         // convert expires DateTime to timestamp
-        if ($options['expires'] instanceof \DateTimeImmutable) {
+        if ($options['expires'] instanceof DateTimeImmutable) {
             $options['expires'] = $options['expires']->getTimestamp();
         }
 
         // downgrade secure cookies if SSL is not available
-        if (!$this->has_ssl_available) { $options['secure'] = FALSE;}
+        if (!$this->has_ssl_available) {
+            $options['secure'] = false;
+        }
 
         // remove samesite option if SSL is not available
-        if (!$this->has_ssl_available) { unset($options['samesite']);}
+        if (!$this->has_ssl_available) {
+            unset($options['samesite']);
+        }
 
         $this->set_cookie($name, $value, $options);
 
@@ -79,7 +83,19 @@ class CookieWrapper
 
     public function get(string $name): ?string
     {
-        return $this->cookies[$name] ?? NULL;
+        if (!isset($this->cookies[$name])) {
+            return null;
+        }
+
+        $value = $this->cookies[$name];
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        throw new UnexpectedValueException(
+            sprintf('Cookie named %s should have been string, got %s', $name, get_debug_type($value))
+        );
     }
 
     public function has(string $name): bool
@@ -93,17 +109,33 @@ class CookieWrapper
             $name,
             '',
             [
-                'expires'  => 1,
-                'secure'   => FALSE,
-                'httponly' => FALSE
+                'expires' => 1,
+                'secure' => false,
+                'httponly' => false,
             ]
         );
         unset($this->cookies[$name]);
     }
 
-    protected function set_cookie($name, $value, $options) { setcookie($name, $value, $options); }
+    /** @param array<string, mixed> $options */
+    protected function set_cookie(string $name, string $value, array $options): void
+    {
+        $cookie_options = [
+            'expires' => is_int($options['expires'] ?? null) ? $options['expires'] : 0,
+            'path' => is_string($options['path'] ?? null) ? $options['path'] : '/',
+            'domain' => is_string($options['domain'] ?? null) ? $options['domain'] : '',
+            'secure' => (bool) ($options['secure'] ?? false),
+            'httponly' => (bool) ($options['httponly'] ?? false),
+        ];
+        $samesite = $options['samesite'] ?? null;
+        if (in_array($samesite, ['Lax', 'lax', 'None', 'none', 'Strict', 'strict'], true)) {
+            $cookie_options['samesite'] = $samesite;
+        }
 
-    protected function headers_sent(&$file, &$line): bool
+        setcookie($name, $value, $cookie_options);
+    }
+
+    protected function headers_sent(?string &$file = null, ?int &$line = null): bool
     {
         return headers_sent($file, $line);
     }

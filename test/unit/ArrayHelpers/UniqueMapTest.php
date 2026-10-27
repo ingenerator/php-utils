@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
@@ -7,13 +8,12 @@ use Ingenerator\PHPUtils\ArrayHelpers\DuplicateMapItemException;
 use Ingenerator\PHPUtils\ArrayHelpers\UniqueMap;
 use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
+
 use function iterator_to_array;
 
-class UniqueMapTest extends TestCase
+final class UniqueMapTest extends TestCase
 {
-
-
-    public function test_it_returns_entries_by_key()
+    public function testItReturnsEntriesByKey(): void
     {
         $bar = new class { };
         $subject = new UniqueMap(
@@ -25,30 +25,32 @@ class UniqueMapTest extends TestCase
         );
         $this->assertSame($bar, $subject['bar']);
         $this->assertSame('some-foo', $subject['foo']);
-        $this->assertSame(null, $subject['nully']);
+        $this->assertNull($subject['nully']);
     }
 
-    public function test_it_throws_on_access_to_undefined_key()
+    public function testItThrowsOnAccessToUndefinedKey(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $this->expectException(OutOfBoundsException::class);
-        $subject['other-item'];
+        $f = $subject['other-item'];
     }
 
-    public function test_it_accepts_new_items()
+    public function testItAcceptsNewItems(): void
     {
         $new1 = new class { };
         $subject = new UniqueMap(['any' => 'item']);
+        /* @phpstan-ignore offsetAssign.valueType (don't need to enforce collection type in this test) */
         $subject['new1'] = $new1;
         $subject['new2'] = 'some-string';
+        /* @phpstan-ignore offsetAssign.valueType (don't need to enforce collection type in this test) */
         $subject['new3'] = null;
 
         $this->assertSame($new1, $subject['new1']);
         $this->assertSame('some-string', $subject['new2']);
-        $this->assertSame(null, $subject['new3']);
+        $this->assertNull($subject['new3']);
     }
 
-    public function test_it_throws_on_attempt_to_overwrite_key()
+    public function testItThrowsOnAttemptToOverwriteKey(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
 
@@ -61,7 +63,7 @@ class UniqueMapTest extends TestCase
         }
     }
 
-    public function test_it_reports_if_an_item_exists()
+    public function testItReportsIfAnItemExists(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['other'] = 'thing';
@@ -76,14 +78,14 @@ class UniqueMapTest extends TestCase
         );
     }
 
-    public function test_it_allows_items_to_be_deleted_and_reinserted()
+    public function testItAllowsItemsToBeDeletedAndReinserted(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
 
         unset($subject['any']);
         $this->assertFalse(isset($subject['any']), 'not set after deletion');
         try {
-            $subject['any'];
+            $f = $subject['any'];
             $this->fail('Cannot access key after removal');
         } catch (OutOfBoundsException) {
             // Expected
@@ -94,11 +96,12 @@ class UniqueMapTest extends TestCase
         $this->assertSame('new item', $subject['any']);
     }
 
-    public function test_it_is_iterable()
+    public function testItIsIterable(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
         $subject['other'] = 'new2';
+        /* @phpstan-ignore offsetAssign.valueType (don't need to enforce collection type in this test) */
         $subject['nully'] = null;
 
         $this->assertSame(
@@ -107,19 +110,18 @@ class UniqueMapTest extends TestCase
         );
     }
 
-    public function test_it_is_countable()
+    public function testItIsCountable(): void
     {
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
         $subject['other'] = 'new2';
 
-        $this->assertSame(3, count($subject));
+        $this->assertCount(3, $subject);
     }
 
-    public function test_it_supports_conditional_read_like_an_array()
+    public function testItSupportsConditionalReadLikeAnArray(): void
     {
         $subject = new UniqueMap(['i-exist' => 'ok']);
         $this->assertSame('any-default', $subject['i do not'] ?? 'any-default');
     }
-
 }

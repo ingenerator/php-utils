@@ -1,322 +1,305 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Repository;
 
-
-use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
 use Ingenerator\PHPUtils\Repository\AbstractArrayRepository;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use UnexpectedValueException;
+
 use function array_map;
 
-class AbstractArrayRepositoryTest extends TestCase
+final class AbstractArrayRepositoryTest extends TestCase
 {
-    public function test_it_is_initialisable_with_no_entities()
+    public function testItIsInitialisableWithNoEntities(): void
     {
         $subject = AnyArrayRepository::withNothing();
         $this->assertInstanceOf(AnyArrayRepository::class, $subject);
         $this->assertSame([], $subject->getEntities());
     }
 
-    public function test_it_is_initialisable_with_single_entity()
+    public function testItIsInitialisableWithSingleEntity(): void
     {
-        $e       = new AnyEntity;
+        $e = new AnyEntity();
         $subject = AnyArrayRepository::with($e);
         $this->assertSame([$e], $subject->getEntities());
     }
 
-    public function test_it_is_initialisable_with_array_of_props_to_stub()
+    public function testWithInitialisesWithNoEntities(): void
+    {
+        $subject = AnyArrayRepository::with();
+        $this->assertSame([], $subject->getEntities());
+    }
+
+    public function testItIsInitialisableWithArrayOfPropsToStub(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'foo']);
-        $e       = $subject->getEntities()[0];
+        $e = $subject->getEntities()[0];
         $this->assertInstanceOf(AnyEntity::class, $e);
         $this->assertSame('foo', $e->getProp1());
     }
 
-    public function test_it_is_initialisable_with_multiple_entities_and_arrays()
+    public function testItIsInitialisableWithMultipleEntitiesAndArrays(): void
     {
-        $e1       = new AnyEntity();
-        $subject  = AnyArrayRepository::with($e1, ['prop1' => 'e2']);
+        $e1 = new AnyEntity();
+        $subject = AnyArrayRepository::with($e1, ['prop1' => 'e2']);
         $entities = $subject->getEntities();
         $this->assertCount(2, $entities);
         $this->assertSame($e1, $entities[0]);
         $this->assertInstanceOf(AnyEntity::class, $entities[1]);
     }
 
-    public function test_it_is_initialisable_with_list_of_multiple_entities()
+    public function testItIsInitialisableWithListOfMultipleEntities(): void
     {
-        $e1      = new AnyEntity;
-        $e2      = new AnyEntity;
+        $e1 = new AnyEntity();
+        $e2 = new AnyEntity();
         $subject = AnyArrayRepository::withList([$e1, $e2]);
         $this->assertSame([$e1, $e2], $subject->getEntities());
     }
 
+    /**
+     * @param list<array<string, mixed>> $entities
+     * @param array<string, int> $expect
+     */
     #[TestWith([[], []])]
     #[TestWith([[['prop1' => 'foo'], ['prop1' => 'bar'], ['prop1' => 'foo']], ['foo' => 2, 'bar' => 1]])]
-    public function test_it_provides_base_layer_for_counting_entities_by_group($entities, $expect)
+    public function testItProvidesBaseLayerForCountingEntitiesByGroup(array $entities, array $expect): void
     {
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
-            $subject->countWith(function (AnyEntity $e) { return $e->getProp1(); })
+            /* @phpstan-ignore return.type (we know the test data has strings here) */
+            $subject->countWith(fn (AnyEntity $e): string => $e->getProp1())
         );
     }
 
-    public function test_its_load_with_throws_if_no_entity()
+    public function testItsLoadWithThrowsIfNoEntity(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'boo']);
         $this->expectException(InvalidArgumentException::class);
-        $subject->loadWith(function (AnyEntity $e) { return $e->getProp1() === 'baz'; });
+        $subject->loadWith(fn (AnyEntity $e): bool => $e->getProp1() === 'baz');
     }
 
-    public function test_its_load_with_returns_entity()
+    public function testItsLoadWithReturnsEntity(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
-        $e       = $subject->loadWith(function (AnyEntity $e) { return $e->getProp1() === 'boo'; });
+        $e = $subject->loadWith(fn (AnyEntity $e): bool => $e->getProp1() === 'boo');
         $this->assertSame($subject->getEntities()[1], $e);
     }
 
-    public function test_its_load_with_throws_if_entity_not_unique()
+    public function testItsLoadWithThrowsIfEntityNotUnique(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
         $this->expectException(UnexpectedValueException::class);
-        $subject->loadWith(function (AnyEntity $e) { return TRUE; });
+        $subject->loadWith(fn (AnyEntity $e): true => true);
     }
 
-    public function test_its_find_with_returns_null_if_no_entity()
+    public function testItsFindWithReturnsNullIfNoEntity(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'boo']);
         $this->assertNull(
-            $subject->findWith(function (AnyEntity $e) { return $e->getProp1() === 'baz'; })
+            $subject->findWith(fn (AnyEntity $e): bool => $e->getProp1() === 'baz')
         );
     }
 
-    public function test_its_find_with_returns_entity()
+    public function testItsFindWithReturnsEntity(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
-        $e       = $subject->findWith(function (AnyEntity $e) { return $e->getProp1() === 'boo'; });
+        $e = $subject->findWith(fn (AnyEntity $e): bool => $e->getProp1() === 'boo');
         $this->assertSame($subject->getEntities()[1], $e);
     }
 
-    public function test_its_find_with_throws_if_entity_not_unique()
+    public function testItsFindWithThrowsIfEntityNotUnique(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'bat'], ['prop1' => 'boo']);
         $this->expectException(UnexpectedValueException::class);
-        $subject->findWith(function (AnyEntity $e) { return TRUE; });
+        $subject->findWith(fn (AnyEntity $e): true => true);
     }
 
+    /**
+     * @param list<array<string, mixed>> $entities
+     * @param list<int> $expect
+     */
     #[TestWith([[], []])]
     #[TestWith([[['prop1' => 'ok', 'prop2' => 0], ['prop1' => 'nah-ah', 'prop2' => 1], ['prop1' => 'ok', 'prop2' => 2]], [0, 2]])]
-    public function test_its_list_with_returns_all_matched_entities($entities, $expect)
+    public function testItsListWithReturnsAllMatchedEntities(array $entities, array $expect): void
     {
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
             array_map(
-                function (AnyEntity $e) { return $e->getProp2(); },
-                $subject->listWith(function (AnyEntity $e) { return $e->getProp1() === 'ok'; })
+                fn (AnyEntity $e): mixed => $e->getProp2(),
+                $subject->listWith(fn (AnyEntity $e): bool => $e->getProp1() === 'ok')
             )
         );
     }
 
-    public function test_its_save_only_adds_new_entities()
+    public function testItsSaveOnlyAddsNewEntities(): void
     {
-        $e1      = new AnyEntity;
+        $e1 = new AnyEntity();
         $subject = AnyArrayRepository::with($e1);
-        $e2      = new AnyEntity;
+        $e2 = new AnyEntity();
         $subject->saveEntity($e2);
         $subject->saveEntity($e1);
         $this->assertSame([$e1, $e2], $subject->getEntities());
     }
 
-    public function test_its_nothing_saved_assertion_passes_when_nothing_saved()
+    public function testItsNothingSavedAssertionPassesWhenNothingSaved(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'f']);
         $subject->assertNothingSaved();
     }
 
-    public function test_its_nothing_saved_assertion_fails_if_anything_saved()
+    public function testItsNothingSavedAssertionFailsIfAnythingSaved(): void
     {
         $subject = AnyArrayRepository::withNothing();
-        $subject->saveEntity(new AnyEntity);
+        $subject->saveEntity(new AnyEntity());
         $this->assertAssertionFails(
-            function () use ($subject) {
+            function () use ($subject): void {
                 $subject->assertNothingSaved();
             }
         );
     }
 
-    protected function assertAssertionFails($callable)
+    protected function assertAssertionFails(callable $callable): void
     {
         try {
             $callable();
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException) {
             // Ignore it this is correct
             return;
         }
         $this->fail('Should fail with an assertion failure');
     }
 
-    public function test_its_saved_only_assertion_passes_when_only_one_object_saved()
+    public function testItsSavedOnlyAssertionPassesWhenOnlyOneObjectSaved(): void
     {
-        $e1      = new AnyEntity;
+        $e1 = new AnyEntity();
         $subject = AnyArrayRepository::withNothing();
         $subject->saveEntity($e1);
         $subject->assertSavedOnly($e1);
     }
 
-    public function test_its_saved_only_fails_if_not_saved()
+    public function testItsSavedOnlyFailsIfNotSaved(): void
     {
-        $e1      = new AnyEntity;
+        $e1 = new AnyEntity();
         $subject = AnyArrayRepository::with($e1);
 
         $this->assertAssertionFails(
-            function () use ($subject, $e1) {
+            function () use ($subject, $e1): void {
                 $subject->assertSavedOnly($e1);
             }
         );
     }
 
-    public function test_its_saved_only_fails_if_different_object_with_same_props_saved()
+    public function testItsSavedOnlyFailsIfDifferentObjectWithSamePropsSaved(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'foo'], ['prop1' => 'foo']);
-        $e1      = $subject->getEntities()[0];
-        $e2      = $subject->getEntities()[1];
+        $e1 = $subject->getEntities()[0];
+        $e2 = $subject->getEntities()[1];
         $subject->saveEntity($e2);
 
         $this->assertAssertionFails(
-            function () use ($subject, $e1) {
+            function () use ($subject, $e1): void {
                 $subject->assertSavedOnly($e1);
             }
         );
     }
 
-    public function test_its_saved_only_fails_if_object_modified_since_save()
+    public function testItsSavedOnlyFailsIfObjectModifiedSinceSave(): void
     {
-        $e1      = new AnyEntity;
+        $e1 = new AnyEntity();
         $subject = AnyArrayRepository::with($e1);
         $subject->saveEntity($e1);
 
         $e1->setProp2('Bar');
 
         $this->assertAssertionFails(
-            function () use ($subject, $e1) {
+            function () use ($subject, $e1): void {
                 $subject->assertSavedOnly($e1);
             }
         );
     }
-
 }
 
-
+/**
+ * @extends AbstractArrayRepository<AnyEntity>
+ */
 class AnyArrayRepository extends AbstractArrayRepository
 {
-    /**
-     * @return string
-     */
-    protected static function getEntityBaseClass()
+    protected static function getEntityBaseClass(): string
     {
         return AnyEntity::class;
     }
 
-    /**
-     * @return array
-     */
-    public function getEntities()
+    /** @return array<int, AnyEntity> */
+    public function getEntities(): array
     {
         return $this->entities;
     }
 
-    public function assertNothingSaved()
+    public function assertNothingSaved(): void
     {
         parent::assertNothingSaved();
     }
 
-    /**
-     * @param object $entity
-     */
-    public function assertSavedOnly($entity)
+    public function assertSavedOnly($entity): void
     {
         parent::assertSavedOnly($entity);
     }
 
-    /**
-     * @param callable $callable
-     *
-     * @return int[]
-     */
-    public function countWith($callable)
+    public function countWith($callable): array
     {
         return parent::countWith($callable);
     }
 
-    /**
-     * @param callable $callable
-     *
-     * @return object
-     */
-    public function loadWith($callable)
+    public function loadWith($callable): object
     {
         return parent::loadWith($callable);
     }
 
-    /**
-     * @param $callable
-     *
-     * @return object
-     */
-    public function findWith($callable)
+    public function findWith($callable): ?object
     {
         return parent::findWith($callable);
     }
 
-    /**
-     * @param callable $callable
-     *
-     * @return object[]
-     */
-    public function listWith($callable)
+    public function listWith($callable): array
     {
         return parent::listWith($callable);
     }
 
-    public function saveEntity($entity)
+    public function saveEntity($entity): void
     {
         parent::saveEntity($entity);
     }
-
-
 }
 
 class AnyEntity
 {
-    protected $prop1;
-    protected $prop2;
+    protected mixed $prop1;
+    protected mixed $prop2;
 
-    /**
-     * @return mixed
-     */
-    public function getProp1()
+    public function getProp1(): mixed
     {
         return $this->prop1;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getProp2()
+    public function getProp2(): mixed
     {
         return $this->prop2;
     }
 
-    public function setProp2($string)
+    public function setProp2(mixed $string): void
     {
         $this->prop2 = $string;
     }

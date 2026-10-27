@@ -1,102 +1,67 @@
 <?php
 
-
 namespace Ingenerator\PHPUtils\Logging;
 
-
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
-use Ingenerator\PHPUtils\Monitoring\MetricId;
-use Ingenerator\PHPUtils\Monitoring\MetricsAgent;
 use Ingenerator\PHPUtils\Object\InitialisableSingletonTrait;
 use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use RuntimeException;
+use Stringable;
 use Throwable;
+
 use function array_pad;
+use function array_values;
 use function debug_backtrace;
 use function file_put_contents;
-use function get_class;
 use function http_response_code;
 use function is_callable;
 use function json_encode;
 use function mb_strcut;
+use function memory_get_peak_usage;
 use function microtime;
 use function sprintf;
 use function strlen;
 use function strtoupper;
 use function substr;
 
-
 /**
- * Log destination that formats logs as JSON lines for forwarding into Stackdriver Logging, with relevant metadata
+ * Log destination that formats logs as JSON lines for forwarding into Stackdriver Logging, with relevant metadata.
  *
  * Also provides a request logger that can be called on system shutdown to log the HTTP request itself into Stackdriver
  * again with appropriate application-level metadata.
  *
  * Exceptions will be formatted and (by default) tagged to be reported to Stackdriver Errors - see `->log()` for details
+ *
+ * @phpstan-type TLogMetadataGroup array<string, mixed>
+ * @phpstan-type TLogMetadataSource TLogMetadataGroup|callable(): TLogMetadataGroup|LogMetadataProvider
  */
 class StackdriverApplicationLogger extends AbstractLogger
 {
     use InitialisableSingletonTrait;
 
-    const PROP_EXCEPTION                = 'exception';
-    const PROP_INGEN_TYPE               = '@ingenType';
-    const PROP_REPORT_STACKDRIVER_ERROR = '_report_stackdriver_error';
-    const PROP_SOURCE_LOCATION          = 'logging.googleapis.com/sourceLocation';
-    const TYPE_STACKDRIVER_ERROR        = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
+    public const PROP_EXCEPTION = 'exception';
+    public const PROP_INGEN_TYPE = '@ingenType';
+    public const PROP_REPORT_STACKDRIVER_ERROR = '_report_stackdriver_error';
+    public const PROP_SOURCE_LOCATION = 'logging.googleapis.com/sourceLocation';
+    public const TYPE_STACKDRIVER_ERROR = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
+
+    protected ExternalCallSiteFinder $call_site_finder;
 
     /**
-     * @var ExternalCallSiteFinder
+     * @var array<string, mixed>
      */
-    protected $call_site_finder;
+    protected array $metadata;
 
     /**
-     * @var string
+     * @var list<TLogMetadataSource>
      */
-    protected $log_destination;
+    protected array $metadata_sources;
 
     /**
-     * @var array
-     */
-    protected $metadata;
-
-    /**
-     * @var array
-     */
-    protected               $metadata_sources;
-
-    protected ?MetricsAgent $metrics_agent = NULL;
-
-    protected string        $metric_name   = 'application-logs';
-
-    /**
-     * Create an instance that also reports a metric counter on each log entry.
-     *
-     * @param MetricsAgent                       $agent
-     * @param string                             $metric_name
-     * @param string                             $log_destination
-     * @param array|callable|LogMetadataProvider ...$metadata_sources
-     *
-     * @return StackdriverApplicationLogger
-     * @see __construct for the usage of the log_destination and metadata_sources arguments
-     *
-     */
-    public static function withMetrics(
-        MetricsAgent $agent,
-        string       $metric_name,
-        string       $log_destination,
-                     ...$metadata_sources
-    ): StackdriverApplicationLogger {
-        $i                = new static($log_destination, ...$metadata_sources);
-        $i->metrics_agent = $agent;
-        $i->metric_name   = $metric_name;
-
-        return $i;
-    }
-
-    /**
-     * Create an instance of the logger and provide metadata
+     * Create an instance of the logger and provide metadata.
      *
      * The class takes an arbitrary number of metadata sources, each of which can be:
      *
@@ -130,9 +95,6 @@ class StackdriverApplicationLogger extends AbstractLogger
      *                // etc
      *           );
      *
-     *           // Optional - if you want to report stats on the number of log entries logged
-     *           $logger->reportLogCounts(new StatsiteMetricsAgent, 'app-log-entries');
-     *
      *           if (PHP_SAPI !== 'cli') {
      *             register_shutdown_function(
      *               function () use ($logger) {
@@ -149,19 +111,18 @@ class StackdriverApplicationLogger extends AbstractLogger
      *   return StackdriverApplicationLogger::instance();
      *
      * @param string                             $log_destination     A PHP file / stream destination to append, commonly php://stdout
-     * @param array|callable|LogMetadataProvider ...$metadata_sources Sources of metadata to merge together
+     * @param TLogMetadataSource ...$metadata_sources Sources of metadata to merge together
      */
     public function __construct(
-        string $log_destination,
-               ...$metadata_sources
+        protected string $log_destination,
+        array|callable|LogMetadataProvider ...$metadata_sources,
     ) {
-        $this->metadata_sources = array_pad($metadata_sources, 2, []);
-        $this->log_destination  = $log_destination;
-        $this->call_site_finder = new ExternalCallSiteFinder;
+        $this->metadata_sources = array_values(array_pad($metadata_sources, 2, []));
+        $this->call_site_finder = new ExternalCallSiteFinder();
     }
 
     /**
-     * Logs the message
+     * Logs the message.
      *
      * A small number of `context` keys will be 'hoisted' to override top-level log entry values (see the start
      * of the method below). All others will be presented in a `custom_context` key within the jsonPayload to avoid the
@@ -191,12 +152,8 @@ class StackdriverApplicationLogger extends AbstractLogger
      * Note that the sourceLocation should be the location of the code that triggered the logging call (e.g. the error
      * handler / exception catch block). Where an exception is provided, the exception data structure will contain the
      * details of the location where the exception itself was thrown.
-     *
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
      */
-    public function log($level, $message, array $context = []): void
+    public function log($level, string|Stringable $message, array $context = []): void
     {
         // These are the only `context` keys that will be used as top-level properties. Anything else is moved to a
         // `custom_context` key to prevent it overwriting internal metadata and low-level log entry properties e.g.
@@ -213,68 +170,65 @@ class StackdriverApplicationLogger extends AbstractLogger
 
         $log_entry = AssociativeArrayUtils::deepMerge(
             [
-                'severity'            => strtoupper($level),
-                'message'             => $message,
+                'severity' => strtoupper(is_string($level) ? $level : ''),
+                'message' => $message,
                 self::PROP_INGEN_TYPE => 'app',
             ],
             $this->getMetadata(),
             $context_overrides
         );
+        // In context, we know that the ::deepMerge above returns an array<string, mixed> since that is the type of all
+        // the inputs.
+        /** @var array<string, mixed> $log_entry */
 
-        if ( ! isset($log_entry[self::PROP_SOURCE_LOCATION])) {
-            // Find source location here rather than in the initial array merge to avoid having to make this backtrace
-            // call if it's already been provided / overridden by the caller.
-            $log_entry[self::PROP_SOURCE_LOCATION] = $this->call_site_finder->findExternalCall(
-                debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
-                [static::class]
-            );
-        }
+        // Find source location here rather than in the initial array merge to avoid having to make this backtrace
+        // call if it's already been provided / overridden by the caller.
+        $log_entry[self::PROP_SOURCE_LOCATION] ??= $this->call_site_finder->findExternalCall(
+            debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5),
+            [static::class]
+        );
 
-        if ( ! empty($context)) {
+        if ($context !== []) {
             $log_entry['custom_context'] = $context;
         }
 
-        if (($log_entry[self::PROP_EXCEPTION] ?? NULL) instanceof Throwable) {
+        if (($log_entry[self::PROP_EXCEPTION] ?? null) instanceof Throwable) {
             // Convert exceptions to a nested data format with previous chain and log-safe trace
             $log_entry[self::PROP_EXCEPTION] = $this->formatException($log_entry[self::PROP_EXCEPTION]);
-            if ( ! isset($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR])) {
-                $log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] = TRUE;
-            }
+            $log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] ??= true;
         }
 
-        if ($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] ?? FALSE) {
+        if ($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR] ?? false) {
             $log_entry = $this->addStackdriverErrorReportingData($log_entry);
         }
 
         $this->writeLog($log_entry);
-
-        if ($this->metrics_agent) {
-            // Report the log entry metric if they've configured an agent to collect it
-            $this->metrics_agent->incrementCounterByOne(MetricId::nameAndSource($this->metric_name, $level));
-        }
     }
 
     /**
-     * Lazily compiles all provided metadata
+     * Lazily compiles all provided metadata.
      *
-     * @return array
+     * @return TLogMetadataGroup
      */
     protected function getMetadata(): array
     {
-        if ($this->metadata !== NULL) {
+        if (isset($this->metadata)) {
             return $this->metadata;
         }
 
-        $metadata    = [];
+        $metadata = [];
         $meta_errors = [];
         foreach ($this->metadata_sources as $index => $source) {
             try {
                 if ($source instanceof LogMetadataProvider) {
                     $source = $source->getMetadata();
-                } else if (is_callable($source)) {
+                } elseif (is_callable($source)) {
                     $source = $source();
                 }
                 $metadata = AssociativeArrayUtils::deepMerge($metadata, $source);
+                // In context, we know that the ::deepMerge above returns an array<string, mixed> since that is the type of all
+                // the inputs.
+                /** @var array<string, mixed> $metadata */
             } catch (Throwable $e) {
                 // @todo: include name/type of metadata source here (need a string helper to get the type name?)
                 $meta_errors[] = ['idx' => $index, 'throwable' => $e];
@@ -282,7 +236,7 @@ class StackdriverApplicationLogger extends AbstractLogger
         }
 
         // Clean up any references to the sources, they're no longer needed
-        $this->metadata_sources = NULL;
+        $this->metadata_sources = [];
 
         $this->metadata = $metadata;
 
@@ -290,7 +244,7 @@ class StackdriverApplicationLogger extends AbstractLogger
             $e = $err['throwable'];
             /** @var Throwable $e */
             $this->alert(
-                sprintf('Invalid log metadata source#%s [%s] %s', $err['idx'], get_class($e), $e->getMessage()),
+                sprintf('Invalid log metadata source#%s [%s] %s', $err['idx'], $e::class, $e->getMessage()),
                 ['exception' => $e]
             );
         }
@@ -298,18 +252,29 @@ class StackdriverApplicationLogger extends AbstractLogger
         return $this->metadata;
     }
 
+    /**
+     * @return array{
+     *     class: string,
+     *     msg: string,
+     *     code: int,
+     *     file: string,
+     *     line: int,
+     *     trace: string,
+     *     previous?: array<string, mixed>
+     * }
+     */
     protected function formatException(Throwable $e): array
     {
         $result = [
-            'class' => get_class($e),
-            'msg'   => $e->getMessage(),
-            'code'  => $e->getCode(),
-            'file'  => $e->getFile(),
-            'line'  => $e->getLine(),
+            'class' => $e::class,
+            'msg' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
             'trace' => $this->getExceptionTraceAsStringWithoutArgs($e->getTrace()),
         ];
 
-        if ($previous = $e->getPrevious()) {
+        if (($previous = $e->getPrevious()) instanceof Throwable) {
             $result['previous'] = $this->formatException($previous);
         }
 
@@ -317,7 +282,7 @@ class StackdriverApplicationLogger extends AbstractLogger
     }
 
     /**
-     * Get the exception call stack without any function arguments
+     * Get the exception call stack without any function arguments.
      *
      * All of the out-of-the-box PHP exception traces include argument values for the called functions.
      * This may leak sensitive data (either user input or system values) that should not be present in
@@ -326,9 +291,7 @@ class StackdriverApplicationLogger extends AbstractLogger
      * This method renders a string trace that follows the format of the standard trace (so it can be
      * parsed by tools that are looking for that) but without including any function argument details.
      *
-     * @param array $trace_stack
-     *
-     * @return string
+     * @param list<array{file?: string, line?: int, class?: string, type?: string, function?: string}> $trace_stack
      */
     protected function getExceptionTraceAsStringWithoutArgs(array $trace_stack): string
     {
@@ -338,10 +301,10 @@ class StackdriverApplicationLogger extends AbstractLogger
             $trace_lines[] = sprintf(
                 '#%d %s: %s%s%s()',
                 $index,
-                isset($trace['file']) ? $trace['file'].'('.$trace['line'].')' : '[internal function]',
+                isset($trace['file'], $trace['line']) ? $trace['file'].'('.$trace['line'].')' : '[internal function]',
                 $trace['class'] ?? '',
                 $trace['type'] ?? '',
-                $trace['function']
+                $trace['function'] ?? ''
             );
         }
         $trace_lines[] = '#'.count($trace_stack).' {main}';
@@ -349,29 +312,43 @@ class StackdriverApplicationLogger extends AbstractLogger
         return implode("\n", $trace_lines);
     }
 
+    /**
+     * @param array<string, mixed> $log_entry
+     *
+     * @return array<string, mixed> $server
+     */
     protected function addStackdriverErrorReportingData(array $log_entry): array
     {
         $log_entry['@type'] = self::TYPE_STACKDRIVER_ERROR;
 
         // Thanks @google for these having different keys in context.reportLocation rather than using sourceLocation
-        $source_location                        = $log_entry[self::PROP_SOURCE_LOCATION];
-        $log_entry['context']['reportLocation'] = [
-            'filePath'     => $source_location['file'] ?? NULL,
-            'lineNumber'   => $source_location['line'] ?? NULL,
-            'functionName' => $source_location['function'] ?? NULL,
+        $source_location = $log_entry[self::PROP_SOURCE_LOCATION] ?? [];
+        if (!is_array($source_location)) {
+            $source_location = [];
+        }
+        $context = $log_entry['context'] ?? [];
+        if (!is_array($context)) {
+            $context = [];
+        }
+        $context['reportLocation'] = [
+            'filePath' => $source_location['file'] ?? null,
+            'lineNumber' => $source_location['line'] ?? null,
+            'functionName' => $source_location['function'] ?? null,
         ];
+        $log_entry['context'] = $context;
 
         // If this was logged from an exception, add the exception info in Error Reporting's required format but with
         // our safe trace string.
-        $exception = $log_entry[self::PROP_EXCEPTION] ?? NULL;
-        if (is_array($exception) and isset($exception['class'])) {
+        $exception = $log_entry[self::PROP_EXCEPTION] ?? null;
+        if (is_array($exception) && isset($exception['class'])) {
+            $as_string = static fn (mixed $value): string => is_scalar($value) ? (string) $value : '';
             $log_entry['stack_trace'] = sprintf(
                 "PHP Warning: %s: %s in %s:%s\nStack trace:\n%s",
-                $exception['class'],
-                $exception['msg'],
-                $exception['file'],
-                $exception['line'],
-                $exception['trace']
+                $as_string($exception['class'] ?? ''),
+                $as_string($exception['msg'] ?? ''),
+                $as_string($exception['file'] ?? ''),
+                $as_string($exception['line'] ?? ''),
+                $as_string($exception['trace'] ?? '')
             );
         }
         unset($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR]);
@@ -379,6 +356,9 @@ class StackdriverApplicationLogger extends AbstractLogger
         return $log_entry;
     }
 
+    /**
+     * @param array<string, mixed> $log_entry
+     */
     protected function writeLog(array $log_entry): void
     {
         try {
@@ -391,7 +371,7 @@ class StackdriverApplicationLogger extends AbstractLogger
                 FILE_APPEND
             );
 
-            if ($success === FALSE) {
+            if ($success === false) {
                 throw new RuntimeException('Unknown write failure');
             }
         } catch (Throwable $e) {
@@ -400,7 +380,7 @@ class StackdriverApplicationLogger extends AbstractLogger
     }
 
     /**
-     * Logs the http request as a standalone log entry - usually registered as a shutdown func
+     * Logs the http request as a standalone log entry - usually registered as a shutdown func.
      *
      * The advantage of this over e.g. apache logs is that the log entry can contain application-specific metadata
      * such as the logged-in user, matched module/action/controller, unique request ID and session ID that ties together
@@ -409,21 +389,29 @@ class StackdriverApplicationLogger extends AbstractLogger
      * Log entries have a severity set based on http_response_code, to provide a second route for detection/altering of
      * 4xx and 5xx responses.
      *
-     * @param array|null $server             The $_SERVER array
      * @param float|null $request_start_time The microtime when the request started processing - usually a const defined at the very start of your PHP
      */
-    public function logRequest(?array $server, ?float $request_start_time = NULL): void
-    {
-        $server    = $server ?: $_SERVER;
+    public function logRequest(
+        ServerGlobal $server = new ServerGlobal(),
+        ?float $request_start_time = null,
+    ): void {
         $http_code = http_response_code() ?: '{na}';
-        $meta      = $this->getMetadata();
+        $meta = $this->getMetadata();
+        $meta_context = $meta['context'] ?? [];
+        if (!is_array($meta_context)) {
+            $meta_context = [];
+        }
+        $http_request_meta = $meta_context['httpRequest'] ?? [];
+        if (!is_array($http_request_meta)) {
+            $http_request_meta = [];
+        }
         $log_entry = AssociativeArrayUtils::deepMerge(
             [
-                'severity'            => strtoupper($this->getLogPriorityForHttpCode($http_code)),
+                'severity' => strtoupper($this->getLogPriorityForHttpCode((string) $http_code)),
                 self::PROP_INGEN_TYPE => 'rqst',
-                'httpRequest'         => $meta['context']['httpRequest'] ?? [],
+                'httpRequest' => $http_request_meta,
                 'context' => [
-                    'mem_mb' => sprintf('%.2f',\memory_get_peak_usage(TRUE) / 1_000_000),
+                    'mem_mb' => sprintf('%.2f', memory_get_peak_usage(true) / 1_000_000),
                 ],
             ],
             $meta,
@@ -431,25 +419,30 @@ class StackdriverApplicationLogger extends AbstractLogger
                 'httpRequest' => [
                     // requestMethod, requestUrl, remoteIp are expected to come from metadata provider as they are
                     // shared with application log entry context
-                    'status'    => $http_code,
+                    'status' => $http_code,
                     'userAgent' => $this->truncate(
-                        StringSanitiser::ensurePrintableUtf8($server['HTTP_USER_AGENT'] ?? ''),
+                        StringSanitiser::ensurePrintableUtf8($server->getString('HTTP_USER_AGENT') ?? ''),
                         500
                     ),
-                    'latency'   => $this->calculateRequestLatency($request_start_time),
+                    'latency' => $this->calculateRequestLatency($request_start_time),
                 ],
             ]
         );
         // No need to duplicate the httpRequest in context, we have already given it as a top-level property
-        unset($log_entry['context']['httpRequest']);
+        if (is_array($log_entry['context'])) {
+            unset($log_entry['context']['httpRequest']);
+        }
 
+        // In context, we know that the ::deepMerge above returns an array<string, mixed> since that is the type of all
+        // the inputs.
+        /** @var array<string, mixed> $log_entry */
         $this->writeLog($log_entry);
     }
 
     private function truncate(?string $value, int $max_byte_length): ?string
     {
-        if ($value === NULL) {
-            return NULL;
+        if ($value === null) {
+            return null;
         }
 
         if (strlen($value) <= $max_byte_length) {
@@ -465,34 +458,25 @@ class StackdriverApplicationLogger extends AbstractLogger
     protected function getLogPriorityForHttpCode(string $code): string
     {
         $map = [
-            '403'  => LogLevel::WARNING,
+            '403' => LogLevel::WARNING,
             '{na}' => LogLevel::WARNING,
         ];
-        if (isset($map[$code])) {
-            return $map[$code];
-        }
 
-        switch (substr($code, 0, 1)) {
-            case '2':
-            case '3':
-                return LogLevel::INFO;
-            case '4':
-                return LogLevel::NOTICE;
-            case '5':
-            default:
-                return LogLevel::ERROR;
-        }
+        return $map[$code] ?? match (substr($code, 0, 1)) {
+            '2', '3' => LogLevel::INFO,
+            '4' => LogLevel::NOTICE,
+            default => LogLevel::ERROR,
+        };
     }
 
-    protected function calculateRequestLatency(?float $request_start_time)
+    protected function calculateRequestLatency(?float $request_start_time): ?string
     {
-        if ($request_start_time === NULL) {
-            return NULL;
+        if ($request_start_time === null) {
+            return null;
         }
 
-        $request_end_time = microtime(TRUE);
+        $request_end_time = microtime(true);
 
         return sprintf('%0.6fs', $request_end_time - $request_start_time);
     }
-
 }

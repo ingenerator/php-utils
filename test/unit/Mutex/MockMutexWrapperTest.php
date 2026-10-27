@@ -1,29 +1,29 @@
 <?php
 
+declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\unit\Mutex;
-
 
 use Ingenerator\PHPUtils\Mutex\MockMutexWrapper;
 use Ingenerator\PHPUtils\Mutex\MutexTimedOutException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
-class MockMutexWrapperTest extends TestCase
+final class MockMutexWrapperTest extends TestCase
 {
-
-    public function test_it_calls_callable_and_returns()
+    public function testItCallsCallableAndReturns(): void
     {
         $this->assertSame(
             'callable-result',
             $this->newSubject()->withLock(
                 'anything',
                 1,
-                function () { return 'callable-result'; }
+                fn (): string => 'callable-result'
             )
         );
     }
 
-    public function test_it_throws_if_configured_to_throw()
+    public function testItThrowsIfConfiguredToThrow(): void
     {
         $subject = $this->newSubject();
         $subject->willTimeoutEverything();
@@ -31,13 +31,12 @@ class MockMutexWrapperTest extends TestCase
         $subject->withLock(
             'anything',
             1,
-            function () { throw new \RuntimeException('Callable should not have run'); }
+            function (): never { throw new RuntimeException('Callable should not have run'); }
         );
     }
 
-    protected function newSubject()
+    protected function newSubject(): MockMutexWrapper
     {
-        return new MockMutexWrapper;
+        return new MockMutexWrapper();
     }
-
 }

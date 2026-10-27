@@ -1,106 +1,87 @@
 <?php
+
 /**
  * @author    Craig Gosman <craig@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
-
 namespace Ingenerator\PHPUtils\Session;
 
-
+use BadMethodCallException;
+use DateInterval;
+use DateTimeImmutable;
+use ErrorException;
 use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use PDO;
+use RuntimeException;
 use SessionHandlerInterface;
+use SessionIdInterface;
+use SessionUpdateTimestampHandlerInterface;
 use UnexpectedValueException;
 
-class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface, \SessionIdInterface
+use function date;
+use function ini_set;
+use function session_create_id;
+use function session_set_save_handler;
+use function sha1;
+
+class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHandlerInterface, SessionIdInterface
 {
-    /**
-     * @var PDO
-     */
-    protected $db;
+    protected int $session_lifetime;
+
+    protected ?string $session_lock = null;
 
     /**
-     * @var string
+     * @var array<string, string>
      */
-    protected $hash_salt;
+    protected array $data_cache;
+
+    protected string $client_ip;
+
+    protected string $client_user_agent;
 
     /**
-     * @var int
-     */
-    protected $lock_timeout;
-
-    /**
-     * @var int
-     */
-    protected $session_lifetime;
-
-    /**
-     * @var string
-     */
-    protected $session_lock;
-
-    /**
-     * @var string[]
-     */
-    protected $data_cache;
-
-    /**
-     * @var string
-     */
-    protected $client_ip;
-
-    /**
-     * @var string
-     */
-    protected $client_user_agent;
-
-    /**
-     * @param PDO    $db
-     * @param string $hash_salt
      * @param int    $lock_timeout seconds to wait for MySQL lock
      */
-    public function __construct(PDO $db, $hash_salt, $lock_timeout = 20)
-    {
-        $this->db                = $db;
-        $this->hash_salt         = $hash_salt;
-        $this->lock_timeout      = $lock_timeout;
-        $this->session_lifetime  = \ini_get('session.gc_maxlifetime');
-        $this->client_ip         = $_SERVER['REMOTE_ADDR'] ?? '';
-        $this->client_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    public function __construct(
+        protected PDO $db,
+        protected string $hash_salt,
+        protected int $lock_timeout = 20,
+        ServerGlobal $server = new ServerGlobal(),
+    ) {
+        $lifetime = \ini_get('session.gc_maxlifetime');
+        if (!is_numeric($lifetime)) {
+            throw new RuntimeException('session.gc_maxlifetime must be an integer, got '.json_encode($lifetime));
+        }
+        $this->session_lifetime = (int) $lifetime;
+        $this->client_ip = $server->getString('REMOTE_ADDR') ?? '';
+        $this->client_user_agent = $server->getString('HTTP_USER_AGENT') ?? '';
     }
 
-    /**
-     * @return void
-     */
     public function initialise(): void
     {
         // strict mode is required both for general security, and to enable the create_sid and
         // validateId methods in this handler interface, which won't otherwise be called.
-        \ini_set('session.use_strict_mode', TRUE);
-        \session_set_save_handler($this, TRUE);
+        ini_set('session.use_strict_mode', true);
+        session_set_save_handler($this, true);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function close(): bool
     {
         return $this->releaseLock();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function destroy($session_id): bool
     {
-        return $this->db->prepare("DELETE FROM `sessions` WHERE `id` = :id")
+        return $this->db->prepare('DELETE FROM `sessions` WHERE `id` = :id')
             ->execute(['id' => $session_id]);
     }
 
     /**
-     * Garbage collects expired sessions based on current session.gc_maxlifetime
+     * Garbage collects expired sessions based on current session.gc_maxlifetime.
      *
      * @return int
      */
@@ -109,36 +90,33 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         return $this->gc($this->session_lifetime);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function gc($maxlifetime): int|false
     {
-        $now = new \DateTimeImmutable();
-        $gc  = $this->db->prepare("DELETE FROM `sessions` WHERE `last_active` < :expire");
+        $now = new DateTimeImmutable();
+        $gc = $this->db->prepare('DELETE FROM `sessions` WHERE `last_active` < :expire');
         $gc->execute(
-            ['expire' => DateString::ymdhis($now->sub(new \DateInterval('PT'.$maxlifetime.'S')))]
+            ['expire' => DateString::ymdhis($now->sub(new DateInterval('PT'.$maxlifetime.'S')))]
         );
 
         return $gc->rowCount();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function open($save_path, $name): bool
     {
-        return TRUE;
+        return true;
     }
 
     /**
-     * Called any time a new session ID needs to be created, because the user has none or they have expired
+     * Called any time a new session ID needs to be created, because the user has none or they have expired.
      *
      * {@inheritDoc}
      */
     public function create_sid(): string
     {
-        $session_id = \session_create_id();
+        $session_id = session_create_id();
+        if ($session_id === false) {
+            throw new RuntimeException('Unable to create session ID');
+        }
 
         /*
          * The session does not exist, so create it in the DB
@@ -162,16 +140,16 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
          */
 
         $this->db->prepare(
-            "INSERT INTO `sessions` (`id`, `hash`, `session_data`, `last_active`, `session_start`, `user_agent`, `ip`)
-                          VALUES (:id, :hash, :data, :now, :now, :user_agent, :ip)"
+            'INSERT INTO `sessions` (`id`, `hash`, `session_data`, `last_active`, `session_start`, `user_agent`, `ip`)
+                          VALUES (:id, :hash, :data, :now, :now, :user_agent, :ip)'
         )->execute(
             [
-                'id'         => $session_id,
-                'hash'       => $this->calculateHash(),
-                'data'       => '',
-                'now'        => \date('Y-m-d H:i:s'),
+                'id' => $session_id,
+                'hash' => $this->calculateHash(),
+                'data' => '',
+                'now' => date('Y-m-d H:i:s'),
                 'user_agent' => StringSanitiser::ensurePrintableUtf8($this->client_user_agent, 255),
-                'ip'         => $this->client_ip,
+                'ip' => $this->client_ip,
             ]
         );
 
@@ -181,60 +159,62 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         return $session_id;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     public function validateId($session_id): bool
     {
-        if ( ! (is_string($session_id) && preg_match($this->getValidSessionIdRegex(), $session_id))) {
+        if (!is_string($session_id) || !preg_match($this->getValidSessionIdRegex(), $session_id)) {
             // It cannot be a valid SID if it doesn't match the format that we generate
             // It's likely a credential stuffing bot - ignore it
             return false;
         }
 
-        $now = new \DateTimeImmutable();
+        $now = new DateTimeImmutable();
         $this->getLock($session_id);
 
         $query = $this->db->prepare(
-            "SELECT `session_data` FROM `sessions` WHERE `id` = :id AND `last_active` > :expire AND `hash` = :hash LIMIT 1"
+            'SELECT `session_data` FROM `sessions` WHERE `id` = :id AND `last_active` > :expire AND `hash` = :hash LIMIT 1'
         );
         $query->execute(
             [
-                'id'     => $session_id,
+                'id' => $session_id,
                 'expire' => DateString::ymdhis(
-                    $now->sub(new \DateInterval('PT'.$this->session_lifetime.'S'))
+                    $now->sub(new DateInterval('PT'.$this->session_lifetime.'S'))
                 ),
-                'hash'   => $this->calculateHash(),
+                'hash' => $this->calculateHash(),
             ]
         );
 
         // it is recommended to use fetchAll so that PDO can close the DB cursor, even tho we only expect one row
         $rows = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($session_data = ($rows[0]['session_data'] ?? NULL)) {
+        if ($rows !== []) {
+            if (!is_array($rows[0]) || !isset($rows[0]['session_data'])) {
+                throw new RuntimeException('Unexpected data type returned from database');
+            }
+
+            if (!is_string($rows[0]['session_data'])) {
+                throw new RuntimeException('Unexpected data type returned from database');
+            }
+
             // OK, they have a session, not expired and the hash is correct
             // Cache the data for the read call that will immediately follow
             // And keep the lock as we need to hold it till the end of their request
-            $this->data_cache[$session_id] = $session_data;
+            $this->data_cache[$session_id] = $rows[0]['session_data'];
 
-            return TRUE;
-
-        } else {
-            // No data means:
-            // - the session has expired
-            // - this request is a session fixation attack
-            // - the hash salt or algorithm has changed (e.g. a code change)
-            //
-            // In any of these cases, we want to issue a new session ID to this client
-            // We also want to release the lock on the current ID so that a session fixation can't
-            // lock someone else's session.
-            //
-            // Returning false here prompts php to call ->create_sid() and issue a new session ID
-            $this->releaseLock();
-
-            return FALSE;
+            return true;
         }
+        // No data means:
+        // - the session has expired
+        // - this request is a session fixation attack
+        // - the hash salt or algorithm has changed (e.g. a code change)
+        //
+        // In any of these cases, we want to issue a new session ID to this client
+        // We also want to release the lock on the current ID so that a session fixation can't
+        // lock someone else's session.
+        //
+        // Returning false here prompts php to call ->create_sid() and issue a new session ID
+        $this->releaseLock();
+
+        return false;
     }
 
     private function getValidSessionIdRegex(): string
@@ -259,16 +239,13 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function read($session_id): string|false
     {
-        if ( ! isset($this->data_cache[$session_id])) {
+        if (!isset($this->data_cache[$session_id])) {
             // This cannot realistically ever happen in real life. PHP will *always* have called
             // either create_sid() or validateId() before it calls read, and both those methods
             // cache a value for the session.
-            throw new \BadMethodCallException(
+            throw new BadMethodCallException(
                 'Session data for '.$session_id.' has not been cached - session ID not validated?'
             );
         }
@@ -280,8 +257,7 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
     }
 
     /**
-     * Called to write the session data when anything in $_SESSION has changed
-     *
+     * Called to write the session data when anything in $_SESSION has changed.
      *
      * If $_SESSION is unchanged, updateTimestamp() will be called instead (so long as
      * session.lazy_write is set to the default `1` in php config)
@@ -294,23 +270,23 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         // If user_agent has changed the hash will have changed
         // If the hash has changed the user will have been issued a new session ID after validateId
         return $this->db->prepare(
-            "UPDATE sessions
+            'UPDATE sessions
                         SET `session_data` = :data,
                             `last_active`  = :now,
                             `ip`           = :ip
-                        WHERE id = :id"
+                        WHERE id = :id'
         )->execute(
             [
-                'id'   => $session_id,
+                'id' => $session_id,
                 'data' => $session_data,
-                'now'  => \date('Y-m-d H:i:s'),
-                'ip'   => $this->client_ip,
+                'now' => date('Y-m-d H:i:s'),
+                'ip' => $this->client_ip,
             ]
         );
     }
 
     /**
-     * Called to mark a session still active even if the data hasn't changed
+     * Called to mark a session still active even if the data hasn't changed.
      */
     public function updateTimestamp($session_id, $session_data): bool
     {
@@ -319,41 +295,35 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
         // If the hash has changed the user will have been issued a new session ID after validateId
 
         return $this->db->prepare(
-            "UPDATE sessions
+            'UPDATE sessions
                         SET `last_active`  = :now,
                             `ip`           = :ip
-                        WHERE id = :id"
+                        WHERE id = :id'
         )->execute(
             [
-                'id'  => $session_id,
-                'now' => \date('Y-m-d H:i:s'),
-                'ip'  => $this->client_ip,
+                'id' => $session_id,
+                'now' => date('Y-m-d H:i:s'),
+                'ip' => $this->client_ip,
             ]
         );
     }
 
-    /**
-     * @return string
-     */
     protected function calculateHash(): string
     {
         // Note, intentionally using the *raw* user-agent (as reported by the client) rather than the sanitised one.
         $hash = $this->client_user_agent.$this->hash_salt;
 
-        return \sha1($hash);
+        return sha1($hash);
     }
 
     /**
-     * @param $session_id
-     *
-     * @return bool
-     * @throws \ErrorException
+     * @throws ErrorException
      */
-    protected function getLock($session_id): bool
+    protected function getLock(string $session_id): bool
     {
         $this->session_lock = 'session_'.$session_id;
 
-        $query = $this->db->prepare("SELECT GET_LOCK(:session_lock, :timeout)");
+        $query = $this->db->prepare('SELECT GET_LOCK(:session_lock, :timeout)');
         $query->execute(['session_lock' => $this->session_lock, 'timeout' => $this->lock_timeout]);
         $result = $query->fetchColumn(0);
 
@@ -361,31 +331,28 @@ class MysqlSession implements SessionHandlerInterface, \SessionUpdateTimestampHa
             throw new SessionLockNotObtainedException('Could not obtain session lock!');
         }
 
-        return TRUE;
+        return true;
     }
 
-    /**
-     * @return bool
-     */
     protected function releaseLock(): bool
     {
-        if ( ! $this->session_lock) {
+        if (!$this->session_lock) {
             // The lock has already been released e.g. due to validateSid releasing it because
             // we did not have a valid claim on that ID (expired / fixation)
-            return TRUE;
+            return true;
         }
 
-        $query = $this->db->prepare("SELECT RELEASE_LOCK(:session_lock)");
+        $query = $this->db->prepare('SELECT RELEASE_LOCK(:session_lock)');
         $query->execute(['session_lock' => $this->session_lock]);
         $result = $query->fetchColumn(0);
 
         if ($result == 1) {
             // Mark the session lock already cleared
-            $this->session_lock = NULL;
+            $this->session_lock = null;
 
-            return TRUE;
+            return true;
         }
 
-        return FALSE;
+        return false;
     }
 }

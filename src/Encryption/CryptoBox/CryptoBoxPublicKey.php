@@ -1,32 +1,39 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\Encryption\CryptoBox;
 
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
+use InvalidArgumentException;
 use SensitiveParameter;
 use Stringable;
+
 use function preg_match;
 use function sodium_crypto_box_seal;
 use function sodium_memzero;
 use function strlen;
+
 use const SODIUM_CRYPTO_BOX_PUBLICKEYBYTES;
 
 /**
- * Represents the public key of a keypair, together with an identifier to support key rotation
+ * Represents the public key of a keypair, together with an identifier to support key rotation.
  */
-class CryptoBoxPublicKey implements Stringable
+final class CryptoBoxPublicKey implements Stringable
 {
-
     public static function fromString(string $exported): static
     {
-        if ( ! preg_match('/(?P<keypair_id>[a-z0-9-]+)\.(?P<key_b64>[a-zA-Z0-9_-]+)$/', $exported, $matches)) {
-            throw new \InvalidArgumentException('Invalid public key string format');
+        if (!preg_match('/(?P<keypair_id>[a-z0-9-]+)\.(?P<key_b64>[a-zA-Z0-9_-]+)$/', $exported, $matches)) {
+            throw new InvalidArgumentException('Invalid public key string format');
         }
 
+        $public_key = Base64Url::decode($matches['key_b64']);
+        if ($public_key === false) {
+            throw new InvalidArgumentException('Invalid public key encoding');
+        }
 
-        return new static(
-            public_key: Base64Url::decode($matches['key_b64']),
+        return new self(
+            public_key: $public_key,
             // public key is not secret, no need for constant-time encoding
             keypair_id: $matches['keypair_id']
         );
@@ -34,22 +41,22 @@ class CryptoBoxPublicKey implements Stringable
 
     public function __construct(
         /**
-         * The public key in raw binary form
+         * The public key in raw binary form.
          */
         public readonly string $public_key,
         /**
-         * An ID to support key rotation
+         * An ID to support key rotation.
          */
-        public readonly string $keypair_id
+        public readonly string $keypair_id,
     ) {
         if (strlen($this->public_key) !== SODIUM_CRYPTO_BOX_PUBLICKEYBYTES) {
-            throw new \InvalidArgumentException('Invalid public key - incorrect length');
+            throw new InvalidArgumentException('Invalid public key - incorrect length');
         }
     }
 
     public function encrypt(
         #[SensitiveParameter]
-        string $plaintext
+        string $plaintext,
     ): CryptoBoxString {
         try {
             return new CryptoBoxString(

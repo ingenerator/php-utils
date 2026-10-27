@@ -1,11 +1,14 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\ArrayHelpers;
 
+use InvalidArgumentException;
 
 use function array_key_exists;
 use function array_keys;
@@ -18,7 +21,6 @@ use function is_array;
 
 class AssociativeArrayUtils
 {
-
     /**
      * Recursively merge two or more arrays. Values in an associative array
      * overwrite previous values with the same key. Values in an indexed array
@@ -37,17 +39,17 @@ class AssociativeArrayUtils
      *
      * Updated PHP7 implementation of Kohana's \Arr::merge, with the same behaviour
      *
-     * @param array $merge_base        initial array
-     * @param array $merge_patches,... array to merge
+     * @param array<mixed> $merge_base        initial array
+     * @param array<mixed> ...$merge_patches array to merge
      *
-     * @return  array
+     * @return array<mixed>
      */
-    public static function deepMerge(array $merge_base, array ...$merge_patches)
+    public static function deepMerge(array $merge_base, array ...$merge_patches): array
     {
         foreach ($merge_patches as $patch) {
             if (AssociativeArrayUtils::isAssociative($patch)) {
                 foreach ($patch as $key => $value) {
-                    if (is_array($value) and is_array($merge_base[$key] ?? NULL)) {
+                    if (is_array($value) && is_array($merge_base[$key] ?? null)) {
                         $merge_base[$key] = AssociativeArrayUtils::deepMerge($merge_base[$key], $value);
                     } else {
                         $merge_base[$key] = $value;
@@ -55,7 +57,7 @@ class AssociativeArrayUtils
                 }
             } else {
                 foreach ($patch as $value) {
-                    if ( ! in_array($value, $merge_base, TRUE)) {
+                    if (!in_array($value, $merge_base, true)) {
                         $merge_base[] = $value;
                     }
                 }
@@ -76,12 +78,9 @@ class AssociativeArrayUtils
      *
      * Imported from the Kohana framework.
      *
-     * @param array $array array to check
-     *
-     * @return  boolean
+     * @param array<mixed> $array array to check
      *
      * @author Kohana Team
-     *
      */
     public static function isAssociative(array $array): bool
     {
@@ -94,13 +93,14 @@ class AssociativeArrayUtils
     }
 
     /**
-     * Turns 'this.thing.here => bar' into ['this']['thing']['here'] = bar
-     *
-     * @param array $input
-     *
-     * @return array
+     * Turns 'this.thing.here => bar' into ['this']['thing']['here'] = bar.
      */
-    public static function pathsToNested(array $input)
+    /**
+     * @param array<string, mixed> $input
+     *
+     * @return array<mixed>
+     */
+    public static function pathsToNested(array $input): array
     {
         $result = [];
         foreach ($input as $key => $value) {
@@ -113,21 +113,26 @@ class AssociativeArrayUtils
     /**
      * Set a value on an array by path.
      *
-     * @param array        $array     Array to update
-     * @param string|array $path      Path
+     * @param array<mixed> $array     Array to update
+     * @param string|list<string> $path Path
      * @param mixed        $value     Value to set
      * @param string       $delimiter Path delimiter
      *
      * @author Kohana Team
      */
-    public static function setPath(array &$array, $path, $value, string $delimiter = '.'): void
+    public static function setPath(array &$array, string|array $path, mixed $value, string $delimiter = '.'): void
     {
-
-        // The path has already been separated into keys
-        $keys = $path;
-        if ( ! is_array($path)) {
+        if (is_array($path)) {
+            $keys = $path;
+        } else {
+            if ($delimiter === '') {
+                throw new InvalidArgumentException('Path delimiter cannot be empty');
+            }
             // Split the keys by delimiter
             $keys = explode($delimiter, $path);
+        }
+        if ($keys === []) {
+            throw new InvalidArgumentException('Path must not be empty');
         }
 
         // Set current $array to inner-most array path
@@ -139,10 +144,13 @@ class AssociativeArrayUtils
                 $key = (int) $key;
             }
 
-            if ( ! isset($array[$key])) {
-                $array[$key] = [];
+            if (isset($array[$key]) && !is_array($array[$key])) {
+                throw new InvalidArgumentException(
+                    sprintf('Cannot write keys within a non-array path %s (got %s)', $key, get_debug_type($array[$key]))
+                );
             }
 
+            $array[$key] ??= [];
             $array = &$array[$key];
         }
 
@@ -151,7 +159,7 @@ class AssociativeArrayUtils
     }
 
     /**
-     * Splits a source array by key - modifies source to remove entries with requested keys, returning removed entries
+     * Splits a source array by key - modifies source to remove entries with requested keys, returning removed entries.
      *
      * e.g.
      *
@@ -159,17 +167,18 @@ class AssociativeArrayUtils
      *   $result = AssociativeArrayUtils::popKeys($array, ['things', 'might', 'undefined']);
      *   assert($array === ['mix' => 'of', 'useful' => 'separately']);
      *   assert($result === ['things' => 'that', 'might' => 'be']); // Note `undefined` not present in source or result
+     */
+    /**
+     * @param array<array-key, mixed> $source
+     * @param list<array-key> $pop_keys
      *
-     * @param array $source
-     * @param array $pop_keys
-     *
-     * @return array
+     * @return array<array-key, mixed>
      */
     public static function popKeys(array &$source, array $pop_keys): array
     {
         $result = [];
         foreach ($pop_keys as $key) {
-            if (isset($source[$key]) or array_key_exists($key, $source)) {
+            if (isset($source[$key]) || array_key_exists($key, $source)) {
                 $result[$key] = $source[$key];
                 unset($source[$key]);
             }

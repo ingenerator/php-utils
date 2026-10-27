@@ -1,5 +1,11 @@
 ### Unreleased
 
+* Drop support for psr/log 1.x and 2.x.
+* BREAKING: AbstractArrayRepository::getEntityBaseClass() is now abstract.
+* Refactored ConsistentStringScrambler to use Randomizer rather than mt_rand.
+* BREAKING: Drop custom Metrics interfaces and implementations.
+* BREAKING: Drop InvalidUserDateTime and validation / factory methods that interact with it.
+
 ### v2.5.1 (2025-09-17)
 
 * Fix MysqlSession to immediately return false (without database check) if session ID does not match the pattern of IDs

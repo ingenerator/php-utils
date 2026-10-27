@@ -1,47 +1,53 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\Object;
 
+use Closure;
+use DomainException;
+use LogicException;
+use stdClass;
+
+use function get_object_vars;
+use function is_object;
+
 /**
  * Rips properties out of an object using local object scope and returns them as an array.
- *
- * @package Ingenerator\Support
  */
 class ObjectPropertyRipper
 {
     /**
-     * @var \Closure[]
+     * @var Closure[]
      */
-    protected static $rippers = [];
+    protected static array $rippers = [];
 
     /**
-     * Grab the values of all these (presumably private / protected) properties from inside object
+     * Grab the values of all these (presumably private / protected) properties from inside object.
      *
-     * @param object   $object
      * @param string[] $properties
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public static function rip($object, array $properties)
+    public static function rip(object $object, array $properties): array
     {
-        $ripper = static::getRipper(\get_class($object));
+        $class = $object::class;
+        $ripper = static::getRipper($class);
 
-        return $ripper($object, $properties);
+        return $ripper($object, array_values($properties));
     }
 
     /**
-     * Grab the values of all properties from inside the object
+     * Grab the values of all properties from inside the object.
      *
      * Note it does not support objects where a parent class has any private properties, as these cannot be reliably
      * exported.
      *
-     * @param object $object
-     *
-     * @return array
+     * @return array<string, mixed>
      */
     public static function ripAll(object $object): array
     {
@@ -50,9 +56,13 @@ class ObjectPropertyRipper
         // that are not present on other instances of the same class
 
         $props = (self::bindScopedClosure(
-            fn() => \get_object_vars($object),
+            fn (): array => get_object_vars($object),
             $object,
         ))();
+        // Currently phpstan doesn't support typing a method to take a callable with arbitrary arguments so
+        // it's not possible to tell it that the ::bindScopedClosure return will be the return of the closure.
+        // See https://github.com/phpstan/phpstan/issues/8214
+        /** @var array<string, mixed> $props */
 
         // Safety check - the method above is efficient but can't return private props from parent classes
         // And actually, turning complex classes like that into arrays is probelematic anyway because there's
@@ -60,8 +70,8 @@ class ObjectPropertyRipper
         // unsupported usage and throw to indicate the data is incomplete.
         $array_vals = (array) $object;
         if (count($array_vals) !== count($props)) {
-            throw new \DomainException(
-                'Cannot rip all variables from '.\get_class($object).' - does it have inherited private props?'
+            throw new DomainException(
+                'Cannot rip all variables from '.$object::class.' - does it have inherited private props?'
             );
         }
 
@@ -69,14 +79,9 @@ class ObjectPropertyRipper
     }
 
     /**
-     * Grab a single property value from the object
-     *
-     * @param object $object
-     * @param string $property
-     *
-     * @return mixed
+     * Grab a single property value from the object.
      */
-    public static function ripOne($object, $property)
+    public static function ripOne(object $object, string $property): mixed
     {
         return static::rip($object, [$property])[$property];
     }
@@ -85,16 +90,17 @@ class ObjectPropertyRipper
      * Create a callback bound to the scope of the provided class so that it has access to internal
      * properties.
      *
-     * @param string $class
+     * @param class-string $class
      *
-     * @return \Closure
+     * @return Closure(object, list<string>): array<string, mixed>
      */
-    protected static function getRipper($class)
+    protected static function getRipper(string $class): Closure
     {
         static::$rippers[$class] ??= self::bindScopedClosure(
-            function ($object, $properties) {
+            function (object $object, array $properties): array {
                 $values = [];
                 foreach ($properties as $property) {
+                    assert(is_string($property), 'Should have been called with string property names');
                     $values[$property] = $object->$property;
                 }
 
@@ -107,12 +113,12 @@ class ObjectPropertyRipper
     }
 
     /**
-     * @param object|class-string<object> $scope
+     * @param object|class-string $scope
      */
-    private static function bindScopedClosure(callable $callback, object|string $scope): \Closure
+    private static function bindScopedClosure(Closure $callback, object|string $scope): Closure
     {
-        $scope_class = \is_object($scope) ? $scope::class : $scope;
-        if ($scope_class === \stdClass::class) {
+        $scope_class = is_object($scope) ? $scope::class : $scope;
+        if ($scope_class === stdClass::class) {
             // Cannot bind to the scope of an internal class (e.g. stdClass), and there is no need to do so since
             // all stdClass properties are public.
             // Note that this is the *not* the case for a user-defined class that extends stdClass, hence checking
@@ -120,6 +126,7 @@ class ObjectPropertyRipper
             $scope = null;
         }
 
-        return \Closure::bind($callback, newThis: null, newScope: $scope);
+        return Closure::bind($callback, newThis: null, newScope: $scope)
+            ?? throw new LogicException('Unable to bind closure to requested scope');
     }
 }

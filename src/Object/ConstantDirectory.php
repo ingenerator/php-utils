@@ -1,53 +1,45 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\Object;
 
+use ReflectionClass;
 
-class ConstantDirectory
+use function strlen;
+use function strncmp;
+
+final class ConstantDirectory
 {
     /**
-     * @var string
+     * @var array<string, mixed>
      */
-    protected $class_name;
+    private array $constants;
 
-    /**
-     * @var array
-     */
-    protected $constants;
-
-    /**
-     * @param string $class_name
-     */
-    protected function __construct($class_name)
+    /** @param class-string $class_name */
+    private function __construct(private readonly string $class_name)
     {
-        $this->class_name = $class_name;
+    }
+
+    /** @param class-string $class */
+    public static function forClass(string $class): static
+    {
+        return new self($class);
     }
 
     /**
-     * @param string $class
-     *
-     * @return static
+     * @return array<string, mixed> keyed by the constant id
      */
-    public static function forClass($class)
+    public function filterConstants(string $prefix): array
     {
-        return new static($class);
-    }
-
-    /**
-     * @param string $prefix
-     *
-     * @return array keyed by the constant id
-     */
-    public function filterConstants($prefix)
-    {
-        $prefix_len = \strlen($prefix);
-        $consts     = [];
+        $prefix_len = strlen($prefix);
+        $consts = [];
         foreach ($this->listConstants() as $name => $value) {
-            if (\strncmp($name, $prefix, $prefix_len) === 0) {
+            if (strncmp($name, $prefix, $prefix_len) === 0) {
                 $consts[$name] = $value;
             }
         }
@@ -56,11 +48,11 @@ class ConstantDirectory
     }
 
     /**
-     * @return array keyed by the constant id
+     * @return array<string, mixed> keyed by the constant id
      */
-    public function listConstants()
+    public function listConstants(): array
     {
-        if ($this->constants === NULL) {
+        if (!isset($this->constants)) {
             $this->constants = $this->loadConstants();
         }
 
@@ -68,12 +60,12 @@ class ConstantDirectory
     }
 
     /**
-     * @return array keyed by the constant id
+     * @return array<string, mixed> keyed by the constant id
      */
-    protected function loadConstants()
+    private function loadConstants(): array
     {
         $consts = [];
-        $refl   = new \ReflectionClass($this->class_name);
+        $refl = new ReflectionClass($this->class_name);
         foreach ($refl->getConstants() as $name => $value) {
             $consts[$name] = $value;
         }

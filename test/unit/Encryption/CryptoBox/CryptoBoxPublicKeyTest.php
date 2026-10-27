@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
@@ -6,18 +7,18 @@ namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxKeypair;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxPublicKey;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class CryptoBoxPublicKeyTest extends TestCase
+final class CryptoBoxPublicKeyTest extends TestCase
 {
-
     /*
      * See also the tests for CryptoBoxKeypair which cover some behaviour of the public key object
      * by testing through the behaviour of the public key.
      */
 
-    public function test_it_can_be_created_from_a_known_string_input_and_used_to_encrypt()
+    public function testItCanBeCreatedFromAKnownStringInputAndUsedToEncrypt(): void
     {
         $subject = CryptoBoxPublicKey::fromString('some-key.-J5fsjd53SB2lLmTVcGC0k0w59d9E-qBOYVcuDzUpRU');
         $encrypted = $subject->encrypt('open sesame');
@@ -31,25 +32,26 @@ class CryptoBoxPublicKeyTest extends TestCase
         );
     }
 
-    public static function provider_invalid_keypair_string()
+    /**
+     * @return Iterator<string, array<string>>
+     */
+    public static function provider_invalid_keypair_string(): Iterator
     {
-        return [
-            'empty' => [''],
-            'incorrect format' => ['just a long string'],
-            'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'],
-            'no keypair_id' => ['-J5fsjd53SB2lLmTVcGC0k0w59d9E-qBOYVcuDzUpRU'],
-            'keypair is too short' => ['some-key.cnViYmlzaA'],
-        ];
+        yield 'empty' => [''];
+        yield 'incorrect format' => ['just a long string'];
+        yield 'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'];
+        yield 'no keypair_id' => ['-J5fsjd53SB2lLmTVcGC0k0w59d9E-qBOYVcuDzUpRU'];
+        yield 'keypair is too short' => ['some-key.cnViYmlzaA'];
     }
 
     #[DataProvider('provider_invalid_keypair_string')]
-    public function test_it_throws_on_attempt_to_create_from_invalid_string($invalid)
+    public function testItThrowsOnAttemptToCreateFromInvalidString(string $invalid): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxPublicKey::fromString($invalid);
     }
 
-    public function test_it_can_be_converted_to_a_urlsafe_base64_string_and_back()
+    public function testItCanBeConvertedToAUrlsafeBase64StringAndBack(): void
     {
         $expected = CryptoBoxKeypair::generate('key-one')->getPublicKey();
 

@@ -1,62 +1,67 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace test\unit\Ingenerator\PHPUtils\Object;
 
-
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
-class ObjectPropertyPopulatorTest extends TestCase
-{
+use function get_object_vars;
 
-    public function test_it_assigns_single_property()
+final class ObjectPropertyPopulatorTest extends TestCase
+{
+    public function testItAssignsSingleProperty(): void
     {
-        $class = new TestPopulatingClass;
+        $class = new TestPopulatingClass();
         ObjectPropertyPopulator::assign($class, 'something_private', 'food');
         $this->assertSame('food', $class->toArray()['something_private']);
     }
 
-    public function test_it_assigns_array_of_properties()
+    public function testItAssignsArrayOfProperties(): void
     {
-        $class = new TestPopulatingClass;
+        $class = new TestPopulatingClass();
         ObjectPropertyPopulator::assignHash(
             $class,
             [
-                'something_private'   => 'bed',
-                'something_protected' => 'gold'
+                'something_private' => 'bed',
+                'something_protected' => 'gold',
             ]
         );
         $this->assertEquals(
             [
-                'something_private'   => 'bed',
+                'something_private' => 'bed',
                 'something_protected' => 'gold',
-                'already_init'        => 'Foo'
+                'already_init' => 'Foo',
             ],
             $class->toArray()
         );
     }
 
-    public function test_it_throws_if_assigning_unknown_property()
+    public function testItThrowsIfAssigningUnknownProperty(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        ObjectPropertyPopulator::assignHash(new TestPopulatingClass, ['junk' => 'rubbish']);
+        $this->expectException(InvalidArgumentException::class);
+        ObjectPropertyPopulator::assignHash(new TestPopulatingClass(), ['junk' => 'rubbish']);
     }
-
 }
-
 
 class TestPopulatingClass
 {
-    private $something_private;
-    protected $something_protected;
-    protected $already_init = 'Foo';
+    /* @phpstan-ignore property.onlyRead (written by the populator in tests) */
+    private mixed $something_private;
+    protected mixed $something_protected;
+    protected string $already_init = 'Foo';
 
-    public function toArray()
+    /** @return array<mixed> */
+    public function toArray(): array
     {
-        return \get_object_vars($this);
+        return get_object_vars($this);
     }
 }

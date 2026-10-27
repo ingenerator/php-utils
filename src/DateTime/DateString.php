@@ -1,30 +1,25 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\DateTime;
 
+use DateTimeImmutable;
 
 /**
- * Helpers to format a datetime as a string or return an empty value
- *
- * @package Ingenerator\Support\DateTime
+ * Helpers to format a datetime as a string or return an empty value.
  */
 class DateString
 {
-
-    /**
-     * @param \DateTimeImmutable|NULL $date
-     * @param string                  $format
-     * @param string                  $empty_value
-     *
-     * @return string
-     */
-    public static function format(?\DateTimeImmutable $date, $format, $empty_value = '')
+    public static function format(?DateTimeImmutable $date, string $format, ?string $empty_value = ''): ?string
     {
-        if ( ! $date) {
+        if (!$date instanceof DateTimeImmutable) {
             return $empty_value;
         }
 
@@ -32,40 +27,25 @@ class DateString
     }
 
     /**
-     * Formats to ISO8601 (the real one not the PHP one :-O) with microsecond precision
-     *
-     * @param \DateTimeImmutable|null $date
-     * @param string                  $empty_value
-     *
-     * @return string
+     * Formats to ISO8601 (the real one not the PHP one :-O) with microsecond precision.
      */
-    public static function isoMS(?\DateTimeImmutable $date, ?string $empty_value = ''): ?string
+    public static function isoMS(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
         return static::format($date, 'Y-m-d\TH:i:s.uP', $empty_value);
     }
 
     /**
-     * Formats as Y-m-d H:i:s
-     *
-     * @param \DateTimeImmutable|NULL $date
-     * @param string                  $empty_value
-     *
-     * @return string
+     * Formats as Y-m-d H:i:s.
      */
-    public static function ymd(?\DateTimeImmutable $date, $empty_value = '')
+    public static function ymd(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
         return static::format($date, 'Y-m-d', $empty_value);
     }
 
     /**
-     * Formats as Y-m-d H:i:s
-     *
-     * @param \DateTimeImmutable|NULL $date
-     * @param string                  $empty_value
-     *
-     * @return string
+     * Formats as Y-m-d H:i:s.
      */
-    public static function ymdhis(?\DateTimeImmutable $date, $empty_value = '')
+    public static function ymdhis(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
         return static::format($date, 'Y-m-d H:i:s', $empty_value);
     }

@@ -1,200 +1,213 @@
 <?php
 
+declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Cookie;
-
 
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\Cookie\CookieWrapper;
 use Ingenerator\PHPUtils\Cookie\HeadersSentException;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
-class CookieWrapperTest extends TestCase
+final class CookieWrapperTest extends TestCase
 {
+    /** @var array<mixed> */
+    private array $_old_cookie_var;
 
-    protected $_old_cookie_var;
-
-    protected $ssl_available = TRUE;
+    private bool $ssl_available = true;
 
     #[TestWith(['my', true, 'cookie'])]
     #[TestWith(['has', true, 'values'])]
     #[TestWith(['anything', false, null])]
-    public function test_it_has_cookies_from_superglobal($name, $expect_has, $expect_val)
+    public function testItHasCookiesFromSuperglobal(string $name, bool $expect_has, ?string $expect_val): void
     {
         $_COOKIE = ['my' => 'cookie', 'has' => 'values'];
         $subject = $this->newSubject();
         $this->assertSame(
             [
-                'has'   => $expect_has,
+                'has' => $expect_has,
                 'value' => $expect_val,
             ],
             [
-                'has'   => $subject->has($name),
+                'has' => $subject->has($name),
                 'value' => $subject->get($name),
-            ]
+            ],
         );
     }
 
-    public function test_it_has_cookies_that_have_been_set_during_request()
+    public function testItThrowsOnAccessToNonStringCookie(): void
+    {
+        $_COOKIE = ['somecookie' => ['one' => 'is array ']];
+        $subject = $this->newSubject();
+        $this->expectExceptionObject(
+            new UnexpectedValueException('Cookie named somecookie should have been string, got array'),
+        );
+        $subject->get('somecookie');
+    }
+
+    public function testItHasCookiesThatHaveBeenSetDuringRequest(): void
     {
         $_COOKIE = [];
         $subject = $this->newSubject();
         $subject->set('anything', 'any value');
         $this->assertSame(
             [
-                'has'   => TRUE,
+                'has' => true,
                 'value' => 'any value',
             ],
             [
-                'has'   => $subject->has('anything'),
+                'has' => $subject->has('anything'),
                 'value' => $subject->get('anything'),
-            ]
+            ],
         );
     }
 
-    public function test_it_throws_from_set_cookie_if_headers_have_been_sent()
+    public function testItThrowsFromSetCookieIfHeadersHaveBeenSent(): void
     {
-        $subject               = $this->newSubject();
+        $subject = $this->newSubject();
         $subject->headers_sent = ['file' => 'myfile.php', 'line' => 152];
         $this->expectException(HeadersSentException::class);
         $this->expectExceptionMessage(
-            'Cannot assign cookie foo - headers have been sent by output at myfile.php:152'
+            'Cannot assign cookie foo - headers have been sent by output at myfile.php:152',
         );
         $subject->set('foo', 'anything');
     }
 
-    public function test_it_sets_cookies_using_provided_options()
+    public function testItSetsCookiesUsingProvidedOptions(): void
     {
-        $this->ssl_available = TRUE;
-        $subject             = $this->newSubject();
+        $this->ssl_available = true;
+        $subject = $this->newSubject();
         $subject->set(
             'anything',
             'any value',
             [
-                'expires'  => 1600952284,
-                'path'     => '/somedir',
-                'domain'   => 'foo.bar.com',
-                'secure'   => FALSE,
-                'httponly' => FALSE,
-            ]
+                'expires' => 1600952284,
+                'path' => '/somedir',
+                'domain' => 'foo.bar.com',
+                'secure' => false,
+                'httponly' => false,
+            ],
         );
 
         $this->assertSame(
             [
                 [
-                    'name'    => 'anything',
-                    'value'   => 'any value',
+                    'name' => 'anything',
+                    'value' => 'any value',
                     'options' => [
-                        'domain'   => 'foo.bar.com',
-                        'expires'  => 1600952284,
-                        'httponly' => FALSE,
-                        'path'     => '/somedir',
-                        'secure'   => FALSE,
+                        'domain' => 'foo.bar.com',
+                        'expires' => 1600952284,
+                        'httponly' => false,
+                        'path' => '/somedir',
+                        'secure' => false,
                     ],
                 ],
             ],
-            $subject->setcookie_calls
+            $subject->setcookie_calls,
         );
     }
 
-    public function test_it_applies_sane_defaults_when_setting_cookies()
+    public function testItAppliesSaneDefaultsWhenSettingCookies(): void
     {
-        $this->ssl_available = TRUE;
-        $subject             = $this->newSubject();
+        $this->ssl_available = true;
+        $subject = $this->newSubject();
         $subject->set('somecookie', 'some stuff');
 
         $this->assertSame(
             [
                 [
-                    'name'    => 'somecookie',
-                    'value'   => 'some stuff',
+                    'name' => 'somecookie',
+                    'value' => 'some stuff',
                     'options' => [
-                        'domain'   => '',
-                        'expires'  => 0,
-                        'httponly' => TRUE,
-                        'path'     => '/',
-                        'secure'   => TRUE,
+                        'domain' => '',
+                        'expires' => 0,
+                        'httponly' => true,
+                        'path' => '/',
+                        'secure' => true,
                     ],
-                ]
+                ],
             ],
-            $subject->setcookie_calls
+            $subject->setcookie_calls,
         );
     }
 
-    public function test_it_can_set_expires_from_datetime_immutable()
+    public function testItCanSetExpiresFromDatetimeImmutable(): void
     {
         $subject = $this->newSubject();
         $subject->set(
             'any',
             'thing',
-            ['expires' => new DateTimeImmutable('2028-03-02 10:02:02 +01:00')]
+            ['expires' => new DateTimeImmutable('2028-03-02 10:02:02 +01:00')],
         );
         $this->assertSame(
             1835600522,
-            $subject->setcookie_calls[0]['options']['expires']
+            $subject->setcookie_calls[0]['options']['expires'],
         );
     }
 
+    /** @param array<string, mixed> $opts */
     #[TestWith([['secure' => true], false])]
     #[TestWith([['secure' => false], false])]
     #[TestWith([[], false])]
-    public function test_it_downgrades_secure_cookies_when_no_ssl_available($opts, $expect)
+    public function testItDowngradesSecureCookiesWhenNoSslAvailable(array $opts, bool $expect): void
     {
-        $this->ssl_available = FALSE;
-        $subject             = $this->newSubject();
+        $this->ssl_available = false;
+        $subject = $this->newSubject();
         $subject->set('whatever', 'things', $opts);
 
         $this->assertSame($expect, $subject->setcookie_calls[0]['options']['secure']);
     }
 
+    /** @param array<string, mixed> $opts */
     #[TestWith([true, [], null])]
     #[TestWith([true, ['samesite' => 'Lax'], 'Lax'])]
     #[TestWith([true, ['samesite' => 'None'], 'None'])]
     #[TestWith([false, ['samesite' => 'None'], null])]
-    public function test_it_adds_samesite_attribute_only_if_ssl_available($has_ssl, $opts, $expect)
+    public function testItAddsSamesiteAttributeOnlyIfSslAvailable(bool $has_ssl, array $opts, ?string $expect): void
     {
         $this->ssl_available = $has_ssl;
-        $subject             = $this->newSubject();
+        $subject = $this->newSubject();
         $subject->set('whatever', 'things', $opts);
 
-        if ($expect === NULL) {
+        if ($expect === null) {
             $this->assertArrayNotHasKey('samesite', $subject->setcookie_calls[0]['options']);
         } else {
             $this->assertSame($expect, $subject->setcookie_calls[0]['options']['samesite']);
         }
     }
 
-    public function test_it_deletes_cookie_by_setting_value_empty_and_expires_in_past()
+    public function testItDeletesCookieBySettingValueEmptyAndExpiresInPast(): void
     {
         $_COOKIE['myvar'] = 'whoopsy';
-        $subject          = $this->newSubject();
+        $subject = $this->newSubject();
         $subject->delete('myvar');
         $this->assertSame(
             [
                 [
-                    'name'    => 'myvar',
-                    'value'   => '',
+                    'name' => 'myvar',
+                    'value' => '',
                     'options' => [
-                        'domain'   => '',
-                        'expires'  => 1,
-                        'httponly' => FALSE,
-                        'path'     => '/',
-                        'secure'   => FALSE,
+                        'domain' => '',
+                        'expires' => 1,
+                        'httponly' => false,
+                        'path' => '/',
+                        'secure' => false,
                     ],
                 ],
             ],
-            $subject->setcookie_calls
+            $subject->setcookie_calls,
         );
         $this->assertSame(
             [
-                'has'   => FALSE,
-                'value' => NULL,
+                'has' => false,
+                'value' => null,
             ],
             [
-                'has'   => $subject->has('myvar'),
+                'has' => $subject->has('myvar'),
                 'value' => $subject->get('myvar'),
-            ]
+            ],
         );
     }
 
@@ -210,7 +223,7 @@ class CookieWrapperTest extends TestCase
         $_COOKIE = $this->_old_cookie_var;
     }
 
-    protected function newSubject()
+    protected function newSubject(): TestableCookieWrapper
     {
         return new TestableCookieWrapper($this->ssl_available);
     }
@@ -218,30 +231,34 @@ class CookieWrapperTest extends TestCase
 
 class TestableCookieWrapper extends CookieWrapper
 {
+    /** @var list<array{name: string, value: ?string, options: array<string, mixed>}> */
     public $setcookie_calls = [];
-    public $headers_sent = FALSE;
 
+    /** @var false|array{file: string, line: int} */
+    public $headers_sent = false;
+
+    /** @param array<string, mixed> $options */
     protected function set_cookie(
-        $name,
-        $value,
-        $options
+        string $name,
+        string $value,
+        array $options,
     ): void {
         $this->setcookie_calls[] = [
-            'name'    => $name,
-            'value'   => $value,
+            'name' => $name,
+            'value' => $value,
             'options' => $options,
         ];
     }
 
-    protected function headers_sent(&$file, &$line): bool
+    protected function headers_sent(?string &$file = null, ?int &$line = null): bool
     {
-        if ($this->headers_sent === FALSE) {
-            return FALSE;
+        if ($this->headers_sent === false) {
+            return false;
         }
 
         $file = $this->headers_sent['file'];
         $line = $this->headers_sent['line'];
 
-        return TRUE;
+        return true;
     }
 }

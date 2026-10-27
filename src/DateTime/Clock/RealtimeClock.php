@@ -1,6 +1,8 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
@@ -10,61 +12,53 @@ use DateInterval;
 use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 
+use function microtime;
+use function usleep;
+
 /**
  * Simple wrapper around current date/time methods to allow easy injection of fake time in
- * dependent classes
- *
- * @package Ingenerator\Util
+ * dependent classes.
  */
 class RealtimeClock
 {
-    /**
-     * @return DateTimeImmutable
-     */
-    public function getDateTime()
+    public function getDateTime(): DateTimeImmutable
     {
-        return new DateTimeImmutable;
+        return new DateTimeImmutable();
+    }
+
+    public function getMicrotime(): float
+    {
+        return microtime(true);
+    }
+
+    public function usleep(int $microseconds): void
+    {
+        usleep($microseconds);
     }
 
     /**
-     * @return float
+     * Calculate a relative date in the past, optionally truncating time to 0 - sugar for getDateTime()->sub().
      */
-    public function getMicrotime()
-    {
-        return \microtime(TRUE);
-    }
-
-    /**
-     * @param $microseconds
-     */
-    public function usleep($microseconds)
-    {
-        \usleep($microseconds);
-    }
-
-    /**
-     * Calculate a relative date in the past, optionally truncating time to 0 - sugar for getDateTime()->sub()
-     */
-    public function ago(DateInterval $interval, bool $date_only = FALSE): DateTimeImmutable
+    public function ago(DateInterval $interval, bool $date_only = false): DateTimeImmutable
     {
         $result = $this->getDateTime()->sub($interval);
 
         return match ($date_only) {
-            FALSE => $result,
-            TRUE => DateTimeImmutableFactory::zeroTime($result)
+            false => $result,
+            true => DateTimeImmutableFactory::zeroTime($result),
         };
     }
 
     /**
-     * Calculate a relative date in the future, optionally truncating time to 0 - sugar for getDateTime()->add()
+     * Calculate a relative date in the future, optionally truncating time to 0 - sugar for getDateTime()->add().
      */
-    public function future(DateInterval $interval, bool $date_only = FALSE): DateTimeImmutable
+    public function future(DateInterval $interval, bool $date_only = false): DateTimeImmutable
     {
         $result = $this->getDateTime()->add($interval);
 
         return match ($date_only) {
-            FALSE => $result,
-            TRUE => DateTimeImmutableFactory::zeroTime($result)
+            false => $result,
+            true => DateTimeImmutableFactory::zeroTime($result),
         };
     }
 }

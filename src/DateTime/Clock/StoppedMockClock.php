@@ -1,118 +1,95 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\DateTime\Clock;
 
-use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
+use DateInterval;
+use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateTimeImmutableFactory;
 use PHPUnit\Framework\Assert;
 
-class StoppedMockClock extends RealtimeClock
+final class StoppedMockClock extends RealtimeClock
 {
-    /**
-     * @var float
-     */
-    protected $current_microtime;
+    private float $current_microtime;
+
+    /** @var list<int> */
+    private array $sleeps = [];
 
     /**
-     * @var int[]
+     * Use descriptive static constructors for a new instance.
      */
-    protected $sleeps;
-
-    /**
-     * Use descriptive static constructors for a new instance
-     */
-    protected function __construct(\DateTimeImmutable $start_time)
+    protected function __construct(DateTimeImmutable $start_time)
     {
         $this->current_microtime = (float) $start_time->format('U.u');
     }
 
-    /**
-     * @param float $microtime
-     *
-     * @return static
-     */
-    public static function atMicrotime($microtime)
+    public static function atMicrotime(float $microtime): static
     {
-        return new static(DateTimeImmutableFactory::atMicrotime($microtime));
+        return new self(DateTimeImmutableFactory::atMicrotime($microtime));
     }
 
-    /**
-     * @return static
-     */
-    public static function atNow()
+    public static function atNow(): static
     {
-        return new static(new \DateTimeImmutable);
+        return new self(new DateTimeImmutable());
     }
 
-    /**
-     * @param string $time
-     *
-     * @return static
-     */
-    public static function at($time)
+    public static function at(string|DateTimeImmutable $time): static
     {
-        if ( ! $time instanceof \DateTimeImmutable) {
-            $time = new \DateTimeImmutable($time);
+        if (!$time instanceof DateTimeImmutable) {
+            $time = new DateTimeImmutable($time);
         }
 
-        return new static($time);
+        return new self($time);
     }
 
-    /**
-     * @param string $interval_spec
-     *
-     * @return static
-     */
-    public static function atTimeAgo($interval_spec)
+    public static function atTimeAgo(string $interval_spec): static
     {
-        $now = new \DateTimeImmutable;
-        $ago = $now->sub(new \DateInterval($interval_spec));
+        $now = new DateTimeImmutable();
+        $ago = $now->sub(new DateInterval($interval_spec));
 
-        return new static($ago);
+        return new self($ago);
     }
 
-    public function getDateTime()
+    public function getDateTime(): DateTimeImmutable
     {
         return DateTimeImmutableFactory::atMicrotime($this->current_microtime);
     }
 
-    public function getMicrotime()
+    public function getMicrotime(): float
     {
         return $this->current_microtime;
     }
 
-    public function tick(\DateInterval $period)
+    public function tick(DateInterval $period): void
     {
-        $now                     = $this->getDateTime()->add($period);
+        $now = $this->getDateTime()->add($period);
         $this->current_microtime = (float) $now->getTimestamp();
     }
 
-    /**
-     * @param float $microseconds
-     */
-    public function tickMicroseconds($microseconds)
+    public function tickMicroseconds(float $microseconds): void
     {
         $this->current_microtime += ($microseconds / 1000000);
     }
 
-    public function usleep($microseconds)
+    public function usleep(int $microseconds): void
     {
         $this->tickMicroseconds($microseconds);
         $this->sleeps[] = $microseconds;
     }
 
-    public function assertSlept(array $expected, $msg = '')
+    /** @param list<int> $expected */
+    public function assertSlept(array $expected, string $msg = ''): void
     {
         Assert::assertSame($expected, $this->sleeps, $msg);
     }
 
-    public function assertNeverSlept($msg = '')
+    public function assertNeverSlept(string $msg = ''): void
     {
-        Assert::assertNull($this->sleeps, $msg);
+        Assert::assertSame([], $this->sleeps, $msg);
     }
-
 }

@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\DateTime;
 
 use DateInterval;
+use InvalidArgumentException;
+
 use function array_diff;
 use function array_filter;
 use function array_intersect_key;
@@ -26,22 +30,22 @@ class DateIntervalUtils
     {
         $components = array_filter((array) $interval);
 
-        $supported_components = array_intersect_key(static::SUPPORTED_HUMAN_COMPONENTS, $components);
+        $supported_components = array_intersect_key(self::SUPPORTED_HUMAN_COMPONENTS, $components);
 
         if (count($supported_components) !== count($components)) {
             $key_list = implode(', ', array_diff(array_keys($components), array_keys($supported_components)));
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Cannot humanise a DateInterval with unsupported components: '.$key_list
             );
         }
 
         $parts = [];
         foreach ($supported_components as $key => $human_value) {
-            $qty     = $components[$key] ?? NULL;
-            $parts[] = $qty.' '.$human_value.($qty > 1 ? 's' : '');
+            $qty = $interval->$key ?? null;
+            $parts[] = sprintf('%s %s%s', $qty, $human_value, $qty > 1 ? 's' : '');
         }
 
-        $last_part   = array_pop($parts);
+        $last_part = array_pop($parts);
         $second_last = array_pop($parts);
 
         return implode(

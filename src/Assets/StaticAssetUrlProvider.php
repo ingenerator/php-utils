@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Ingenerator\PHPUtils\Assets;
-
 
 use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Simple / basic provider for CSS, JS, image etc asset URLs supporting cache-busting in dev and remote hosting in prod
+ * Simple / basic provider for CSS, JS, image etc asset URLs supporting cache-busting in dev and remote hosting in prod.
  *
  * This class provides a very simple mechanism for generating URLs to a site's inbuilt CSS/JS/etc. It operates in two
  * modes.
@@ -33,27 +33,17 @@ use RuntimeException;
  *     this file should then be deployed alongside the application.
  *
  * All this class does is read that file to get the URL prefix, and concat it onto the front of every asset path.
- *
  */
 class StaticAssetUrlProvider
 {
-    const MODE_LOCAL  = 'local';
-    const MODE_REMOTE = 'remote';
+    public const MODE_LOCAL = 'local';
+    public const MODE_REMOTE = 'remote';
 
-    /**
-     * @var string
-     */
-    protected $local_asset_path;
+    protected string $local_asset_path;
 
-    /**
-     * @var string
-     */
-    protected $mode;
+    protected string $mode;
 
-    /**
-     * @var string
-     */
-    protected $remote_asset_url;
+    protected string $remote_asset_url;
 
     /**
      * @param string $mode                local or remote mode (see above) - commonly toggle based on runtime environment
@@ -63,12 +53,12 @@ class StaticAssetUrlProvider
     public function __construct(
         string $mode,
         string $local_asset_path,
-        string $asset_base_url_file
+        string $asset_base_url_file,
     ) {
-        if ( ! in_array($mode, [static::MODE_LOCAL, static::MODE_REMOTE])) {
-            throw new InvalidArgumentException('Invalid asset mode `'.$mode.'` for '.__CLASS__);
+        if (!in_array($mode, [static::MODE_LOCAL, static::MODE_REMOTE])) {
+            throw new InvalidArgumentException('Invalid asset mode `'.$mode.'` for '.self::class);
         }
-        $this->mode             = $mode;
+        $this->mode = $mode;
         $this->local_asset_path = rtrim($local_asset_path, '/');
 
         if ($this->mode === static::MODE_REMOTE) {
@@ -78,13 +68,13 @@ class StaticAssetUrlProvider
 
     protected function loadAssetBaseUrl(string $asset_base_url_file): string
     {
-        if ( ! file_exists($asset_base_url_file)) {
+        if (!file_exists($asset_base_url_file)) {
             throw new InvalidArgumentException('No asset base url file at '.$asset_base_url_file);
         }
 
         $url = require $asset_base_url_file;
 
-        if (empty($url) OR ! is_string($url)) {
+        if (empty($url) || !is_string($url)) {
             throw new RuntimeException('Invalid content in asset base url file '.$asset_base_url_file);
         }
 
@@ -106,20 +96,15 @@ class StaticAssetUrlProvider
 
         if ($this->mode === static::MODE_LOCAL) {
             return $this->getLocalTimestampedUrl($rel_path);
-        } else {
-            return $this->remote_asset_url.$rel_path;
         }
+
+        return $this->remote_asset_url.$rel_path;
     }
 
-    /**
-     * @param string $rel_path
-     *
-     * @return string
-     */
     protected function getLocalTimestampedUrl(string $rel_path): string
     {
         $local_path = $this->local_asset_path.$rel_path;
-        if ( ! file_exists($local_path)) {
+        if (!file_exists($local_path)) {
             throw new RuntimeException('Undefined asset file '.$local_path);
         }
 

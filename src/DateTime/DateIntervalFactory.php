@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\DateTime;
 
 use DateInterval;
 
 class DateIntervalFactory
 {
-
     public static function days(int $days): DateInterval
     {
         return new DateInterval('P'.$days.'D');

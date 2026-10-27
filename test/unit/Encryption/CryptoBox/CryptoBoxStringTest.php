@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
@@ -6,34 +7,36 @@ namespace test\unit\Ingenerator\PHPUtils\Encryption\CryptoBox;
 use Ingenerator\PHPUtils\Encryption\CryptoBox\CryptoBoxString;
 use Ingenerator\PHPUtils\StringEncoding\Base64Url;
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+
 use function random_bytes;
 
-class CryptoBoxStringTest extends TestCase
+final class CryptoBoxStringTest extends TestCase
 {
     /*
      * Heavily tested through the tests for CryptoBoxKeypair and CryptoBoxPublicKey
      */
-
-    public static function provider_invalid_string_format()
+    /**
+     * @return Iterator<string, array<string>>
+     */
+    public static function provider_invalid_string_format(): Iterator
     {
-        return [
-            'empty' => [''],
-            'incorrect format' => ['just a long string'],
-            'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'],
-            'no keypair_id' => ['zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'],
-        ];
+        yield 'empty' => [''];
+        yield 'incorrect format' => ['just a long string'];
+        yield 'not base64url' => ['key-id."!&*£&C531()"£&$$$"!£'];
+        yield 'no keypair_id' => ['zio0N2IcV1QU637aor-JVG2yrbrY4iuCAE1YiCz6E5j7Y8LeZmysuvLZOgaIeZuQshSjvijpVhHoTSP-qmsfBA'];
     }
 
     #[DataProvider('provider_invalid_string_format')]
-    public function test_it_throws_invalid_argument_if_attempting_to_create_from_invalid_string($keypair_string)
+    public function testItThrowsInvalidArgumentIfAttemptingToCreateFromInvalidString(string $keypair_string): void
     {
         $this->expectException(InvalidArgumentException::class);
         CryptoBoxString::fromString($keypair_string);
     }
 
-    public function test_it_can_be_converted_to_string_encoding_and_recreated()
+    public function testItCanBeConvertedToStringEncodingAndRecreated(): void
     {
         $expected = new CryptoBoxString(ciphertext: random_bytes(21), keypair_id: 'b');
         $exported = (string) $expected;
@@ -46,12 +49,11 @@ class CryptoBoxStringTest extends TestCase
         );
     }
 
-    public function test_it_can_provide_just_the_ciphertext_as_base64()
+    public function testItCanProvideJustTheCiphertextAsBase64(): void
     {
         $original = random_bytes(23);
         $subject = new CryptoBoxString(ciphertext: $original, keypair_id: 'alpha');
 
         $this->assertSame($original, Base64Url::decode($subject->getCiphertextB64()));
     }
-
 }

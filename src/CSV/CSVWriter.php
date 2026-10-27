@@ -1,78 +1,84 @@
 <?php
+
 /**
  * @author    Andrew Coulton <andrew@ingenerator.com>
+ *
  * @licence   BSD-3-Clause
  */
 
 namespace Ingenerator\PHPUtils\CSV;
 
-
-use Ingenerator\PHPUtils\CSV\MismatchedSchemaException;
+use InvalidArgumentException;
+use LogicException;
 use RuntimeException;
+
+use function array_keys;
+use function array_merge;
+use function fclose;
+use function fopen;
+use function fputcsv;
+use function get_resource_type;
+use function is_resource;
+use function is_string;
 
 class CSVWriter
 {
-    const UTF8_BOM = "\xEF\xBB\xBF";
+    final public const UTF8_BOM = "\xEF\xBB\xBF";
 
     /**
-     * @var resource
+     * @var resource|null
      */
     protected $resource;
 
-    /**
-     * @var bool
-     */
-    protected $owns_resource;
+    protected bool $owns_resource;
 
-    /**
-     * @var array
-     */
-    protected $expect_schema;
+    /** @var list<array-key>|null */
+    protected ?array $expect_schema = null;
 
-    /**
-     * @var array
-     */
-    protected $options = [
-        'write_utf8_bom' => FALSE,
-        'quote_headers' => TRUE,
+    /** @var array{write_utf8_bom: bool, quote_headers: bool, eol: string} */
+    protected array $options = [
+        'write_utf8_bom' => false,
+        'quote_headers' => true,
         'eol' => "\n",
     ];
 
     /**
-     * @param string $file
-     * @param array  $options
+     * @param string|resource $file
+     * @param array{write_utf8_bom?: bool, quote_headers?: bool, eol?: string} $options
      */
-    public function open($file, array $options = [])
+    public function open(mixed $file, array $options = []): void
     {
-        if (\is_resource($file) AND (\get_resource_type($file) === 'stream')) {
-            $this->resource      = $file;
-            $this->owns_resource = FALSE;
-        } elseif (\is_string($file)) {
-            $this->resource      = \fopen($file, 'w');
-            $this->owns_resource = TRUE;
+        if (is_resource($file) && get_resource_type($file) === 'stream') {
+            $this->resource = $file;
+            $this->owns_resource = false;
+        } elseif (is_string($file)) {
+            $resource = fopen($file, 'w');
+            if ($resource === false) {
+                throw new RuntimeException('Unable to open CSV file '.$file);
+            }
+            $this->resource = $resource;
+            $this->owns_resource = true;
         } else {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Expected `file` to be string or an existing resource'
             );
         }
-        $this->expect_schema = NULL;
-        $this->options       = \array_merge($this->options, $options);
+        $this->expect_schema = null;
+        $this->options = array_merge($this->options, $options);
     }
 
-    /**
-     * @param array $row
-     */
-    public function write(array $row)
+    /** @param array<array-key, bool|float|int|string|null> $row */
+    public function write(array $row): void
     {
-        if ( ! $this->isResourceOpen()) {
-            throw new \LogicException('Cannot write to a closed file');
+        if (!$this->isResourceOpen()) {
+            throw new LogicException('Cannot write to a closed file');
         }
 
-        $row_schema = \array_keys($row);
+        $row_schema = array_keys($row);
 
-        if ($this->expect_schema === NULL) {
+        if ($this->expect_schema === null) {
             if ($this->options['write_utf8_bom']) {
-                \fputs($this->resource, static::UTF8_BOM);
+                fwrite($this->resource, self::UTF8_BOM);
             }
             $this->expect_schema = $row_schema;
             $this->writeHeaders($this->expect_schema);
@@ -80,39 +86,54 @@ class CSVWriter
             throw MismatchedSchemaException::forSchema($this->expect_schema, $row_schema);
         }
 
-        \fputcsv($this->resource, $row, eol: $this->options['eol']);
+        if (!$this->isResourceOpen()) {
+            throw new LogicException('Cannot write to a closed file');
+        }
+        fputcsv($this->resource, $row, eol: $this->options['eol']);
     }
 
-    protected function isResourceOpen()
+    /**
+     * @phpstan-assert-if-true resource $this->resource
+     */
+    protected function isResourceOpen(): bool
     {
-        return $this->resource && (\get_resource_type($this->resource) === 'stream');
+        return $this->resource && (get_resource_type($this->resource) === 'stream');
     }
 
-    public function close()
+    public function close(): void
     {
-        if ( ! $this->resource) {
-            throw new \LogicException('Cannot close a file that has not been opened!');
+        if (!$this->resource) {
+            throw new LogicException('Cannot close a file that has not been opened!');
         }
 
         if ($this->owns_resource) {
-            \fclose($this->resource);
+            fclose($this->resource);
         }
 
-        $this->resource = NULL;
+        $this->resource = null;
     }
 
+    /**
+     * @param list<array-key> $keys
+     */
     private function writeHeaders(array $keys): void
     {
         if ($this->options['quote_headers']) {
-            \fputcsv($this->resource, $keys, eol: $this->options['eol']);
+            if (!$this->isResourceOpen()) {
+                throw new LogicException('Cannot write to a closed file');
+            }
+            fputcsv($this->resource, $keys, eol: $this->options['eol']);
         } else {
             array_walk(
                 $keys,
-                fn(string $str) => ! str_contains($str, ',')
+                fn (int|string $str): true => !str_contains((string) $str, ',')
                     ?: throw new RuntimeException(
                         "Column header `$str` cannot contain comma if headers are not quoted"
                     )
             );
+            if (!$this->isResourceOpen()) {
+                throw new LogicException('Cannot write to a closed file');
+            }
             fwrite($this->resource, implode(',', $keys).$this->options['eol']);
         }
     }
