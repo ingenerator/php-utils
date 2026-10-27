@@ -19,7 +19,7 @@ class StrictDate
     /**
      * Validate that value of one field is a date after the value of another.
      *
-     * @param ArrayAccess<string, mixed> $validation
+     * @param ArrayAccess<string, covariant mixed> $validation
      *
      * @deprecated validate input before creating DateTimeImmutable objects
      */
@@ -39,7 +39,7 @@ class StrictDate
     /**
      * Validate that value of one field is a date on or after value of another (>= ignoring time).
      *
-     * @param ArrayAccess<string, mixed> $validation
+     * @param ArrayAccess<string, covariant mixed> $validation
      *
      * @deprecated validate input before creating DateTimeImmutable objects
      */
@@ -88,7 +88,11 @@ class StrictDate
 
     protected static function is_datetime_format(string $format, mixed $value): bool
     {
-        $dt = DateTimeImmutable::createFromFormat($format, (string) $value);
+        if (!is_string($value)) {
+            return false;
+        }
+
+        $dt = DateTimeImmutable::createFromFormat($format, $value);
 
         return $dt && $dt->format($format) === $value;
     }
