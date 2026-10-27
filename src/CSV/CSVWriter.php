@@ -67,7 +67,7 @@ class CSVWriter
         $this->options = array_merge($this->options, $options);
     }
 
-    /** @param array<array-key, mixed> $row */
+    /** @param array<array-key, bool|float|int|string|null> $row */
     public function write(array $row): void
     {
         if (!$this->isResourceOpen()) {
