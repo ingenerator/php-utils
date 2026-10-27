@@ -49,7 +49,7 @@ class ExternalCallSiteFinder
      *    }
      */
     /**
-     * @param list<array<string, mixed>> $trace
+     * @param list<array{file?: string, line?: int, function?: string, class?: string, type?:string}> $trace
      * @param list<class-string> $ignore_classes
      *
      * @return array<string, mixed>
@@ -95,15 +95,15 @@ class ExternalCallSiteFinder
             $func = '{closure}';
         } elseif (isset($next_call['class'])) {
             // This was a class method - either -> for instance scope, or :: for static
-            $func = $next_call['class'].$next_call['type'].$next_call['function'];
+            $func = $next_call['class'].($next_call['type'] ?? '{unknown type}').$next_call['function'];
         } else {
             // This was a pure (named) function
             $func = $next_call['function'];
         }
 
         return [
-            'file' => $called_from['file'],
-            'line' => $called_from['line'],
+            'file' => $called_from['file'] ?? '{unknown file}',
+            'line' => $called_from['line'] ?? '{unknown file}',
             'function' => $func,
         ];
     }
