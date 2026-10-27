@@ -41,8 +41,8 @@ class DateIntervalUtils
 
         $parts = [];
         foreach ($supported_components as $key => $human_value) {
-            $qty = $components[$key] ?? null;
-            $parts[] = $qty.' '.$human_value.($qty > 1 ? 's' : '');
+            $qty = $interval->$key ?? null;
+            $parts[] = sprintf('%s %s%s', $qty, $human_value, $qty > 1 ? 's' : '');
         }
 
         $last_part = array_pop($parts);
