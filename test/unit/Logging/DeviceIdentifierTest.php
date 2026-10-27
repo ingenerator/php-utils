@@ -145,11 +145,7 @@ final class DeviceIdentifierTest extends TestCase
 
     public function testItsStaticInitCreatesInstanceAndInitialises(): void
     {
-        ScopeChangingCaller::call(
-            DeviceIdentifier::class,
-            /** @phpstan-ignore staticProperty.protected (intentional modification of state to reset singleton) */
-            function (): void { DeviceIdentifier::$instance = null; }
-        );
+        DeviceIdentifier::resetInstance();
 
         $old_cookie = $_COOKIE;
         try {
@@ -172,11 +168,7 @@ final class DeviceIdentifierTest extends TestCase
 
     public function testItsStaticInitCreatesInstanceAndInitialisesWithFixedIdInCli(): void
     {
-        ScopeChangingCaller::call(
-            DeviceIdentifier::class,
-            /** @phpstan-ignore staticProperty.protected (intentional modification of state to reset singleton) */
-            function (): void { DeviceIdentifier::$instance = null; }
-        );
+        DeviceIdentifier::resetInstance();
 
         DeviceIdentifier::initAndEnsureCookieSet(true); // Fall back to default arg
         $this->assertSame(DeviceIdentifier::CLI_ID, DeviceIdentifier::get());
@@ -185,11 +177,7 @@ final class DeviceIdentifierTest extends TestCase
 
     public function testItsStaticGetCanReadFromCookiesEvenIfNotInitialised(): void
     {
-        ScopeChangingCaller::call(
-            DeviceIdentifier::class,
-            /** @phpstan-ignore staticProperty.protected (intentional modification of state to reset singleton) */
-            function (): void { DeviceIdentifier::$instance = null; }
-        );
+        DeviceIdentifier::resetInstance();
 
         $old_cookie = $_COOKIE;
         try {
@@ -221,7 +209,7 @@ final class DeviceIdentifierTest extends TestCase
     {
         return ScopeChangingCaller::call(
             DeviceIdentifier::class,
-            /** @phpstan-ignore new.protectedConstructor (intentional modification of state to reset singleton) */
+            /** @phpstan-ignore new.privateConstructor (intentional modification of state to reset singleton) */
             fn (CookieWrapper $cookies): DeviceIdentifier => new DeviceIdentifier($cookies),
             $this->cookies
         );

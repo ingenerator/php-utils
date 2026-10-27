@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Logging;
 
 use DateInterval;
@@ -24,16 +26,24 @@ use function random_bytes;
  * It *must not* be used for any application logic as the value is protected only against invalid
  * formats, it is not in any way protected against forgery or cloning.
  */
-class DeviceIdentifier
+final class DeviceIdentifier
 {
-    protected static ?DeviceIdentifier $instance;
+    private static ?DeviceIdentifier $instance;
+
+    /**
+     * @internal
+     */
+    public static function resetInstance(): void
+    {
+        self::$instance = null;
+    }
 
     /**
      * Forces the singleton state to a known value for use in testing.
      */
     public static function forceGlobalTestValue(string $id): void
     {
-        static::$instance = new DeviceIdentifier(new ArrayCookieWrapperStub(['did' => $id]));
+        self::$instance = new DeviceIdentifier(new ArrayCookieWrapperStub(['did' => $id]));
     }
 
     /**
@@ -49,12 +59,12 @@ class DeviceIdentifier
             // Note that as it's not really appropriate to inject the `is_cli` arg to `::get()`, and we can't stub
             // PHP_SAPI for testing, that method will still return `-unset-` if it is called before
             // ::initAndEnsureCookieSet()
-            static::forceGlobalTestValue(static::CLI_ID);
+            self::forceGlobalTestValue(self::CLI_ID);
         } else {
-            static::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
+            self::$instance = new DeviceIdentifier(new CookieWrapper($ssl_available));
         }
-        assert(static::$instance instanceof DeviceIdentifier, 'Should have been assigned by above or by ::forceGlobalTestValue');
-        static::$instance->init();
+        assert(self::$instance instanceof DeviceIdentifier, 'Should have been assigned by above or by ::forceGlobalTestValue');
+        self::$instance->init();
     }
 
     /**
@@ -66,7 +76,7 @@ class DeviceIdentifier
      */
     public static function get(): string
     {
-        $i = static::$instance ?: new DeviceIdentifier(new CookieWrapper());
+        $i = self::$instance ?? new DeviceIdentifier(new CookieWrapper());
 
         return $i->getValue();
     }
@@ -75,9 +85,9 @@ class DeviceIdentifier
     public const COOKIE_LIFETIME = 'P5Y';
     public const VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
 
-    protected ?string $id = null;
+    private ?string $id = null;
 
-    protected function __construct(protected CookieWrapper $cookies)
+    private function __construct(private readonly CookieWrapper $cookies)
     {
     }
 
@@ -117,10 +127,10 @@ class DeviceIdentifier
         }
     }
 
-    protected function assignNewIdAndSetCookies(): void
+    private function assignNewIdAndSetCookies(): void
     {
         $this->id = Base64Url::encode(random_bytes(16));
-        $expire = (new DateTimeImmutable())->add(new DateInterval(static::COOKIE_LIFETIME));
+        $expire = (new DateTimeImmutable())->add(new DateInterval(self::COOKIE_LIFETIME));
 
         // The cookies are set with httponly=false to allow access from JS (though generally it is
         // preferred to render it server-side and inject into javascript through data attributes /
