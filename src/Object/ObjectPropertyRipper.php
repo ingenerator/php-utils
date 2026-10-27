@@ -38,7 +38,7 @@ class ObjectPropertyRipper
         $class = $object::class;
         $ripper = static::getRipper($class);
 
-        return $ripper($object, $properties);
+        return $ripper($object, array_values($properties));
     }
 
     /**
@@ -59,6 +59,10 @@ class ObjectPropertyRipper
             fn (): array => get_object_vars($object),
             $object,
         ))();
+        // Currently phpstan doesn't support typing a method to take a callable with arbitrary arguments so
+        // it's not possible to tell it that the ::bindScopedClosure return will be the return of the closure.
+        // See https://github.com/phpstan/phpstan/issues/8214
+        /** @var array<string, mixed> $props */
 
         // Safety check - the method above is efficient but can't return private props from parent classes
         // And actually, turning complex classes like that into arrays is probelematic anyway because there's
@@ -87,13 +91,16 @@ class ObjectPropertyRipper
      * properties.
      *
      * @param class-string $class
+     *
+     * @return Closure(object, list<string>): array<string, mixed>
      */
     protected static function getRipper(string $class): Closure
     {
         static::$rippers[$class] ??= self::bindScopedClosure(
-            function ($object, $properties): array {
+            function (object $object, array $properties): array {
                 $values = [];
                 foreach ($properties as $property) {
+                    assert(is_string($property), 'Should have been called with string property names');
                     $values[$property] = $object->$property;
                 }
 
