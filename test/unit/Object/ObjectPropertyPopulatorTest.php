@@ -54,7 +54,6 @@ final class ObjectPropertyPopulatorTest extends TestCase
 
 class TestPopulatingClass
 {
-
     /* @phpstan-ignore property.onlyRead (written by the populator in tests) */
     private mixed $something_private;
     protected mixed $something_protected;

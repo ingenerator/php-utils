@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Config\RectorConfig;
+use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
 use Rector\Php82\Rector\Class_\ReadOnlyClassRector;
 
 return RectorConfig::configure()
@@ -25,8 +25,8 @@ return RectorConfig::configure()
         ReadOnlyClassRector::class,
         // Don't force test properties to readonly
         ReadOnlyPropertyRector::class => [
-            __DIR__.'/test/unit/Object/ObjectPropertyPopulatorTest.php'
-        ]
+            __DIR__.'/test/unit/Object/ObjectPropertyPopulatorTest.php',
+        ],
     ])
     ->withImportNames(
         removeUnusedImports: true,
