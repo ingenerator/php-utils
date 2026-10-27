@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ingenerator\PHPUtils\Logging;
 
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use Throwable;
 
 use function array_shift;
@@ -33,18 +36,16 @@ class DefaultLogMetadata
      * Note that these values are also "hoisted" by the request logger rather than look them up separately so you should
      * always include this or an equivalent metadata set with the same values.
      *
-     * @param array<string, mixed> $server the $_SERVER global
-     *
      * @return array<string, array<string, array<string, mixed>>>
      */
-    public static function httpContext(array $server): array
+    public static function httpContext(ServerGlobal $server = new ServerGlobal()): array
     {
         return [
             'context' => [
                 'httpRequest' => [
-                    'requestMethod' => $server['REQUEST_METHOD'] ?? null,
-                    'requestUrl' => $server['REQUEST_URI'] ?? null,
-                    'remoteIp' => $server['REMOTE_ADDR'] ?? '{na}',
+                    'requestMethod' => $server->getString('REQUEST_METHOD') ?? null,
+                    'requestUrl' => $server->getString('REQUEST_URI') ?? null,
+                    'remoteIp' => $server->getString('REMOTE_ADDR') ?? '{na}',
                 ],
             ],
         ];
@@ -53,19 +54,19 @@ class DefaultLogMetadata
     /**
      * Basic request tracing information including a random unique request ID and google trace if any.
      *
-     * @param array<string, mixed> $server
-     *
      * @return array{context: array{req: string}, 'logging.googleapis.com/trace': string}
      */
-    public static function requestTrace(array $server = [], ?string $gcp_project = null): array
-    {
+    public static function requestTrace(
+        ServerGlobal $server = new ServerGlobal(),
+        ?string $gcp_project = null,
+    ): array {
         $request_id = uniqid('', true);
 
         // Attempt to parse the GCP trace ID header as per https://cloud.google.com/run/docs/logging#writing_structured_logs
         // Note this only works if we have a GCP project as a constructor arg
         // If that doesn't work then just use the request ID as the trace ID - it won't match anything
         // in stackdriver but will still tie the logs for the request together.
-        $trace_hdr_parts = explode('/', $server['HTTP_X_CLOUD_TRACE_CONTEXT'] ?? $request_id);
+        $trace_hdr_parts = explode('/', $server->getString('HTTP_X_CLOUD_TRACE_CONTEXT') ?? $request_id);
         if ($gcp_project && count($trace_hdr_parts) === 2) {
             $trace_id = 'projects/'.$gcp_project.'/traces/'.$trace_hdr_parts[0];
         } else {

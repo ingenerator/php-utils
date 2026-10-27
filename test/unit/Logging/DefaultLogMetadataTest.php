@@ -6,6 +6,7 @@ namespace test\unit\Ingenerator\PHPUtils\Logging;
 
 use Ingenerator\PHPUtils\Logging\DefaultLogMetadata;
 use Ingenerator\PHPUtils\Logging\DeviceIdentifier;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use Iterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -31,7 +32,7 @@ final class DefaultLogMetadataTest extends TestCase
     #[TestWith([[], '{na}'])]
     public function testItsHttpContextProvidesClientIpFromServerVars(array $server, string $expect): void
     {
-        $result = DefaultLogMetadata::httpContext($server);
+        $result = DefaultLogMetadata::httpContext(ServerGlobal::fake($server));
         $this->assertSame($expect, $result['context']['httpRequest']['remoteIp']);
     }
 
@@ -41,7 +42,7 @@ final class DefaultLogMetadataTest extends TestCase
     #[TestWith([[], null])]
     public function testItsHttpContextProvidesRequestUrlFromServerVars(array $server, ?string $expect): void
     {
-        $result = DefaultLogMetadata::httpContext($server);
+        $result = DefaultLogMetadata::httpContext(ServerGlobal::fake($server));
         $this->assertSame($expect, $result['context']['httpRequest']['requestUrl']);
     }
 
@@ -50,7 +51,7 @@ final class DefaultLogMetadataTest extends TestCase
     #[TestWith([[], null])]
     public function testItsHttpContextProvidesRequestMethodFromServerVars(array $server, ?string $expect): void
     {
-        $result = DefaultLogMetadata::httpContext($server);
+        $result = DefaultLogMetadata::httpContext(ServerGlobal::fake($server));
         $this->assertSame($expect, $result['context']['httpRequest']['requestMethod']);
     }
 
@@ -125,7 +126,7 @@ final class DefaultLogMetadataTest extends TestCase
         ?string $project,
         string $expect,
     ): void {
-        $result = DefaultLogMetadata::requestTrace($server, $project);
+        $result = DefaultLogMetadata::requestTrace(ServerGlobal::fake($server), $project);
         $this->assertArrayHasKey('logging.googleapis.com/trace', $result);
         $this->assertSame(
             $expect,

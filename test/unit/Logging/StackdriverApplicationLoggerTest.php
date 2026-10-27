@@ -10,6 +10,7 @@ use Ingenerator\PHPUtils\Logging\LoggingFailureException;
 use Ingenerator\PHPUtils\Logging\LogMetadataProvider;
 use Ingenerator\PHPUtils\Logging\StackdriverApplicationLogger;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use InvalidArgumentException;
 use Iterator;
 use org\bovigo\vfs\vfsStream;
@@ -516,7 +517,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
 
     public function testItsRequestLoggerLogsRequestAsIngeneratorRequestLogType(): void
     {
-        $this->newSubject()->logRequest([]);
+        $this->newSubject()->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame('rqst', $entry['@ingenType']);
     }
@@ -540,7 +541,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         $logger = $this->newSubject();
         http_response_code($http_status);
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect, $entry['severity'], 'Expect correct severity');
     }
@@ -557,7 +558,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         ];
 
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             $original_http_meta,
@@ -571,7 +572,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     #[TestWith(['logging.googleapis.com/sourceLocation'])]
     public function testItsRequestLoggerDoesNotLogIrrelevantProperties(string $prop): void
     {
-        $this->newSubject()->logRequest([]);
+        $this->newSubject()->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertArrayNotHasKey($prop, $entry);
     }
@@ -583,7 +584,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         ];
 
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(['mem_mb', 'user'], array_keys($entry['context']));
         $this->assertSame('john@do.com', $entry['context']['user']);
@@ -593,7 +594,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         http_response_code(402);
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
@@ -609,7 +610,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         http_response_code(402);
         $logger = $this->newSubject();
-        $logger->logRequest($server);
+        $logger->logRequest(ServerGlobal::fake($server));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
@@ -619,7 +620,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $ua_val = 'abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 long ※ note the utf8 safe truncation and trimming';
         $expect = 'abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz 1234567890 long…';
         $logger = $this->newSubject();
-        $logger->logRequest(['HTTP_USER_AGENT' => $ua_val]);
+        $logger->logRequest(ServerGlobal::fake(['HTTP_USER_AGENT' => $ua_val]));
         $entry = $this->assertLoggedOneLine();
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
@@ -628,7 +629,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         $start = microtime(true);
         $logger = $this->newSubject();
-        $logger->logRequest([], $start);
+        $logger->logRequest(ServerGlobal::fake([]), $start);
         $end = microtime(true);
         $entry = $this->assertLoggedOneLine();
         $this->assertMatchesRegularExpression('/^(0\.[0-9]+)s$/', $entry['httpRequest']['latency']);
@@ -639,7 +640,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     public function testItsRequestLoggerLogsNullLatencyIfNoStartTime(): void
     {
         $logger = $this->newSubject();
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
         $this->assertNull($entry['httpRequest']['latency']);
     }
@@ -648,7 +649,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         $logger = $this->newSubject();
         $peak_before = memory_get_peak_usage(true);
-        $logger->logRequest([]);
+        $logger->logRequest(ServerGlobal::fake([]));
         $peak_after = memory_get_peak_usage(true);
         $entry = $this->assertLoggedOneLine();
         $this->assertIsString(

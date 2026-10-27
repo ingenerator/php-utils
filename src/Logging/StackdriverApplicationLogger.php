@@ -5,6 +5,7 @@ namespace Ingenerator\PHPUtils\Logging;
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
 use Ingenerator\PHPUtils\Object\InitialisableSingletonTrait;
 use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use RuntimeException;
@@ -169,7 +170,7 @@ class StackdriverApplicationLogger extends AbstractLogger
 
         $log_entry = AssociativeArrayUtils::deepMerge(
             [
-                'severity' => strtoupper($level),
+                'severity' => strtoupper(is_string($level) ? $level : ''),
                 'message' => $message,
                 self::PROP_INGEN_TYPE => 'app',
             ],
@@ -315,24 +316,33 @@ class StackdriverApplicationLogger extends AbstractLogger
         $log_entry['@type'] = self::TYPE_STACKDRIVER_ERROR;
 
         // Thanks @google for these having different keys in context.reportLocation rather than using sourceLocation
-        $source_location = $log_entry[self::PROP_SOURCE_LOCATION];
-        $log_entry['context']['reportLocation'] = [
+        $source_location = $log_entry[self::PROP_SOURCE_LOCATION] ?? [];
+        if (!is_array($source_location)) {
+            $source_location = [];
+        }
+        $context = $log_entry['context'] ?? [];
+        if (!is_array($context)) {
+            $context = [];
+        }
+        $context['reportLocation'] = [
             'filePath' => $source_location['file'] ?? null,
             'lineNumber' => $source_location['line'] ?? null,
             'functionName' => $source_location['function'] ?? null,
         ];
+        $log_entry['context'] = $context;
 
         // If this was logged from an exception, add the exception info in Error Reporting's required format but with
         // our safe trace string.
         $exception = $log_entry[self::PROP_EXCEPTION] ?? null;
         if (is_array($exception) && isset($exception['class'])) {
+            $as_string = static fn (mixed $value): string => is_scalar($value) ? (string) $value : '';
             $log_entry['stack_trace'] = sprintf(
                 "PHP Warning: %s: %s in %s:%s\nStack trace:\n%s",
-                $exception['class'],
-                $exception['msg'],
-                $exception['file'],
-                $exception['line'],
-                $exception['trace']
+                $as_string($exception['class'] ?? ''),
+                $as_string($exception['msg'] ?? ''),
+                $as_string($exception['file'] ?? ''),
+                $as_string($exception['line'] ?? ''),
+                $as_string($exception['trace'] ?? '')
             );
         }
         unset($log_entry[self::PROP_REPORT_STACKDRIVER_ERROR]);
@@ -373,12 +383,12 @@ class StackdriverApplicationLogger extends AbstractLogger
      * Log entries have a severity set based on http_response_code, to provide a second route for detection/altering of
      * 4xx and 5xx responses.
      *
-     * @param array<string, mixed>|null $server             The $_SERVER array
      * @param float|null $request_start_time The microtime when the request started processing - usually a const defined at the very start of your PHP
      */
-    public function logRequest(?array $server, ?float $request_start_time = null): void
-    {
-        $server = $server ?: $_SERVER;
+    public function logRequest(
+        ServerGlobal $server = new ServerGlobal(),
+        ?float $request_start_time = null,
+    ): void {
         $http_code = http_response_code() ?: '{na}';
         $meta = $this->getMetadata();
         $log_entry = AssociativeArrayUtils::deepMerge(
@@ -397,7 +407,7 @@ class StackdriverApplicationLogger extends AbstractLogger
                     // shared with application log entry context
                     'status' => $http_code,
                     'userAgent' => $this->truncate(
-                        StringSanitiser::ensurePrintableUtf8($server['HTTP_USER_AGENT'] ?? ''),
+                        StringSanitiser::ensurePrintableUtf8($server->getString('HTTP_USER_AGENT') ?? ''),
                         500
                     ),
                     'latency' => $this->calculateRequestLatency($request_start_time),

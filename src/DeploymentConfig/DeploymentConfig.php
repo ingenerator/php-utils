@@ -4,6 +4,7 @@ namespace Ingenerator\PHPUtils\DeploymentConfig;
 
 use Ingenerator\PHPUtils\StringEncoding\InvalidJSONException;
 use Ingenerator\PHPUtils\StringEncoding\JSON;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 
 final class DeploymentConfig
 {
@@ -17,7 +18,7 @@ final class DeploymentConfig
 
     private string $config_dir = '/etc/ingenerator/conf';
 
-    private string $environment;
+    private readonly string $environment;
 
     private readonly ConfigMapDeclarationParser $map_parser;
 
@@ -36,19 +37,11 @@ final class DeploymentConfig
         return $instance;
     }
 
-    /**
-     * @param array<string, mixed>|null $env_vars - if missing will default to reading from $_SERVER
-     */
     private function __construct(
-        ?array $env_vars = null,
+        ServerGlobal $server = new ServerGlobal(),
         ?ConfigValueDecrypter $decrypter = null,
     ) {
-        $env_vars ??= $_SERVER;
-        if (is_string($env_vars['INGENERATOR_ENV'] ?? null)) {
-            $this->environment = $env_vars['INGENERATOR_ENV'];
-        } else {
-            $this->environment = self::PRODUCTION;
-        }
+        $this->environment = $server->getString('INGENERATOR_ENV') ?? self::PRODUCTION;
         $this->map_parser = new ConfigMapDeclarationParser();
         $this->value_decrypter = $decrypter ?? new ConfigValueDecrypter($this->config_dir.'/app-config-keys');
     }

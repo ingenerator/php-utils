@@ -10,6 +10,7 @@ use Ingenerator\PHPUtils\DeploymentConfig\DeploymentConfig;
 use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use Ingenerator\PHPUtils\DeploymentConfig\MissingConfigException;
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use Iterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -299,7 +300,7 @@ final class DeploymentConfigTest extends TestCase
     private function newSubject(array $env_vars): DeploymentConfig
     {
         $creator = Closure::bind(
-            fn (ConfigValueDecrypter $d): DeploymentConfig => new DeploymentConfig($env_vars, $d),
+            fn (ConfigValueDecrypter $d): DeploymentConfig => new DeploymentConfig(ServerGlobal::fake($env_vars), $d),
             null,
             DeploymentConfig::class
         );

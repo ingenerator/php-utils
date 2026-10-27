@@ -14,6 +14,7 @@ use DateTimeImmutable;
 use ErrorException;
 use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\StringEncoding\StringSanitiser;
+use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 use PDO;
 use RuntimeException;
 use SessionHandlerInterface;
@@ -45,15 +46,19 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
     /**
      * @param int    $lock_timeout seconds to wait for MySQL lock
      */
-    public function __construct(protected PDO $db, protected string $hash_salt, protected int $lock_timeout = 20)
-    {
+    public function __construct(
+        protected PDO $db,
+        protected string $hash_salt,
+        protected int $lock_timeout = 20,
+        ServerGlobal $server = new ServerGlobal(),
+    ) {
         $lifetime = \ini_get('session.gc_maxlifetime');
         if (!is_numeric($lifetime)) {
             throw new RuntimeException('session.gc_maxlifetime must be an integer, got '.json_encode($lifetime));
         }
         $this->session_lifetime = (int) $lifetime;
-        $this->client_ip = $_SERVER['REMOTE_ADDR'] ?? '';
-        $this->client_user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $this->client_ip = $server->getString('REMOTE_ADDR') ?? '';
+        $this->client_user_agent = $server->getString('HTTP_USER_AGENT') ?? '';
     }
 
     public function initialise(): void
