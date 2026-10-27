@@ -177,6 +177,9 @@ class StackdriverApplicationLogger extends AbstractLogger
             $this->getMetadata(),
             $context_overrides
         );
+        // In context, we know that the ::deepMerge above returns an array<string, mixed> since that is the type of all
+        // the inputs.
+        /** @var array<string, mixed> $log_entry */
 
         // Find source location here rather than in the initial array merge to avoid having to make this backtrace
         // call if it's already been provided / overridden by the caller.
@@ -223,6 +226,9 @@ class StackdriverApplicationLogger extends AbstractLogger
                     $source = $source();
                 }
                 $metadata = AssociativeArrayUtils::deepMerge($metadata, $source);
+                // In context, we know that the ::deepMerge above returns an array<string, mixed> since that is the type of all
+                // the inputs.
+                /** @var array<string, mixed> $metadata */
             } catch (Throwable $e) {
                 // @todo: include name/type of metadata source here (need a string helper to get the type name?)
                 $meta_errors[] = ['idx' => $index, 'throwable' => $e];
@@ -427,6 +433,9 @@ class StackdriverApplicationLogger extends AbstractLogger
             unset($log_entry['context']['httpRequest']);
         }
 
+        // In context, we know that the ::deepMerge above returns an array<string, mixed> since that is the type of all
+        // the inputs.
+        /** @var array<string, mixed> $log_entry */
         $this->writeLog($log_entry);
     }
 
