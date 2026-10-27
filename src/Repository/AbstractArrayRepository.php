@@ -175,24 +175,24 @@ abstract class AbstractArrayRepository
         $seen_objects[$entity] = true;
 
         $all_props = Closure::bind(
-            fn ($e): array => get_object_vars($e),
+            fn (object $e): array => get_object_vars($e),
             null,
             $entity,
         );
-        $obj_identity = (fn ($a): string => $a::class.'#'.spl_object_id($a));
+        $obj_identity = (fn (object $a): string => $a::class.'#'.spl_object_id($a));
         $result = [];
         foreach ($all_props($entity) as $key => $var) {
             if (!is_object($var)) {
                 $result[$key] = $var;
             } elseif ($var instanceof Collection) {
-                $result[$key] = [];
-                foreach ($var as $collection_item) {
-                    $result[$key][] = [
-                        $obj_identity($var) => $this->entityToArray($collection_item, $seen_objects),
-                    ];
-                }
+                $result[$key] = array_map(
+                    fn (mixed $collection_item): array => [
+                        $obj_identity($var) => is_object($collection_item) ? $this->entityToArray($collection_item, $seen_objects) : '**NOT OBJECT**',
+                    ],
+                    [...$var]
+                );
             } elseif ($var instanceof DateTimeInterface) {
-                $result[$key][$var::class] = $var->format(DateTime::ISO8601);
+                $result[$key] = [$var::class => $var->format(DateTime::ISO8601)];
             } else {
                 $result[$key] = [
                     $obj_identity($var) => $this->entityToArray($var, $seen_objects),
