@@ -23,7 +23,7 @@ use function is_string;
 
 class CSVWriter
 {
-    public const UTF8_BOM = "\xEF\xBB\xBF";
+    final public const UTF8_BOM = "\xEF\xBB\xBF";
 
     /**
      * @var resource|null
@@ -78,7 +78,7 @@ class CSVWriter
 
         if ($this->expect_schema === null) {
             if ($this->options['write_utf8_bom']) {
-                fwrite($this->resource, static::UTF8_BOM);
+                fwrite($this->resource, self::UTF8_BOM);
             }
             $this->expect_schema = $row_schema;
             $this->writeHeaders($this->expect_schema);
