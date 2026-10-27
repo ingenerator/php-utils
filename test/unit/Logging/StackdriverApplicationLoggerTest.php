@@ -38,6 +38,17 @@ use function microtime;
 use function preg_replace;
 use function str_replace;
 
+/**
+ * @phpstan-type TJsonLogEntry array{
+ *     severity: int,
+ *     message: string,
+ *     context: array<string, mixed>,
+ *     "@type": string,
+ *     "@ingenType": string,
+ *     "logging.googleapis.com/sourceLocation": array<string, mixed>,
+ *     ...
+ *   }
+ */
 final class StackdriverApplicationLoggerTest extends TestCase
 {
     private vfsStreamDirectory $vfs;
@@ -160,7 +171,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             ['app' => 'mine', 'ver' => 'this'],
-            $entry['serviceContext']
+            $entry['serviceContext'] ?? null
         );
     }
 
@@ -174,7 +185,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             ['app' => 'mine', 'ver' => 'other', 'microsite' => 'whatever'],
-            $entry['serviceContext']
+            $entry['serviceContext'] ?? null
         );
     }
 
@@ -206,7 +217,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         foreach ($lines as $idx => $line) {
             $this->assertSame(
                 ['req' => 'ab92823232', 'call_site' => 'lazy'],
-                $line['lambda'],
+                $line['lambda'] ?? null,
                 'Expect correct meta line '.$idx
             );
         }
@@ -282,7 +293,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         foreach ($lines as $line) {
             $this->assertSame(
                 ['first_ok', 'third_ok', 'fifth_ok', 'seventh_ok'],
-                $line['sources'],
+                $line['sources'] ?? null,
                 'Should log best-effort metadata for all entries'
             );
             $actual[] = $line['severity'].': '.$line['message'];
@@ -360,7 +371,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             ['context' => ['user' => 'her', 'page' => 'ourpage']],
-            $entry['custom_context']
+            $entry['custom_context'] ?? null
         );
         $this->assertSame(
             ['user' => 'me', 'sess' => 'sass'],
@@ -377,7 +388,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             'Well now, this is a string',
-            $entry['exception']
+            $entry['exception'] ?? null
         );
     }
 
@@ -440,7 +451,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
     {
         $this->newSubject()->info('Broken', ['exception' => $e]);
         $entry = $this->assertLoggedOneLine();
-        $this->assertSame($expect, $entry['exception']);
+        $this->assertSame($expect, $entry['exception'] ?? null);
     }
 
     public function testItReportsExceptionAsStackdriverErrorByDefaultWithStackTraceInStackdriverFormat(): void
@@ -481,7 +492,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
             "Stack trace:\n".self::makeExpectedSanitisedTrace($e),
             (string) $e
         );
-        $this->assertSame($expect_text, $entry['stack_trace']);
+        $this->assertSame($expect_text, $entry['stack_trace'] ?? null);
     }
 
     public function testItDoesNotReportExceptionAsStackdriverErrorIfFlagOverriden(): void
@@ -494,7 +505,9 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertArrayNotHasKey('@type', $entry);
         $this->assertArrayNotHasKey('stack_trace', $entry);
-        $this->assertNull($entry['context']['reportLocation'] ?? null, 'Should not have context.reportLocation');
+        $context = $entry['context'] ?? [];
+        $this->assertIsArray($context);
+        $this->assertArrayNotHasKey('reportLocation', $context, 'Should not have context.reportLocation');
     }
 
     public function testItCanOptionallyReportStackdriverErrorWithoutException(): void
@@ -562,7 +575,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $entry = $this->assertLoggedOneLine();
         $this->assertSame(
             $original_http_meta,
-            array_intersect_key($entry['httpRequest'], $original_http_meta),
+            array_intersect_key($entry['httpRequest'] ?? null, $original_http_meta),
             'Should include metadata in top-level httpRequest struct'
         );
         $this->assertArrayNotHasKey('httpRequest', $entry['context'], 'Should not duplicate httpRequest meta in context');
@@ -596,6 +609,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $logger = $this->newSubject();
         $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame(402, $entry['httpRequest']['status']);
     }
 
@@ -612,6 +626,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $logger = $this->newSubject();
         $logger->logRequest(ServerGlobal::fake($server));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
 
@@ -622,6 +637,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $logger = $this->newSubject();
         $logger->logRequest(ServerGlobal::fake(['HTTP_USER_AGENT' => $ua_val]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame($expect, $entry['httpRequest']['userAgent']);
     }
 
@@ -632,6 +648,8 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $logger->logRequest(ServerGlobal::fake([]), $start);
         $end = microtime(true);
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
+        $this->assertIsString($entry['httpRequest']['latency'] ?? null);
         $this->assertMatchesRegularExpression('/^(0\.[0-9]+)s$/', $entry['httpRequest']['latency']);
         $seconds = (float) str_replace('s', '', $entry['httpRequest']['latency']);
         $this->assertEqualsWithDelta($end - $start, $seconds, 0.1);
@@ -642,6 +660,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $logger = $this->newSubject();
         $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertNull($entry['httpRequest']['latency']);
     }
 
@@ -668,7 +687,7 @@ final class StackdriverApplicationLoggerTest extends TestCase
         );
     }
 
-    /** @return list<array<string, mixed>> */
+    /** @return list<TJsonLogEntry> */
     protected function assertLoggedJSONLines(): array
     {
         if (!is_file($this->log_stream)) {
@@ -683,12 +702,19 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $this->assertSame('', array_pop($lines), 'Expect trailing newline after last message');
 
         return array_map(
-            JSON::decodeArray(...),
+            function (string $l): array {
+                $log = JSON::decodeArray($l);
+
+                // We write and parse this ourselves, assume that it follows the expected structure and matches our
+                // virtual type.
+                /** @var TJsonLogEntry $log */
+                return $log;
+            },
             $lines
         );
     }
 
-    /** @return array<string, mixed> */
+    /** @return TJsonLogEntry */
     protected function assertLoggedOneLine(): array
     {
         $entries = $this->assertLoggedJSONLines();
@@ -727,19 +753,20 @@ final class StackdriverApplicationLoggerTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $entry
+     * @param TJsonLogEntry $entry
      */
     protected function assertClonesSourceLocationToContextReportLocation(array $entry): void
     {
         // Oh look, Google use different keys for the same values in different places. Thanks @google
         $source_location = $entry[StackdriverApplicationLogger::PROP_SOURCE_LOCATION];
+        $this->assertIsArray($source_location);
         $this->assertSame(
             [
                 'filePath' => $source_location['file'],
                 'lineNumber' => $source_location['line'],
                 'functionName' => $source_location['function'],
             ],
-            $entry['context']['reportLocation'],
+            $entry['context']['reportLocation'] ?? null,
             'Should copy sourceLocation to context.reportLocation'
         );
     }

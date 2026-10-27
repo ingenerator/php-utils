@@ -391,11 +391,19 @@ class StackdriverApplicationLogger extends AbstractLogger
     ): void {
         $http_code = http_response_code() ?: '{na}';
         $meta = $this->getMetadata();
+        $meta_context = $meta['context'] ?? [];
+        if (!is_array($meta_context)) {
+            $meta_context = [];
+        }
+        $http_request_meta = $meta_context['httpRequest'] ?? [];
+        if (!is_array($http_request_meta)) {
+            $http_request_meta = [];
+        }
         $log_entry = AssociativeArrayUtils::deepMerge(
             [
                 'severity' => strtoupper($this->getLogPriorityForHttpCode((string) $http_code)),
                 self::PROP_INGEN_TYPE => 'rqst',
-                'httpRequest' => $meta['context']['httpRequest'] ?? [],
+                'httpRequest' => $http_request_meta,
                 'context' => [
                     'mem_mb' => sprintf('%.2f', memory_get_peak_usage(true) / 1_000_000),
                 ],
@@ -415,7 +423,9 @@ class StackdriverApplicationLogger extends AbstractLogger
             ]
         );
         // No need to duplicate the httpRequest in context, we have already given it as a top-level property
-        unset($log_entry['context']['httpRequest']);
+        if (is_array($log_entry['context'])) {
+            unset($log_entry['context']['httpRequest']);
+        }
 
         $this->writeLog($log_entry);
     }
