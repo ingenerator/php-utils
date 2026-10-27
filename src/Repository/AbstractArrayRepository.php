@@ -22,7 +22,6 @@ use WeakMap;
 use function array_pop;
 use function call_user_func;
 use function count;
-use function func_get_args;
 use function get_object_vars;
 use function in_array;
 use function is_object;
@@ -57,13 +56,13 @@ abstract class AbstractArrayRepository
     /**
      * Create a repo with the provided entities. Pass entities, or arrays of properties to stub.
      *
-     * @param TEntityData|TEntityInstance $entity ,...
+     * @param TEntityData|TEntityInstance $entities
      *
      * @return static
      */
-    public static function with(array|object $entity)
+    public static function with(array|object ...$entities)
     {
-        return static::withList(func_get_args());
+        return static::withList(array_values($entities));
     }
 
     /**
@@ -162,12 +161,13 @@ abstract class AbstractArrayRepository
      *
      * Used to capture a snapshot of entity state at the time it's saved to allow later comparison
      *
-     * @param WeakMap<object,true> $seen_objects
+     * @param WeakMap<object, true>|null $seen_objects
      *
      * @return array<mixed>
      */
     protected function entityToArray(object $entity, ?WeakMap $seen_objects = null): array
     {
+        /** @var WeakMap<object, true> $seen_objects */
         $seen_objects ??= new WeakMap();
         if (isset($seen_objects[$entity])) {
             return ['**RECURSION**'];

@@ -35,6 +35,12 @@ final class AbstractArrayRepositoryTest extends TestCase
         $this->assertSame([$e], $subject->getEntities());
     }
 
+    public function testWithInitialisesWithNoEntities(): void
+    {
+        $subject = AnyArrayRepository::with();
+        $this->assertSame([], $subject->getEntities());
+    }
+
     public function testItIsInitialisableWithArrayOfPropsToStub(): void
     {
         $subject = AnyArrayRepository::with(['prop1' => 'foo']);
