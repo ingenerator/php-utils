@@ -85,7 +85,7 @@ class DeviceIdentifier
      */
     public function getValue(): string
     {
-        if (!isset($this->id)) {
+        if ($this->id === null) {
             $id = $this->cookies->get('did') ?: $this->cookies->get('didf');
             if (empty($id)) {
                 $id = '-unset-';
