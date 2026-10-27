@@ -44,7 +44,7 @@ final class DeploymentConfig
         ?ConfigValueDecrypter $decrypter = null,
     ) {
         $env_vars ??= $_SERVER;
-        if (isset($env_vars['INGENERATOR_ENV'])) {
+        if (is_string($env_vars['INGENERATOR_ENV'] ?? null)) {
             $this->environment = $env_vars['INGENERATOR_ENV'];
         } else {
             $this->environment = self::PRODUCTION;
