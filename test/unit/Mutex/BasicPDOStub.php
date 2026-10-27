@@ -25,7 +25,7 @@ if (PHP_MAJOR_VERSION < 8) {
         {
         }
 
-        public function quote($string, $type = PDO::PARAM_STR)
+        public function quote($string, $type = PDO::PARAM_STR): string|false
         {
             return '{quoted-'.$string.'}';
         }
@@ -35,7 +35,7 @@ if (PHP_MAJOR_VERSION < 8) {
             $mode = PDO::ATTR_DEFAULT_FETCH_MODE,
             $arg3 = null,
             array $ctorargs = [],
-        ) {
+        ): PDOStatement|false {
             Assert::assertNotEmpty($this->query_stack, 'No expectation defined for query '.$statement);
             $next_query = array_shift($this->query_stack);
             Assert::assertSame($next_query['sql'], $statement);
