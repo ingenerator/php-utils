@@ -24,17 +24,13 @@ final class DeploymentConfig
 
     private readonly ConfigValueDecrypter $value_decrypter;
 
-    /**
-     * @return static
-     */
-    public static function instance()
-    {
-        static $instance;
-        if (!$instance) {
-            $instance = new self();
-        }
+    private static DeploymentConfig $instance;
 
-        return $instance;
+    public static function instance(): self
+    {
+        self::$instance ??= new self();
+
+        return self::$instance;
     }
 
     private function __construct(
