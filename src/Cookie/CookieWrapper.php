@@ -3,6 +3,7 @@
 namespace Ingenerator\PHPUtils\Cookie;
 
 use DateTimeImmutable;
+use UnexpectedValueException;
 
 use function array_merge;
 use function headers_sent;
@@ -25,7 +26,15 @@ use function setcookie;
 class CookieWrapper
 {
     /**
-     * @var mixed[]
+     * Note: PHP $_COOKIE is normally array<string,string> however:
+     *  - It can contain arrays following the same syntax as form-encoded fields e.g. a cookie named
+     *    `foo[bar]` with value `ok` will produce a $_COOKIE like ['foo' => ['bar' => 'ok']]
+     *  - It can have any level of nested array structure
+     *  - Nested array keys can be ints e.g. cookie `foo[5]` will produce ['foo' => [5 => 'ok']]
+     *
+     * However we only support returning string values.
+     *
+     * @var array<mixed>
      */
     protected array $cookies = [];
 
@@ -74,7 +83,19 @@ class CookieWrapper
 
     public function get(string $name): ?string
     {
-        return $this->cookies[$name] ?? null;
+        if (!isset($this->cookies[$name])) {
+            return null;
+        }
+
+        $value = $this->cookies[$name];
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        throw new UnexpectedValueException(
+            sprintf('Cookie named %s should have been string, got %s', $name, get_debug_type($value))
+        );
     }
 
     public function has(string $name): bool
@@ -99,7 +120,19 @@ class CookieWrapper
     /** @param array<string, mixed> $options */
     protected function set_cookie(string $name, string $value, array $options): void
     {
-        setcookie($name, $value, $options);
+        $cookie_options = [
+            'expires' => is_int($options['expires'] ?? null) ? $options['expires'] : 0,
+            'path' => is_string($options['path'] ?? null) ? $options['path'] : '/',
+            'domain' => is_string($options['domain'] ?? null) ? $options['domain'] : '',
+            'secure' => (bool) ($options['secure'] ?? false),
+            'httponly' => (bool) ($options['httponly'] ?? false),
+        ];
+        $samesite = $options['samesite'] ?? null;
+        if (in_array($samesite, ['Lax', 'lax', 'None', 'none', 'Strict', 'strict'], true)) {
+            $cookie_options['samesite'] = $samesite;
+        }
+
+        setcookie($name, $value, $cookie_options);
     }
 
     protected function headers_sent(?string &$file = null, ?int &$line = null): bool

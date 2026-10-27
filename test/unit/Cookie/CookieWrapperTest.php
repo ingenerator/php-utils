@@ -9,6 +9,7 @@ use Ingenerator\PHPUtils\Cookie\CookieWrapper;
 use Ingenerator\PHPUtils\Cookie\HeadersSentException;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use UnexpectedValueException;
 
 final class CookieWrapperTest extends TestCase
 {
@@ -32,8 +33,18 @@ final class CookieWrapperTest extends TestCase
             [
                 'has' => $subject->has($name),
                 'value' => $subject->get($name),
-            ]
+            ],
         );
+    }
+
+    public function testItThrowsOnAccessToNonStringCookie(): void
+    {
+        $_COOKIE = ['somecookie' => ['one' => 'is array ']];
+        $subject = $this->newSubject();
+        $this->expectExceptionObject(
+            new UnexpectedValueException('Cookie named somecookie should have been string, got array'),
+        );
+        $subject->get('somecookie');
     }
 
     public function testItHasCookiesThatHaveBeenSetDuringRequest(): void
@@ -49,7 +60,7 @@ final class CookieWrapperTest extends TestCase
             [
                 'has' => $subject->has('anything'),
                 'value' => $subject->get('anything'),
-            ]
+            ],
         );
     }
 
@@ -59,7 +70,7 @@ final class CookieWrapperTest extends TestCase
         $subject->headers_sent = ['file' => 'myfile.php', 'line' => 152];
         $this->expectException(HeadersSentException::class);
         $this->expectExceptionMessage(
-            'Cannot assign cookie foo - headers have been sent by output at myfile.php:152'
+            'Cannot assign cookie foo - headers have been sent by output at myfile.php:152',
         );
         $subject->set('foo', 'anything');
     }
@@ -77,7 +88,7 @@ final class CookieWrapperTest extends TestCase
                 'domain' => 'foo.bar.com',
                 'secure' => false,
                 'httponly' => false,
-            ]
+            ],
         );
 
         $this->assertSame(
@@ -94,7 +105,7 @@ final class CookieWrapperTest extends TestCase
                     ],
                 ],
             ],
-            $subject->setcookie_calls
+            $subject->setcookie_calls,
         );
     }
 
@@ -118,7 +129,7 @@ final class CookieWrapperTest extends TestCase
                     ],
                 ],
             ],
-            $subject->setcookie_calls
+            $subject->setcookie_calls,
         );
     }
 
@@ -128,11 +139,11 @@ final class CookieWrapperTest extends TestCase
         $subject->set(
             'any',
             'thing',
-            ['expires' => new DateTimeImmutable('2028-03-02 10:02:02 +01:00')]
+            ['expires' => new DateTimeImmutable('2028-03-02 10:02:02 +01:00')],
         );
         $this->assertSame(
             1835600522,
-            $subject->setcookie_calls[0]['options']['expires']
+            $subject->setcookie_calls[0]['options']['expires'],
         );
     }
 
@@ -186,7 +197,7 @@ final class CookieWrapperTest extends TestCase
                     ],
                 ],
             ],
-            $subject->setcookie_calls
+            $subject->setcookie_calls,
         );
         $this->assertSame(
             [
@@ -196,7 +207,7 @@ final class CookieWrapperTest extends TestCase
             [
                 'has' => $subject->has('myvar'),
                 'value' => $subject->get('myvar'),
-            ]
+            ],
         );
     }
 
