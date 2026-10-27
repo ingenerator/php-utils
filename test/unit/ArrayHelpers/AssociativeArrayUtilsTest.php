@@ -9,7 +9,6 @@
 namespace test\unit\Ingenerator\PHPUtils\ArrayHelpers;
 
 use Ingenerator\PHPUtils\ArrayHelpers\AssociativeArrayUtils;
-use non;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
