@@ -76,7 +76,16 @@ final class DeploymentConfig
 
         $cfg_path = $this->config_dir.'/'.$path;
         if (file_exists($cfg_path)) {
-            return $this->value_decrypter->decrypt(file_get_contents($cfg_path));
+            $content = file_get_contents($cfg_path);
+            if ($content === false) {
+                throw MissingConfigException::failedFileRead($path, $cfg_path);
+            }
+            $decrypted = $this->value_decrypter->decrypt($content);
+            if (!is_string($decrypted)) {
+                throw MissingConfigException::invalidType($path, $cfg_path, get_debug_type($decrypted));
+            }
+
+            return $decrypted;
         }
         throw MissingConfigException::missingFile($path, $cfg_path, $this->environment);
     }

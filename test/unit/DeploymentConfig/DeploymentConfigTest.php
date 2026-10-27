@@ -11,6 +11,7 @@ use Ingenerator\PHPUtils\DeploymentConfig\InvalidConfigException;
 use Ingenerator\PHPUtils\DeploymentConfig\MissingConfigException;
 use Ingenerator\PHPUtils\Object\ObjectPropertyPopulator;
 use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
+use InvalidArgumentException;
 use Iterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -222,12 +223,43 @@ final class DeploymentConfigTest extends TestCase
         $this->assertSame('Iwasencrypted', $subject->read('secrets/integrations/via/password'));
     }
 
+    public function testItsReadThrowsIfDecryptedValueNotString(): void
+    {
+        $this->decrypter = new class extends ConfigValueDecrypter {
+            public function __construct()
+            {
+            }
+
+            public function decrypt(mixed $value): mixed
+            {
+                if (!is_string($value)) {
+                    throw new InvalidArgumentException('Expected string');
+                }
+
+                return json_decode($value);
+            }
+        };
+
+        $path = $this->givenConfigDirWithFile(
+            'secrets/integrations/via/password',
+            '15',
+        );
+        $subject = $this->newSubjectWithEnvAndConfigDir(
+            DeploymentConfig::DEV,
+            $path,
+        );
+
+        $this->expectException(MissingConfigException::class);
+        $this->expectExceptionMessage('should return a string, got `int`');
+        $subject->read('secrets/integrations/via/password');
+    }
+
     public function testItsReadThrowsIfFileNotPresentOutsideStandalone(): void
     {
         $path = $this->givenEmptyConfigDir();
         $subject = $this->newSubjectWithEnvAndConfigDir(
             DeploymentConfig::DEV,
-            $path
+            $path,
         );
         $this->expectException(MissingConfigException::class);
         $subject->read('secrets/integrations/via/password');
