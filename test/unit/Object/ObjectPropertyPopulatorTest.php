@@ -59,7 +59,7 @@ class TestPopulatingClass
     protected mixed $something_protected;
     protected string $already_init = 'Foo';
 
-    /** @return array<string, mixed> */
+    /** @return array<mixed> */
     public function toArray(): array
     {
         return get_object_vars($this);

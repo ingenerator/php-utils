@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 final class ServerGlobalTest extends TestCase
 {
-    /** @var array<string, mixed> */
+    /** @var array<mixed> */
     private array $old_server;
 
     protected function setUp(): void

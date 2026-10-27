@@ -13,7 +13,7 @@ use UnexpectedValueException;
 
 final class CookieWrapperTest extends TestCase
 {
-    /** @var array<string, mixed> */
+    /** @var array<mixed> */
     private array $_old_cookie_var;
 
     private bool $ssl_available = true;

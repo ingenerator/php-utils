@@ -220,6 +220,8 @@ PHP,
             unlink($temp);
         }
 
+        $this->assertIsArray($result);
+        $this->assertSame(['expected', 'actual'], array_keys($result));
         $this->assertSame($result['expected'], $result['actual']);
     }
 

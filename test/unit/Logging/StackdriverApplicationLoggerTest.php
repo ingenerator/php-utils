@@ -573,9 +573,10 @@ final class StackdriverApplicationLoggerTest extends TestCase
         $logger = $this->newSubject();
         $logger->logRequest(ServerGlobal::fake([]));
         $entry = $this->assertLoggedOneLine();
+        $this->assertIsArray($entry['httpRequest'] ?? null);
         $this->assertSame(
             $original_http_meta,
-            array_intersect_key($entry['httpRequest'] ?? null, $original_http_meta),
+            array_intersect_key($entry['httpRequest'], $original_http_meta),
             'Should include metadata in top-level httpRequest struct'
         );
         $this->assertArrayNotHasKey('httpRequest', $entry['context'], 'Should not duplicate httpRequest meta in context');

@@ -120,7 +120,7 @@ final class MysqlSessionTest extends TestCase
         // it would obviously be better if this ran as an integration test against an actual mysql instance - however
         // really here I only want to test that the validation is done against the database e.g. not short-circuited by
         // the pattern matching.
-        $pdo = $this->mockPDOToPrepareQueries(function ($query): MockObject {
+        $pdo = $this->mockPDOToPrepareQueries(function (string $query): MockObject {
             $result = $this->createMock(PDOStatement::class);
 
             if (str_starts_with($query, 'INSERT INTO `sessions`')) {

@@ -59,7 +59,7 @@ final class AssociativeArrayUtilsTest extends TestCase
     }
 
     /**
-     * @param array<mixed> $input
+     * @param array<string, mixed> $input
      * @param array<mixed> $expect
      */
     #[DataProvider('provider_paths_to_nested')]

@@ -118,6 +118,9 @@ final class RealtimeClockTest extends TestCase
         ];
     }
 
+    /**
+     * @param Closure(RealtimeClock): DateTimeImmutable $test_method
+     */
     #[DataProvider('provider_relative_times')]
     public function testItReturnsRelativeTimes(Closure $test_method, string $expect_result, bool $expect_zero_time): void
     {
