@@ -72,7 +72,8 @@ final class AbstractArrayRepositoryTest extends TestCase
         $subject = AnyArrayRepository::withList($entities);
         $this->assertSame(
             $expect,
-            $subject->countWith(fn (AnyEntity $e): mixed => $e->getProp1())
+            /* @phpstan-ignore return.type (we know the test data has strings here) */
+            $subject->countWith(fn (AnyEntity $e): string => $e->getProp1())
         );
     }
 
