@@ -35,7 +35,7 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
     protected ?string $session_lock = null;
 
     /**
-     * @var string[]
+     * @var array<string, string>
      */
     protected array $data_cache;
 
@@ -186,11 +186,19 @@ class MysqlSession implements SessionHandlerInterface, SessionUpdateTimestampHan
         // it is recommended to use fetchAll so that PDO can close the DB cursor, even tho we only expect one row
         $rows = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($session_data = ($rows[0]['session_data'] ?? null)) {
+        if ($rows !== []) {
+            if (!is_array($rows[0]) || !isset($rows[0]['session_data'])) {
+                throw new RuntimeException('Unexpected data type returned from database');
+            }
+
+            if (!is_string($rows[0]['session_data'])) {
+                throw new RuntimeException('Unexpected data type returned from database');
+            }
+
             // OK, they have a session, not expired and the hash is correct
             // Cache the data for the read call that will immediately follow
             // And keep the lock as we need to hold it till the end of their request
-            $this->data_cache[$session_id] = $session_data;
+            $this->data_cache[$session_id] = $rows[0]['session_data'];
 
             return true;
         }
