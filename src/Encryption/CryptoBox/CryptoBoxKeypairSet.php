@@ -18,6 +18,9 @@ use function sodium_memzero;
  */
 final class CryptoBoxKeypairSet
 {
+    /**
+     * @var UniqueMap<CryptoBoxKeypair>
+     */
     private UniqueMap $keys;
 
     /**
@@ -43,7 +46,9 @@ final class CryptoBoxKeypairSet
     public function __construct(
         CryptoBoxKeypair ...$keys,
     ) {
-        $this->keys = new UniqueMap([]);
+        $map = new UniqueMap();
+        /** @var UniqueMap<CryptoBoxKeypair> $map */
+        $this->keys = $map;
         foreach ($keys as $key) {
             $this->keys[$key->keypair_id] = $key;
         }

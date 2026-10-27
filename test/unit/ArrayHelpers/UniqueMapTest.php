@@ -39,8 +39,10 @@ final class UniqueMapTest extends TestCase
     {
         $new1 = new class { };
         $subject = new UniqueMap(['any' => 'item']);
+        /* @phpstan-ignore offsetAssign.valueType (don't need to enforce collection type in this test) */
         $subject['new1'] = $new1;
         $subject['new2'] = 'some-string';
+        /* @phpstan-ignore offsetAssign.valueType (don't need to enforce collection type in this test) */
         $subject['new3'] = null;
 
         $this->assertSame($new1, $subject['new1']);
@@ -99,6 +101,7 @@ final class UniqueMapTest extends TestCase
         $subject = new UniqueMap(['any' => 'item']);
         $subject['new'] = 'new1';
         $subject['other'] = 'new2';
+        /* @phpstan-ignore offsetAssign.valueType (don't need to enforce collection type in this test) */
         $subject['nully'] = null;
 
         $this->assertSame(
