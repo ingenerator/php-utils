@@ -31,6 +31,8 @@ class ScopeChangingCaller
      * @param class-string $class
      * @param Closure(TArgs):TReturn $func
      * @param TArgs $args,...
+     *
+     * @return TReturn
      */
     public static function call(string $class, Closure $func, mixed ...$args): mixed
     {
