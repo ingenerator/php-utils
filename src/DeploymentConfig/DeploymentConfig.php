@@ -8,13 +8,13 @@ use Ingenerator\PHPUtils\Superglobals\ServerGlobal;
 
 final class DeploymentConfig
 {
-    public const ANY = '*';
-    public const STANDALONE = 'standalone';
-    public const DEV = 'dev';
-    public const CI = 'ci';
-    public const PRODUCTION = 'production';
-    public const QA = 'qa';
-    public const LOADTEST = 'loadtest';
+    public const string ANY = '*';
+    public const string STANDALONE = 'standalone';
+    public const string DEV = 'dev';
+    public const string CI = 'ci';
+    public const string PRODUCTION = 'production';
+    public const string QA = 'qa';
+    public const string LOADTEST = 'loadtest';
 
     private string $config_dir = '/etc/ingenerator/conf';
 

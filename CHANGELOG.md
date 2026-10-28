@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Support PHP 8.5 & 8.6
+* Drop support for PHP 8.2 & 8.3
 * Drop support for psr/log 1.x and 2.x.
 * BREAKING: AbstractArrayRepository::getEntityBaseClass() is now abstract.
 * Refactored ConsistentStringScrambler to use Randomizer rather than mt_rand.

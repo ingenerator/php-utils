@@ -4,11 +4,11 @@ use PhpCsFixer\Finder;
 use PhpCsFixer\Config;
 use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
-$finder = (new Finder())
+$finder = new Finder()
     ->in(__DIR__)
 ;
 
-return (new Config())
+return new Config()
     ->setParallelConfig(ParallelConfigFactory::detect())
     ->setRules([
         '@Symfony' => true,

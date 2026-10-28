@@ -111,12 +111,6 @@ class ExternalCallSiteFinder
     /** @param list<class-string> $ignore_classes */
     protected function isIgnoredClass(string $class, array $ignore_classes): bool
     {
-        foreach ($ignore_classes as $ignored_class) {
-            if (is_a($ignored_class, $class, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($ignore_classes, fn (string $ignored_class): bool => is_a($ignored_class, $class, true));
     }
 }

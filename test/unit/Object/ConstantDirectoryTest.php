@@ -20,10 +20,10 @@ use PHPUnit\Framework\TestCase;
  */
 final class ConstantDirectoryTest extends TestCase
 {
-    public const TEST_ONE = 'any';
-    public const TEST_TWO = 'two';
-    public const TESTTHREE = 'three';
-    public const ANYTHING = 'another';
+    public const string TEST_ONE = 'any';
+    public const string TEST_TWO = 'two';
+    public const string TESTTHREE = 'three';
+    public const string ANYTHING = 'another';
 
     public function testItIsInitialisable(): void
     {
