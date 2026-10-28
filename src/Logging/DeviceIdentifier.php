@@ -130,7 +130,7 @@ final class DeviceIdentifier
     private function assignNewIdAndSetCookies(): void
     {
         $this->id = Base64Url::encode(random_bytes(16));
-        $expire = (new DateTimeImmutable())->add(new DateInterval(self::COOKIE_LIFETIME));
+        $expire = new DateTimeImmutable()->add(new DateInterval(self::COOKIE_LIFETIME));
 
         // The cookies are set with httponly=false to allow access from JS (though generally it is
         // preferred to render it server-side and inject into javascript through data attributes /

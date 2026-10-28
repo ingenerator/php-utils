@@ -35,7 +35,7 @@ final class DateIntervalUtilsTest extends TestCase
 
     public static function provider_unsupported_human_intervals(): Iterator
     {
-        $diff = fn (string $dt1, string $dt2) => (new DateTimeImmutable($dt1))->diff(new DateTimeImmutable($dt2));
+        $diff = fn (string $dt1, string $dt2) => new DateTimeImmutable($dt1)->diff(new DateTimeImmutable($dt2));
         yield 'with micros e.g. from a diff' => [$diff('now', 'now')];
         yield 'negative' => [$diff('2022-01-01 10:03:03', '2021-03-02 10:02:03')];
     }

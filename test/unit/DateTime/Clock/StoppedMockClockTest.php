@@ -72,7 +72,7 @@ final class StoppedMockClockTest extends TestCase
     public function testItIsInitialisableAtADateIntervalInThePast(): void
     {
         $clock = StoppedMockClock::atTimeAgo('P3D');
-        $ago = (new DateTimeImmutable())->sub(new DateInterval('P3D'));
+        $ago = new DateTimeImmutable()->sub(new DateInterval('P3D'));
         $this->assertEqualsWithDelta($ago, $clock->getDateTime(), 1, 'Time is at correct interval');
     }
 
