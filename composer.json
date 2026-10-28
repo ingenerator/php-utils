@@ -20,8 +20,7 @@
     "ext-pdo": "~8.4.0 || ~8.5.0 || ~8.6.0",
     "ext-sodium": "~8.4.0 || ~8.5.0 || ~8.6.0",
     "php": "~8.4.0 || ~8.5.0 || ~8.6.0",
-    "psr/log": "^3.0",
-    "rector/rector": "2.8.1"
+    "psr/log": "^3.0"
   },
   "require-dev": {
     "mikey179/vfsstream": "^1.6.12",
@@ -29,7 +28,8 @@
     "ergebnis/phpunit-slow-test-detector": "^2.15",
     "cweagans/composer-patches": "~2.0",
     "php-cs-fixer/shim": "3.95.27",
-    "phpstan/phpstan": "2.3.2"
+    "phpstan/phpstan": "2.3.2",
+    "rector/rector": "2.8.1"
   },
   "support": {
     "source": "https://github.com/ingenerator/php-utils",
