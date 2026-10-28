@@ -89,7 +89,7 @@ class CSVWriter
         if (!$this->isResourceOpen()) {
             throw new LogicException('Cannot write to a closed file');
         }
-        fputcsv($this->resource, $row, eol: $this->options['eol']);
+        fputcsv($this->resource, $row, escape: '\\', eol: $this->options['eol']);
     }
 
     /**
@@ -122,7 +122,7 @@ class CSVWriter
             if (!$this->isResourceOpen()) {
                 throw new LogicException('Cannot write to a closed file');
             }
-            fputcsv($this->resource, $keys, eol: $this->options['eol']);
+            fputcsv($this->resource, $keys, escape: '\\', eol: $this->options['eol']);
         } else {
             array_walk(
                 $keys,
