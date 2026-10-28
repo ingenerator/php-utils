@@ -81,9 +81,9 @@ final class DeviceIdentifier
         return $i->getValue();
     }
 
-    public const CLI_ID = 'cli-------------------';
-    public const COOKIE_LIFETIME = 'P5Y';
-    public const VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
+    public const string CLI_ID = 'cli-------------------';
+    public const string COOKIE_LIFETIME = 'P5Y';
+    public const string VALID_REGEX = '/^[a-zA-Z0-9\-_=]{22}$/';
 
     private ?string $id = null;
 

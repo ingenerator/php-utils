@@ -23,7 +23,7 @@ use function is_string;
 
 class CSVWriter
 {
-    final public const UTF8_BOM = "\xEF\xBB\xBF";
+    final public const string UTF8_BOM = "\xEF\xBB\xBF";
 
     /**
      * @var resource|null

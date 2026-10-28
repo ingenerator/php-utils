@@ -17,7 +17,7 @@ use function implode;
 
 class DateIntervalUtils
 {
-    private const SUPPORTED_HUMAN_COMPONENTS = [
+    private const array SUPPORTED_HUMAN_COMPONENTS = [
         'y' => 'year',
         'm' => 'month',
         'd' => 'day',
