@@ -1,8 +1,12 @@
 ### Unreleased
 
+
+### v3.0.0 (2026-10-29)
+
 * Support PHP 8.5 & 8.6
 * Drop support for PHP 8.2 & 8.3
 * Drop support for psr/log 1.x and 2.x.
+* BREAKING: Multiple APIs accepting raw array or ?array $_SERVER are now strictly typed to require ServerGlobal
 * BREAKING: AbstractArrayRepository::getEntityBaseClass() is now abstract.
 * Refactored ConsistentStringScrambler to use Randomizer rather than mt_rand.
 * BREAKING: Drop custom Metrics interfaces and implementations.
