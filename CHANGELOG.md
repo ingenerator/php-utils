@@ -1,5 +1,6 @@
 ### Unreleased
 
+* Provide more accurate return typehints for DateString helper methods.
 
 ### v3.0.0 (2026-11-03)
 

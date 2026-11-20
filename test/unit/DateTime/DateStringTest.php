@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 final class DateStringTest extends TestCase
 {
     /**
-     * @return Iterator<int, array<(DateTimeImmutable | string | null)>>
+     * @return Iterator<int, array{?DateTimeImmutable, non-empty-string, string, string}>
      */
     public static function provider_generic_format(): Iterator
     {
@@ -29,6 +29,9 @@ final class DateStringTest extends TestCase
         yield [new DateTimeImmutable('2017-05-04 20:03:02'), 'D d M H:i', '', 'Thu 04 May 20:03'];
     }
 
+    /**
+     * @param non-empty-string $format
+     */
     #[DataProvider('provider_generic_format')]
     public function testItFormatsDateOrReturnsFallbackString(?DateTimeImmutable $date, string $format, string $empty, string $expect): void
     {
