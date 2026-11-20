@@ -1,6 +1,6 @@
 ### Unreleased
 
-* Provide more accurate return typehints for DateString helper methods.
+* Provide more accurate return typehints for DateString helper methods and code that runs in MutexWrapper.
 
 ### v3.0.0 (2026-11-03)
 
