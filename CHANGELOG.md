@@ -1,5 +1,7 @@
 ### Unreleased
 
+* Make AbstractArrayRepository constructor public
+
 
 ### v3.0.0 (2026-11-03)
 
