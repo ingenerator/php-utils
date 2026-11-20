@@ -43,7 +43,7 @@ abstract class AbstractArrayRepository
     /**
      * @param array<int, TEntityInstance> $entities
      */
-    final protected function __construct(protected array $entities)
+    final public function __construct(protected array $entities)
     {
         $this->onConstruct();
     }
