@@ -90,6 +90,7 @@ final class DbBackedMutexWrapperTest extends TestCase
         $subject = $this->newSubject();
         try {
             $subject->withLock('somelock', 2, function (): never { throw new RuntimeException('Stop'); });
+            /* @phpstan-ignore deadCode.unreachable (we want to explicitly prove this bubbles) */
             $this->fail('Should have bubbled exception');
         } catch (RuntimeException$e) {
             $this->assertSame('Stop', $e->getMessage());

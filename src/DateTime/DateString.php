@@ -14,9 +14,17 @@ use DateTimeImmutable;
 
 /**
  * Helpers to format a datetime as a string or return an empty value.
+ *
+ * @template TEmptyValue of string|null
  */
 class DateString
 {
+    /**
+     * @param TEmptyValue $empty_value
+     * @param non-empty-string $format
+     *
+     * @return ($date is null ? TEmptyValue : non-empty-string)
+     */
     public static function format(?DateTimeImmutable $date, string $format, ?string $empty_value = ''): ?string
     {
         if (!$date instanceof DateTimeImmutable) {
@@ -28,6 +36,10 @@ class DateString
 
     /**
      * Formats to ISO8601 (the real one not the PHP one :-O) with microsecond precision.
+     *
+     * @param TEmptyValue $empty_value
+     *
+     * @return ($date is null ? TEmptyValue : non-empty-string)
      */
     public static function isoMS(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
@@ -36,6 +48,10 @@ class DateString
 
     /**
      * Formats as Y-m-d H:i:s.
+     *
+     * @param TEmptyValue $empty_value
+     *
+     * @return ($date is null ? TEmptyValue : non-empty-string)
      */
     public static function ymd(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {
@@ -44,6 +60,10 @@ class DateString
 
     /**
      * Formats as Y-m-d H:i:s.
+     *
+     * @param TEmptyValue $empty_value
+     *
+     * @return ($date is null ? TEmptyValue : non-empty-string)
      */
     public static function ymdhis(?DateTimeImmutable $date, ?string $empty_value = ''): ?string
     {

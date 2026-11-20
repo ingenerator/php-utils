@@ -17,7 +17,11 @@ interface MutexWrapper
      *
      * - If the mutex is not free by the timeout, the method will throw.
      *
-     * @return mixed the result of the provided callable
+     * @template T of mixed
+     *
+     * @param callable():T $exclusive_code
+     *
+     * @return T the result of the provided callable
      *
      * @throws MutexTimedOutException
      */
